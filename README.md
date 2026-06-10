@@ -195,6 +195,30 @@ weights), `-dN` (max degree), `-rN` (investigate N graphs with consecutive
 seeds), `-sN` (random seed), `-v` (report each tree edge), `-gFILE` (restore an
 external graph), `-DDIR` (data directory).
 
+### `girth`
+
+Computes the girth (shortest cycle) and diameter of the Ramanujan graphs built
+by `gbraman`. It prompts for two distinct primes `p` and `q`, prints the
+theoretical bounds the theory predicts, then finds the exact values by
+breadth-first search. For example, `raman(2,43)` has 79464 vertices, girth 20,
+and diameter 22.
+
+```text
+$ go run ./demos/girth/
+Choose a branching factor, p: 2
+OK, now choose the cube root of graph size, q: 43
+The graph has 79464 vertices, each of degree 3, and it is bipartite.
+Any such graph must have diameter >= 15 and girth <= 30;
+theoretical considerations tell us that this one's diameter is <= 34.
+Starting at any given vertex, there are
+       3 vertices at distance 1,
+       ⋮
+       0 vertices at distance 23.
+So the diameter is 22, and the girth is 20.
+```
+
+Enter `p = 2` only with `q = 17` or `43`; an empty line or EOF exits.
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
