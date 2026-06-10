@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/roget"
-	"github.com/sjnam/go-sgb/save"
+	"github.com/sjnam/go-sgb/gbroget"
+	"github.com/sjnam/go-sgb/gbsave"
 )
 
 func main() {
@@ -71,17 +71,17 @@ func main() {
 
 	gbio.DataDirectory = dataDir
 
-	var g *graph.Graph
+	var g *gbgraph.Graph
 	if filename != "" {
 		var err error
-		g, err = save.RestoreGraph(filename)
+		g, err = gbsave.RestoreGraph(filename)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Sorry, can't restore the graph (%v)!\n", err)
 			os.Exit(1)
 		}
 	} else {
 		var err error
-		g, err = roget.Roget(n, d, p, s)
+		g, err = gbroget.Roget(n, d, p, s)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Sorry, can't create the graph! (error code %v)\n", err)
 			os.Exit(1)
@@ -96,7 +96,7 @@ func main() {
 // and the links between them.  useIndex selects the vertex identifier: when
 // true (external graph) vertices are numbered 1..N; when false (Roget graph)
 // the original category number is used.
-func analyze(g *graph.Graph, useIndex bool) {
+func analyze(g *gbgraph.Graph, useIndex bool) {
 	nn := int(g.N)
 	if nn == 0 {
 		return
@@ -104,15 +104,15 @@ func analyze(g *graph.Graph, useIndex bool) {
 	infinity := int64(nn) // sentinel rank for settled vertices
 
 	// specs returns the (id, name) pair used in output for vertex v.
-	specs := func(v *graph.Vertex) (int64, string) {
+	specs := func(v *gbgraph.Vertex) (int64, string) {
 		if useIndex {
-			return graph.VertexIndex(g, v) + 1, v.Name
+			return gbgraph.VertexIndex(g, v) + 1, v.Name
 		}
-		return roget.CatNo(v), v.Name
+		return gbroget.CatNo(v), v.Name
 	}
 
 	// Map vertex pointer → slice index for O(1) arc-tip lookup.
-	idx := make(map[*graph.Vertex]int, nn)
+	idx := make(map[*gbgraph.Vertex]int, nn)
 	for i := range g.Vertices[:nn] {
 		idx[&g.Vertices[i]] = i
 	}
@@ -122,7 +122,7 @@ func analyze(g *graph.Graph, useIndex bool) {
 	// the roget package's cat_no stored in U.
 	rank := make([]int64, nn) // 0 = unseen; infinity = settled
 	parent := make([]int, nn) // DFS-tree parent index; -1 = root
-	untagged := make([]*graph.Arc, nn)
+	untagged := make([]*gbgraph.Arc, nn)
 	link := make([]int, nn)    // stack linkage; -1 = bottom
 	min := make([]int, nn)     // index of min-rank reachable vertex
 	arcFrom := make([]int, nn) // inter-component arc deduplication

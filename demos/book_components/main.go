@@ -26,10 +26,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/books"
+	"github.com/sjnam/go-sgb/gbbooks"
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/save"
+	"github.com/sjnam/go-sgb/gbsave"
 )
 
 var (
@@ -106,17 +106,17 @@ func main() {
 	}
 	gbio.DataDirectory = dataDir
 
-	var g *graph.Graph
+	var g *gbgraph.Graph
 	if filename != "" {
 		var err error
-		g, err = save.RestoreGraph(filename)
+		g, err = gbsave.RestoreGraph(filename)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Sorry, can't restore the graph (%v)!\n", err)
 			os.Exit(1)
 		}
 	} else {
 		var err error
-		g, _, err = books.Book(title, int64(n), int64(x), int64(f), int64(l), inWeight, outWeight, seed)
+		g, _, err = gbbooks.Book(title, int64(n), int64(x), int64(f), int64(l), inWeight, outWeight, seed)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Sorry, can't create the graph (%v)!\n", err)
 			os.Exit(1)
@@ -134,23 +134,23 @@ func main() {
 
 // vertexName returns the two-letter short code for book graphs, or the full
 // vertex name for externally restored graphs.
-func vertexName(v *graph.Vertex) string {
+func vertexName(v *gbgraph.Vertex) string {
 	if filename != "" {
 		return v.Name
 	}
-	sc := books.ShortCode(v)
+	sc := gbbooks.ShortCode(v)
 	return string([]byte{gbio.ImapChr(sc / 36), gbio.ImapChr(sc % 36)})
 }
 
-func printCast(g *graph.Graph, inWeight, outWeight int64) {
+func printCast(g *gbgraph.Graph, inWeight, outWeight int64) {
 	for i := int64(0); i < g.N; i++ {
 		v := &g.Vertices[i]
 		if verbose == 1 {
 			fmt.Printf("%s=%s\n", vertexName(v), v.Name)
 		} else {
 			fmt.Printf("%s=%s, %s [weight %d]\n",
-				vertexName(v), v.Name, books.Desc(v),
-				inWeight*books.InCount(v)+outWeight*books.OutCount(v))
+				vertexName(v), v.Name, gbbooks.Desc(v),
+				inWeight*gbbooks.InCount(v)+outWeight*gbbooks.OutCount(v))
 		}
 	}
 	fmt.Println()
@@ -161,14 +161,14 @@ func printCast(g *graph.Graph, inWeight, outWeight int64) {
 //
 // All algorithm state is kept in local slices indexed by vertex position —
 // none of the graph's utility fields are touched.
-func biconnect(g *graph.Graph) {
+func biconnect(g *gbgraph.Graph) {
 	n := int(g.N)
 	if n == 0 {
 		return
 	}
 
 	// Map vertex pointer → slice index for O(1) arc-tip lookup.
-	idx := make(map[*graph.Vertex]int, n)
+	idx := make(map[*gbgraph.Vertex]int, n)
 	for i := range g.Vertices[:n] {
 		idx[&g.Vertices[i]] = i
 	}
@@ -182,7 +182,7 @@ func biconnect(g *graph.Graph) {
 	const noVertex = -1
 	rank := make([]int64, n)
 	parent := make([]int, n)
-	untagged := make([]*graph.Arc, n)
+	untagged := make([]*gbgraph.Arc, n)
 	minV := make([]int, n)
 	depth := make([]int, n)
 

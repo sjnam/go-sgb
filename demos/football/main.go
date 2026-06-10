@@ -19,14 +19,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/games"
+	"github.com/sjnam/go-sgb/gbgames"
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/graph"
 )
 
 // node represents one step in a chain from start to goal.
 type node struct {
-	game   *graph.Arc
+	game   *gbgraph.Arc
 	totLen int64
 	prev   *node
 	next   *node // list link within a stratum
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	gbio.DataDirectory = "data/"
-	g, err := games.Games(0, 0, 0, 0, 0, 0, 0, 0)
+	g, err := gbgames.Games(0, 0, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Sorry, can't create the graph! (error code %v)\n", err)
 		os.Exit(1)
@@ -88,16 +88,16 @@ func main() {
 
 // computeDel builds a map from arc pointer to score differential.
 // del[a] = a.Len - mate.Len, where mate is the reverse arc for the same game.
-func computeDel(g *graph.Graph) map[*graph.Arc]int64 {
-	del := make(map[*graph.Arc]int64)
+func computeDel(g *gbgraph.Graph) map[*gbgraph.Arc]int64 {
+	del := make(map[*gbgraph.Arc]int64)
 	for i := int64(0); i < g.N; i++ {
 		u := &g.Vertices[i]
 		for a := u.Arcs; a != nil; a = a.Next {
-			j := graph.VertexIndex(g, a.Tip)
+			j := gbgraph.VertexIndex(g, a.Tip)
 			if j > i {
-				date := games.Date(a)
+				date := gbgames.Date(a)
 				for b := a.Tip.Arcs; b != nil; b = b.Next {
-					if b.Tip == u && games.Date(b) == date {
+					if b.Tip == u && gbgames.Date(b) == date {
 						del[a] = a.Len - b.Len
 						del[b] = b.Len - a.Len
 						break
@@ -111,7 +111,7 @@ func computeDel(g *graph.Graph) map[*graph.Arc]int64 {
 
 // promptPair prompts for start then goal, re-asking "Starting" only on empty
 // "Other" or identical teams (matching original goto-restart logic).
-func promptPair(g *graph.Graph, r *bufio.Reader, rng *rand.Rand) (start, goal *graph.Vertex) {
+func promptPair(g *gbgraph.Graph, r *bufio.Reader, rng *rand.Rand) (start, goal *gbgraph.Vertex) {
 	for {
 		start = promptForTeam("Starting", g, r, rng)
 		if start == nil {
@@ -131,7 +131,7 @@ func promptPair(g *graph.Graph, r *bufio.Reader, rng *rand.Rand) (start, goal *g
 
 // promptForTeam displays prompt and reads an exact team name.
 // Returns nil when the user enters an empty line.
-func promptForTeam(prompt string, g *graph.Graph, r *bufio.Reader, rng *rand.Rand) *graph.Vertex {
+func promptForTeam(prompt string, g *gbgraph.Graph, r *bufio.Reader, rng *rand.Rand) *gbgraph.Vertex {
 	for {
 		fmt.Printf("%s team: ", prompt)
 		line, err := r.ReadString('\n')
@@ -157,12 +157,12 @@ func promptForTeam(prompt string, g *graph.Graph, r *bufio.Reader, rng *rand.Ran
 
 // greedyChain finds a long chain from start to goal using a greedy algorithm:
 // at each step pick the arc with maximum del that still allows reaching goal.
-func greedyChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *graph.Vertex) *node {
+func greedyChain(g *gbgraph.Graph, del map[*gbgraph.Arc]int64, start, goal *gbgraph.Vertex) *node {
 	nn := int(g.N)
 	idx := makeIdx(g, nn)
 	blocked := make([]bool, nn)
 	// valid[i] == cookie (cur vertex pointer) means vertex i can reach goal.
-	valid := make([]*graph.Vertex, nn)
+	valid := make([]*gbgraph.Vertex, nn)
 
 	var curNode *node
 	cur := start
@@ -173,7 +173,7 @@ func greedyChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *graph.Ve
 		// The games graph has both arc directions for each game, so
 		// "reachable from goal" = "can reach goal".
 		cookie := cur
-		stack := []*graph.Vertex{goal}
+		stack := []*gbgraph.Vertex{goal}
 		valid[idx[goal]] = cookie
 		for len(stack) > 0 {
 			u := stack[len(stack)-1]
@@ -189,7 +189,7 @@ func greedyChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *graph.Ve
 
 		const sentinel = int64(-10000)
 		d := sentinel
-		var bestArc, lastArc *graph.Arc
+		var bestArc, lastArc *gbgraph.Arc
 		for a := cur.Arcs; a != nil; a = a.Next {
 			if valid[idx[a.Tip]] != cookie {
 				continue
@@ -223,7 +223,7 @@ func greedyChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *graph.Ve
 // stratifiedChain finds a longer chain using a stratified heuristic.
 // It maintains up to `width` nodes per stratum, where h(x) counts vertices
 // on simple paths between x's current position and goal (via bicomponents).
-func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *graph.Vertex, width int64, verbose bool) *node {
+func stratifiedChain(g *gbgraph.Graph, del map[*gbgraph.Arc]int64, start, goal *gbgraph.Vertex, width int64, verbose bool) *node {
 	nn := int(g.N)
 	idx := makeIdx(g, nn)
 
@@ -273,7 +273,7 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 		dfsParent := make([]int, nn) // index; -1 = dummy (root parent)
 		dfsMinV := make([]int, nn)   // index; -1 = dummy
 		dfsLink := make([]int, nn)   // stack link; -1 = empty
-		dfsUntagged := make([]*graph.Arc, nn)
+		dfsUntagged := make([]*gbgraph.Arc, nn)
 
 		for i := range dfsRank {
 			dfsParent[i] = -1
@@ -401,7 +401,7 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 	for {
 		hVal, visited := bicompH(curNode)
 
-		var curV *graph.Vertex
+		var curV *gbgraph.Vertex
 		if curNode == nil {
 			curV = start
 		} else {
@@ -470,8 +470,8 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 }
 
 // makeIdx builds a vertex-pointer→slice-index map.
-func makeIdx(g *graph.Graph, nn int) map[*graph.Vertex]int {
-	idx := make(map[*graph.Vertex]int, nn)
+func makeIdx(g *gbgraph.Graph, nn int) map[*gbgraph.Vertex]int {
+	idx := make(map[*gbgraph.Vertex]int, nn)
 	for i := range g.Vertices[:nn] {
 		idx[&g.Vertices[i]] = i
 	}
@@ -479,7 +479,7 @@ func makeIdx(g *graph.Graph, nn int) map[*graph.Vertex]int {
 }
 
 // printChain reverses the node chain and prints each game in the path.
-func printChain(start, goal *graph.Vertex, curNode *node, del map[*graph.Arc]int64) {
+func printChain(start, goal *gbgraph.Vertex, curNode *node, del map[*gbgraph.Arc]int64) {
 	// Reverse chain by re-stacking.
 	var top *node
 	for x := curNode; x != nil; x = x.prev {
@@ -490,9 +490,9 @@ func printChain(start, goal *graph.Vertex, curNode *node, del map[*graph.Arc]int
 		a := top.game
 		u := a.Tip
 		fmt.Printf("%s: %s %s %d, %s %s %d (%+d)\n",
-			formatDate(games.Date(a)),
-			v.Name, games.Nickname(v), a.Len,
-			u.Name, games.Nickname(u), a.Len-del[a],
+			formatDate(gbgames.Date(a)),
+			v.Name, gbgames.Nickname(v), a.Len,
+			u.Name, gbgames.Nickname(u), a.Len-del[a],
 			top.totLen)
 		v = u
 		top = top.prev

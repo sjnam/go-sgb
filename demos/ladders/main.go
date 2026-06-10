@@ -24,10 +24,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/sjnam/go-sgb/dijk"
+	"github.com/sjnam/go-sgb/gbdijk"
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/words"
+	"github.com/sjnam/go-sgb/gbwords"
 )
 
 var (
@@ -94,7 +94,7 @@ func main() {
 	if randm {
 		wtVec = make([]int64, 9) // zero_vector: ignore frequency information
 	}
-	g, wordIx, err := words.Words(int64(n), wtVec, 0, seed)
+	g, wordIx, err := gbwords.Words(int64(n), wtVec, 0, seed)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't build a dictionary (%v)!\n", err)
@@ -137,11 +137,11 @@ func main() {
 	}
 
 	// Use the 128-bucket wheel when edge lengths are < 128.
-	var q dijk.Queue
+	var q gbdijk.Queue
 	if alph || freq || heur {
-		q = dijk.NewWheelQueue()
+		q = gbdijk.NewWheelQueue()
 	} else {
-		q = dijk.NewDlistQueue()
+		q = gbdijk.NewDlistQueue()
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -165,18 +165,18 @@ func main() {
 }
 
 // findLadder finds and prints the shortest word ladder from start to goal.
-func findLadder(g *graph.Graph, wordIx *words.Index, start, goal string, q dijk.Queue) {
+func findLadder(g *gbgraph.Graph, wordIx *gbwords.Index, start, goal string, q gbdijk.Queue) {
 	savedN := g.N
 
 	// Build an amplified graph gg that borrows g's vertices but has its own
 	// arc storage for the temporary connections to start/goal.
-	gg := graph.NewGraph(0)
+	gg := gbgraph.NewGraph(0)
 	gg.Vertices = g.Vertices
 	gg.N = g.N
 
 	// plantNewEdge adds a temporary edge between the new vertex at gg.Vertices[gg.N]
 	// and the existing vertex v.
-	plantNewEdge := func(v *graph.Vertex) {
+	plantNewEdge := func(v *gbgraph.Vertex) {
 		u := &gg.Vertices[gg.N]
 		gg.NewEdge(u, v, 1)
 		if alph {
@@ -198,7 +198,7 @@ func findLadder(g *graph.Graph, wordIx *words.Index, start, goal string, q dijk.
 	}
 
 	// Insert goal word.
-	var vv *graph.Vertex
+	var vv *gbgraph.Vertex
 	if start == goal {
 		vv = uu
 	} else {
@@ -225,13 +225,13 @@ func findLadder(g *graph.Graph, wordIx *words.Index, start, goal string, q dijk.
 	var minDist int64
 	switch {
 	case !heur:
-		minDist = dijk.Dijkstra(uu, vv, gg, nil, q, trace)
+		minDist = gbdijk.Dijkstra(uu, vv, gg, nil, q, trace)
 	case alph:
-		minDist = dijk.Dijkstra(uu, vv, gg, func(v *graph.Vertex) int64 {
+		minDist = gbdijk.Dijkstra(uu, vv, gg, func(v *gbgraph.Vertex) int64 {
 			return alphDist(v.Name, goal)
 		}, q, trace)
 	default:
-		minDist = dijk.Dijkstra(uu, vv, gg, func(v *graph.Vertex) int64 {
+		minDist = gbdijk.Dijkstra(uu, vv, gg, func(v *gbgraph.Vertex) int64 {
 			return hammDist(v.Name, goal)
 		}, q, trace)
 	}
@@ -239,7 +239,7 @@ func findLadder(g *graph.Graph, wordIx *words.Index, start, goal string, q dijk.
 	if minDist < 0 {
 		fmt.Printf("Sorry, there's no ladder from %s to %s.\n", start, goal)
 	} else {
-		dijk.PrintDijkstraResult(os.Stdout, vv)
+		gbdijk.PrintDijkstraResult(os.Stdout, vv)
 	}
 
 	// Cleanup: remove back-arcs that were prepended to existing vertices,
@@ -291,8 +291,8 @@ func isAllLower(s string) bool {
 
 // freqCost returns the frequency cost of vertex v: 0 for very common words,
 // 16 for words with zero frequency.
-func freqCost(v *graph.Vertex) int64 {
-	acc := words.Weight(v)
+func freqCost(v *gbgraph.Vertex) int64 {
+	acc := gbwords.Weight(v)
 	k := int64(16)
 	for acc != 0 {
 		k--

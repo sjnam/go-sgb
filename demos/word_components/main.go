@@ -13,9 +13,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/words"
+	"github.com/sjnam/go-sgb/gbwords"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	}
 	gbio.DataDirectory = dataDir
 
-	g, _, err := words.Words(0, nil, 0, 0)
+	g, _, err := gbwords.Words(0, nil, 0, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, can't build dictionary (%v)!\n", err)
@@ -41,7 +41,7 @@ func main() {
 
 	// Map each vertex pointer to its slice index for O(1) arc-tip lookup.
 	// This replaces the original's unsafe pointer arithmetic (a->tip > v).
-	idx := make(map[*graph.Vertex]int, n)
+	idx := make(map[*gbgraph.Vertex]int, n)
 	for i := range g.Vertices[:n] {
 		idx[&g.Vertices[i]] = i
 	}
@@ -65,7 +65,7 @@ func main() {
 		isol++
 		comp++
 
-		fmt.Printf("%4d: %5d %s", i+1, words.Weight(v), v.Name)
+		fmt.Printf("%4d: %5d %s", i+1, gbwords.Weight(v), v.Name)
 
 		// In the words graph, arcs to later vertices (higher index = lower weight)
 		// appear before arcs to earlier vertices.  Skip the "future" arcs.
