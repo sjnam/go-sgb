@@ -30,6 +30,7 @@ type node struct {
 	totLen int64
 	prev   *node
 	next   *node // list link within a stratum
+	vid    int64 // packed ID (mm<<8)+m, set when popped in verbose mode
 }
 
 func main() {
@@ -372,11 +373,14 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 		}
 
 		// h(u) = rankAcc of u's bicomp representative.
-		// visited[u] = true iff u was reached in the DFS (dfsRank > 0, not blocked).
+		// visited[u] = true iff the DFS consumed all of u's arcs (the
+		// original's untagged==NULL test). Blocked and unreached vertices
+		// keep at least one untagged arc. dfsRank can't be used here: a
+		// blocked vertex and the representative of a two-vertex bicomponent
+		// both end up with dfsRank == nn.
 		for i := range hVal {
-			r := dfsRank[i]
-			if r == 0 || r == int64(nn) {
-				continue // unvisited or blocked
+			if dfsUntagged[i] != nil {
+				continue
 			}
 			visited[i] = true
 			rep := dfsParent[i]
@@ -387,11 +391,6 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 			} else {
 				hVal[i] = rankAcc[rep]
 			}
-		}
-		// goal's h is 0 (not settled).
-		if dfsRank[goalIdx] > 0 && dfsRank[goalIdx] < int64(nn) {
-			visited[goalIdx] = true
-			hVal[goalIdx] = 0
 		}
 		return hVal, visited
 	}
@@ -452,7 +451,14 @@ func stratifiedChain(g *graph.Graph, del map[*graph.Arc]int64, start, goal *grap
 
 		if verbose {
 			mm++
-			fmt.Printf("[%d,%d]: %s (%+d)\n", m, mm, curNode.game.Tip.Name, curNode.totLen)
+			curNode.vid = mm<<8 + m
+			var pm, pmm int64
+			if curNode.prev != nil {
+				pm = curNode.prev.vid & 0xff
+				pmm = curNode.prev.vid >> 8
+			}
+			fmt.Printf("[%d,%d]=[%d,%d]&%s (%+d)\n",
+				m, mm, pm, pmm, curNode.game.Tip.Name, curNode.totLen)
 		}
 
 		if m == 0 {
