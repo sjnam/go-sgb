@@ -73,7 +73,11 @@ func tryOpen(path string) *os.File {
 		return f
 	}
 	if DataDirectory != "" {
-		if f, err := os.Open(DataDirectory + path); err == nil {
+		npath := path
+		if !strings.HasSuffix(DataDirectory, "/") {
+			npath = "/" + path
+		}
+		if f, err := os.Open(DataDirectory + npath); err == nil {
 			return f
 		}
 	}
