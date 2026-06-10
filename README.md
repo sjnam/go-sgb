@@ -171,6 +171,30 @@ reverse topological order.
 go run ./demos/roget_components/ [-nN] [-dN] [-pN] [-sN] [-gFILE] [-DDIR]
 ```
 
+### `miles_span`
+
+Finds the minimum spanning tree of a highway-mileage graph with four classic
+algorithms and reports how many "mems" (memory references) each one consumes —
+a machine-independent measure of efficiency. The four are Kruskal's algorithm
+(radix sort + union/find), Jarník–Prim with a binary heap, Jarník–Prim with a
+Fibonacci heap, and Cheriton–Tarjan–Karp with binomial queues. The mem counts
+reproduce Knuth's published figures exactly.
+
+```text
+$ go run ./demos/miles_span/
+The graph miles(100,0,0,0,0,10,0) has 405 edges,
+  and its minimum spanning tree has length 14467.
+ The Kruskal/radix-sort algorithm takes 8379 mems;
+ the Jarnik/Prim/binary-heap algorithm takes 7972 mems;
+ the Jarnik/Prim/Fibonacci-heap algorithm takes 11736 mems;
+ the Cheriton/Tarjan/Karp algorithm takes 17770 mems.
+```
+
+Options: `-nN` (N cities, max 128), `-NN`/`-WN`/`-PN` (north/west/population
+weights), `-dN` (max degree), `-rN` (investigate N graphs with consecutive
+seeds), `-sN` (random seed), `-v` (report each tree edge), `-gFILE` (restore an
+external graph), `-DDIR` (data directory).
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
