@@ -219,6 +219,29 @@ So the diameter is 22, and the girth is 20.
 
 Enter `p = 2` only with `q = 17` or `43`; an empty line or EOF exits.
 
+### `assign_lisa`
+
+Solves the assignment problem on a matrix of Mona Lisa pixel brightnesses from
+`gblisa`: it picks at most one entry per row and column to maximize their sum,
+using the Hungarian algorithm, and reports the mem count. With `-P` it writes an
+encapsulated PostScript file `lisa.eps` visualizing the chosen pixels.
+
+```text
+$ go run ./demos/assign_lisa/ -s -p
+Assignment problem for lisa(16,32,255,94,110,97,129,0,100000)
+ 171 172 169 177 186 191 169  99  78  ...
+ ⋮
+The following entries produce an optimum assignment:
+ [0,26]
+ ⋮
+Solved in 13529 mems.
+```
+
+Parameters are `name=value` (`m`, `n`, `d`, `m0`, `m1`, `n0`, `n1`, `d0`, `d1`).
+Flags: `-s` (16×32 smile), `-e` (20×50 eyes), `-c` (complement/minimize),
+`-h` (square-matrix heuristic), `-v`/`-V` (verbose), `-p` (print matrix and
+solution), `-P` (write `lisa.eps`), `-DDIR` (data directory).
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
