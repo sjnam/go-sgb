@@ -101,6 +101,25 @@ func distCode(d []int64) string {
 	return "0"
 }
 
+// boolInt renders a flag as 0 or 1, matching the C-style ID strings of SGB.
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+// multiCode normalizes the ternary multi parameter to -1, 0, or 1.
+func multiCode(multi int64) int64 {
+	switch {
+	case multi > 0:
+		return 1
+	case multi < 0:
+		return -1
+	}
+	return 0
+}
+
 func randLen(rng *flip.RNG, minLen, maxLen int64) int64 {
 	if minLen == maxLen {
 		return minLen
@@ -114,12 +133,12 @@ func randLen(rng *flip.RNG, minLen, maxLen int64) int64 {
 // edges. Parameters:
 //
 //   - multi: 0 = no duplicate arcs; 1 = allow; -1 = allow but keep minimum length
-//   - self: 1 = allow self-loops
-//   - directed: 1 = directed graph; 0 = undirected
+//   - self: allow self-loops
+//   - directed: directed graph (arcs) instead of undirected (edges)
 //   - distFrom, distTo: nonuniform distributions (nil → uniform); each must sum to 2^30
 //   - minLen, maxLen: arc length range (uniform random in [minLen, maxLen])
 //   - seed: random seed
-func RandomGraph(n, m, multi, self, directed int64, distFrom, distTo []int64, minLen, maxLen, seed int64) (*graph.Graph, error) {
+func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int64, minLen, maxLen, seed int64) (*graph.Graph, error) {
 	if n == 0 {
 		return nil, graph.ErrBadSpecs
 	}
@@ -169,22 +188,8 @@ func RandomGraph(n, m, multi, self, directed int64, distFrom, distTo []int64, mi
 		g.Vertices[k].Name = fmt.Sprintf("%d", k)
 	}
 
-	multiCode := int64(0)
-	if multi > 0 {
-		multiCode = 1
-	} else if multi < 0 {
-		multiCode = -1
-	}
-	selfCode := int64(0)
-	if self != 0 {
-		selfCode = 1
-	}
-	dirCode := int64(0)
-	if directed != 0 {
-		dirCode = 1
-	}
 	g.ID = fmt.Sprintf("random_graph(%d,%d,%d,%d,%d,%s,%s,%d,%d,%d)",
-		n, m, multiCode, selfCode, dirCode,
+		n, m, multiCode(multi), boolInt(self), boolInt(directed),
 		distCode(distFrom), distCode(distTo), minLen, maxLen, seed)
 
 	// Build Walker alias tables if needed.
@@ -220,7 +225,7 @@ func RandomGraph(n, m, multi, self, directed int64, distFrom, distTo []int64, mi
 	for mm := m; mm > 0; {
 		u := randVertex(fromTable, n)
 		v := randVertex(toTable, n)
-		if u == v && self == 0 {
+		if u == v && !self {
 			continue
 		}
 		if multi <= 0 {
@@ -235,7 +240,7 @@ func RandomGraph(n, m, multi, self, directed int64, distFrom, distTo []int64, mi
 					newLen := randLen(rng, minLen, maxLen)
 					if newLen < a.Len {
 						a.Len = newLen
-						if directed == 0 {
+						if !directed {
 							a.Partner.Len = newLen
 						}
 					}
@@ -250,7 +255,7 @@ func RandomGraph(n, m, multi, self, directed int64, distFrom, distTo []int64, mi
 				continue
 			}
 		}
-		if directed != 0 {
+		if directed {
 			g.NewArc(u, v, randLen(rng, minLen, maxLen))
 		} else {
 			g.NewEdge(u, v, randLen(rng, minLen, maxLen))
@@ -297,20 +302,12 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64, minLen, maxLen,
 		}
 	}
 
-	g, err := RandomGraph(n, m, multi, 0, 0, distFrom, distTo, minLen, maxLen, seed)
+	g, err := RandomGraph(n, m, multi, false, false, distFrom, distTo, minLen, maxLen, seed)
 	if err != nil {
 		return nil, err
 	}
 	g.ID = fmt.Sprintf("random_bigraph(%d,%d,%d,%d,%s,%s,%d,%d,%d)",
-		n1, n2, m,
-		func() int64 {
-			if multi > 0 {
-				return 1
-			} else if multi < 0 {
-				return -1
-			}
-			return 0
-		}(),
+		n1, n2, m, multiCode(multi),
 		distCode(dist1), distCode(dist2), minLen, maxLen, seed)
 	g.MarkBipartite(n1)
 	return g, nil
@@ -318,11 +315,12 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64, minLen, maxLen,
 
 // ---- RandomLengths ----
 
-// RandomLengths assigns new random lengths to all arcs (or edges, if directed=0)
-// of graph g. If dist is nil, lengths are uniform in [minLen, maxLen]; otherwise
-// dist is a probability distribution of length maxLen-minLen+1 summing to 2^30.
+// RandomLengths assigns new random lengths to all arcs (or paired edges, if
+// directed is false) of graph g. If dist is nil, lengths are uniform in
+// [minLen, maxLen]; otherwise dist is a probability distribution of length
+// maxLen-minLen+1 summing to 2^30.
 // Returns nil on success, or an error on failure.
-func RandomLengths(g *graph.Graph, directed, minLen, maxLen int64, dist []int64, seed int64) error {
+func RandomLengths(g *graph.Graph, directed bool, minLen, maxLen int64, dist []int64, seed int64) error {
 	if g == nil {
 		return graph.ErrMissingOperand
 	}
@@ -360,13 +358,7 @@ func RandomLengths(g *graph.Graph, directed, minLen, maxLen int64, dist []int64,
 	}
 
 	suffix := fmt.Sprintf(",%d,%d,%d,%s,%d)",
-		func() int64 {
-			if directed != 0 {
-				return 1
-			}
-			return 0
-		}(),
-		minLen, maxLen, distCode(dist), seed)
+		boolInt(directed), minLen, maxLen, distCode(dist), seed)
 	graph.MakeCompoundID(g, "random_lengths(", g, suffix)
 
 	randLenFrom := func() int64 {
@@ -386,12 +378,12 @@ func RandomLengths(g *graph.Graph, directed, minLen, maxLen int64, dist []int64,
 		u := &g.Vertices[ui]
 		for a := u.Arcs; a != nil; a = a.Next {
 			v := a.Tip
-			if directed == 0 && ui > graph.VertexIndex(g, v) {
+			if !directed && ui > graph.VertexIndex(g, v) {
 				a.Len = a.Partner.Len
 			} else {
 				newLen := randLenFrom()
 				a.Len = newLen
-				if directed == 0 && u == v && a.Next == a.Partner {
+				if !directed && u == v && a.Next == a.Partner {
 					a.Next.Len = newLen
 					a = a.Next // advance past companion; for-loop will advance again
 				}

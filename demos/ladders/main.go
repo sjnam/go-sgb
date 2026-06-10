@@ -18,14 +18,15 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/sjnam/go-sgb/dijk"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/words"
 )
 
@@ -93,7 +94,7 @@ func main() {
 	if randm {
 		wtVec = make([]int64, 9) // zero_vector: ignore frequency information
 	}
-	g, err := words.Words(int64(n), wtVec, 0, seed)
+	g, wordIx, err := words.Words(int64(n), wtVec, 0, seed)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't build a dictionary (%v)!\n", err)
@@ -159,12 +160,12 @@ func main() {
 			continue
 		}
 
-		findLadder(g, start, goal, q)
+		findLadder(g, wordIx, start, goal, q)
 	}
 }
 
 // findLadder finds and prints the shortest word ladder from start to goal.
-func findLadder(g *graph.Graph, start, goal string, q dijk.Queue) {
+func findLadder(g *graph.Graph, wordIx *words.Index, start, goal string, q dijk.Queue) {
 	savedN := g.N
 
 	// Build an amplified graph gg that borrows g's vertices but has its own
@@ -190,7 +191,7 @@ func findLadder(g *graph.Graph, start, goal string, q dijk.Queue) {
 
 	// Insert start word (use extra vertex slot if not already in dictionary).
 	gg.Vertices[gg.N].Name = start
-	uu := words.FindWord(start, plantNewEdge)
+	uu := wordIx.FindWord(start, plantNewEdge)
 	if uu == nil {
 		uu = &gg.Vertices[gg.N]
 		gg.N++
@@ -202,7 +203,7 @@ func findLadder(g *graph.Graph, start, goal string, q dijk.Queue) {
 		vv = uu
 	} else {
 		gg.Vertices[gg.N].Name = goal
-		vv = words.FindWord(goal, plantNewEdge)
+		vv = wordIx.FindWord(goal, plantNewEdge)
 		if vv == nil {
 			vv = &gg.Vertices[gg.N]
 			gg.N++
@@ -217,24 +218,28 @@ func findLadder(g *graph.Graph, start, goal string, q dijk.Queue) {
 	}
 
 	// Run Dijkstra.
+	var trace io.Writer
+	if verbose {
+		trace = os.Stdout
+	}
 	var minDist int64
 	switch {
 	case !heur:
-		minDist = dijk.Dijkstra(uu, vv, gg, nil, q, verbose)
+		minDist = dijk.Dijkstra(uu, vv, gg, nil, q, trace)
 	case alph:
 		minDist = dijk.Dijkstra(uu, vv, gg, func(v *graph.Vertex) int64 {
 			return alphDist(v.Name, goal)
-		}, q, verbose)
+		}, q, trace)
 	default:
 		minDist = dijk.Dijkstra(uu, vv, gg, func(v *graph.Vertex) int64 {
 			return hammDist(v.Name, goal)
-		}, q, verbose)
+		}, q, trace)
 	}
 
 	if minDist < 0 {
 		fmt.Printf("Sorry, there's no ladder from %s to %s.\n", start, goal)
 	} else {
-		dijk.PrintDijkstraResult(vv)
+		dijk.PrintDijkstraResult(os.Stdout, vv)
 	}
 
 	// Cleanup: remove back-arcs that were prepended to existing vertices,

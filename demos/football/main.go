@@ -20,8 +20,8 @@ import (
 	"strings"
 
 	"github.com/sjnam/go-sgb/games"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 )
 
 // node represents one step in a chain from start to goal.

@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 // ---- intSqrt tests ----
@@ -39,7 +39,7 @@ func TestIntSqrtOne(t *testing.T) {
 // ---- Plane basic tests ----
 
 func TestPlaneDefault(t *testing.T) {
-	g, err := Plane(10, 0, 0, 0, 0, 1)
+	g, err := Plane(10, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane(10,...) failed: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestPlaneDefault(t *testing.T) {
 }
 
 func TestPlaneID(t *testing.T) {
-	g, err := Plane(5, 100, 100, 0, 0, 42)
+	g, err := Plane(5, 100, 100, false, 0, 42)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestPlaneID(t *testing.T) {
 }
 
 func TestPlaneUtilTypes(t *testing.T) {
-	g, err := Plane(5, 0, 0, 0, 0, 1)
+	g, err := Plane(5, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestPlaneUtilTypes(t *testing.T) {
 
 func TestPlaneBadSpecs(t *testing.T) {
 	// n < 2 → VeryBadSpecs
-	_, err := Plane(1, 0, 0, 0, 0, 1)
+	_, err := Plane(1, 0, 0, false, 0, 1)
 	if err == nil {
 		t.Fatal("expected error for n=1")
 	}
@@ -82,7 +82,7 @@ func TestPlaneBadSpecs(t *testing.T) {
 
 func TestPlaneBadRange(t *testing.T) {
 	// xRange > 16384 → BadSpecs
-	_, err := Plane(5, 20000, 0, 0, 0, 1)
+	_, err := Plane(5, 20000, 0, false, 0, 1)
 	if err == nil {
 		t.Fatal("expected error for xRange > 16384")
 	}
@@ -92,7 +92,7 @@ func TestPlaneBadRange(t *testing.T) {
 }
 
 func TestPlaneVertexCoords(t *testing.T) {
-	g, err := Plane(20, 100, 100, 0, 0, 1)
+	g, err := Plane(20, 100, 100, false, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestPlaneVertexCoords(t *testing.T) {
 }
 
 func TestPlaneVertexNames(t *testing.T) {
-	g, err := Plane(5, 0, 0, 0, 0, 1)
+	g, err := Plane(5, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -123,7 +123,7 @@ func TestPlaneVertexNames(t *testing.T) {
 
 func TestPlanePlanar(t *testing.T) {
 	// Delaunay triangulation has at most 3n-6 undirected edges = 6n-12 directed arcs.
-	g, err := Plane(20, 0, 0, 0, 0, 7)
+	g, err := Plane(20, 0, 0, false, 0, 7)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -135,7 +135,7 @@ func TestPlanePlanar(t *testing.T) {
 
 func TestPlaneSymmetric(t *testing.T) {
 	// Every arc u→v should have a reverse arc v→u.
-	g, err := Plane(15, 0, 0, 0, 0, 3)
+	g, err := Plane(15, 0, 0, false, 0, 3)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestPlaneSymmetric(t *testing.T) {
 }
 
 func TestPlanePositiveEdgeLengths(t *testing.T) {
-	g, err := Plane(10, 1000, 1000, 0, 0, 5)
+	g, err := Plane(10, 1000, 1000, false, 0, 5)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -176,7 +176,7 @@ func TestPlanePositiveEdgeLengths(t *testing.T) {
 }
 
 func TestPlaneExtend(t *testing.T) {
-	g, err := Plane(10, 0, 0, 1, 0, 1)
+	g, err := Plane(10, 0, 0, true, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane(extend=1) failed: %v", err)
 	}
@@ -200,8 +200,8 @@ func TestPlaneExtend(t *testing.T) {
 
 func TestPlaneProb(t *testing.T) {
 	// prob=32768 ≈ 50% rejection → fewer edges than prob=0.
-	g0, err0 := Plane(20, 0, 0, 0, 0, 99)
-	g1, err1 := Plane(20, 0, 0, 0, 32768, 99)
+	g0, err0 := Plane(20, 0, 0, false, 0, 99)
+	g1, err1 := Plane(20, 0, 0, false, 32768, 99)
 	if err0 != nil || err1 != nil {
 		t.Fatalf("Plane failed: %v / %v", err0, err1)
 	}
@@ -211,8 +211,8 @@ func TestPlaneProb(t *testing.T) {
 }
 
 func TestPlaneReproducible(t *testing.T) {
-	g1, err1 := Plane(15, 500, 500, 0, 0, 42)
-	g2, err2 := Plane(15, 500, 500, 0, 0, 42)
+	g1, err1 := Plane(15, 500, 500, false, 0, 42)
+	g2, err2 := Plane(15, 500, 500, false, 0, 42)
 	if err1 != nil || err2 != nil {
 		t.Fatalf("Plane failed: %v / %v", err1, err2)
 	}
@@ -228,7 +228,7 @@ func TestPlaneReproducible(t *testing.T) {
 }
 
 func TestPlaneHasEdges(t *testing.T) {
-	g, err := Plane(10, 0, 0, 0, 0, 1)
+	g, err := Plane(10, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("Plane failed: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestPlaneHasEdges(t *testing.T) {
 // ---- PlaneMiles tests ----
 
 func TestPlaneMilesDefault(t *testing.T) {
-	g, err := PlaneMiles(0, 0, 0, 0, 0, 0, 0)
+	g, err := PlaneMiles(0, 0, 0, 0, false, 0, 0)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
@@ -250,7 +250,7 @@ func TestPlaneMilesDefault(t *testing.T) {
 }
 
 func TestPlaneMilesID(t *testing.T) {
-	g, err := PlaneMiles(10, 0, 0, 0, 0, 0, 1)
+	g, err := PlaneMiles(10, 0, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
@@ -261,7 +261,7 @@ func TestPlaneMilesID(t *testing.T) {
 }
 
 func TestPlaneMilesUtilTypes(t *testing.T) {
-	g, err := PlaneMiles(10, 0, 0, 0, 0, 0, 1)
+	g, err := PlaneMiles(10, 0, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
@@ -271,7 +271,7 @@ func TestPlaneMilesUtilTypes(t *testing.T) {
 }
 
 func TestPlaneMilesPlanar(t *testing.T) {
-	g, err := PlaneMiles(20, 0, 0, 0, 0, 0, 1)
+	g, err := PlaneMiles(20, 0, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
@@ -282,7 +282,7 @@ func TestPlaneMilesPlanar(t *testing.T) {
 }
 
 func TestPlaneMilesExtend(t *testing.T) {
-	g, err := PlaneMiles(10, 0, 0, 0, 1, 0, 1)
+	g, err := PlaneMiles(10, 0, 0, 0, true, 0, 1)
 	if err != nil {
 		t.Fatalf("PlaneMiles(extend=1) failed: %v", err)
 	}
@@ -294,7 +294,7 @@ func TestPlaneMilesExtend(t *testing.T) {
 }
 
 func TestPlaneMilesSymmetric(t *testing.T) {
-	g, err := PlaneMiles(15, 0, 0, 0, 0, 0, 7)
+	g, err := PlaneMiles(15, 0, 0, 0, false, 0, 7)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
@@ -321,7 +321,7 @@ func TestPlaneMilesSymmetric(t *testing.T) {
 }
 
 func TestPlaneMilesPositiveLengths(t *testing.T) {
-	g, err := PlaneMiles(10, 0, 0, 0, 0, 0, 1)
+	g, err := PlaneMiles(10, 0, 0, 0, false, 0, 1)
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}

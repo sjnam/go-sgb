@@ -11,7 +11,7 @@ import (
 // ---- RandomGraph basic tests ----
 
 func TestRandomGraphDefault(t *testing.T) {
-	g, err := RandomGraph(100, 200, 0, 0, 0, nil, nil, 1, 1, 0)
+	g, err := RandomGraph(100, 200, 0, false, false, nil, nil, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestRandomGraphDefault(t *testing.T) {
 
 func TestRandomGraphEdgeCount(t *testing.T) {
 	// Undirected, no duplicates, no self-loops → exactly 200 undirected edges = 400 arcs
-	g, err := RandomGraph(100, 200, 0, 0, 0, nil, nil, 1, 1, 0)
+	g, err := RandomGraph(100, 200, 0, false, false, nil, nil, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestRandomGraphEdgeCount(t *testing.T) {
 
 func TestRandomGraphDirectedArcCount(t *testing.T) {
 	// Directed, with duplicates and self-loops → exactly 500 arcs
-	g, err := RandomGraph(50, 500, 1, 1, 1, nil, nil, 1, 1, 7)
+	g, err := RandomGraph(50, 500, 1, true, true, nil, nil, 1, 1, 7)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestRandomGraphDirectedArcCount(t *testing.T) {
 }
 
 func TestRandomGraphID(t *testing.T) {
-	g, err := RandomGraph(10, 20, 0, 0, 0, nil, nil, 1, 1, 42)
+	g, err := RandomGraph(10, 20, 0, false, false, nil, nil, 1, 1, 42)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -58,7 +58,7 @@ func TestRandomGraphID(t *testing.T) {
 
 func TestRandomGraphIDWithDist(t *testing.T) {
 	dist := makeUniformDist(10)
-	g, err := RandomGraph(10, 20, 1, 1, 1, dist, dist, 0, 10, 1)
+	g, err := RandomGraph(10, 20, 1, true, true, dist, dist, 0, 10, 1)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestRandomGraphIDWithDist(t *testing.T) {
 }
 
 func TestRandomGraphVertexNames(t *testing.T) {
-	g, err := RandomGraph(5, 4, 1, 1, 0, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(5, 4, 1, true, false, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestRandomGraphVertexNames(t *testing.T) {
 }
 
 func TestRandomGraphBadSpecs(t *testing.T) {
-	g, err := RandomGraph(0, 10, 0, 0, 0, nil, nil, 1, 1, 0)
+	g, err := RandomGraph(0, 10, 0, false, false, nil, nil, 1, 1, 0)
 	if g != nil {
 		t.Fatal("expected nil for n=0")
 	}
@@ -92,7 +92,7 @@ func TestRandomGraphBadSpecs(t *testing.T) {
 }
 
 func TestRandomGraphVeryBadSpecs(t *testing.T) {
-	g, err := RandomGraph(10, 5, 0, 0, 0, nil, nil, 5, 1, 0)
+	g, err := RandomGraph(10, 5, 0, false, false, nil, nil, 5, 1, 0)
 	if g != nil {
 		t.Fatal("expected nil for minLen > maxLen")
 	}
@@ -102,8 +102,8 @@ func TestRandomGraphVeryBadSpecs(t *testing.T) {
 }
 
 func TestRandomGraphReproducible(t *testing.T) {
-	g1, err1 := RandomGraph(50, 100, 0, 0, 0, nil, nil, 1, 10, 42)
-	g2, err2 := RandomGraph(50, 100, 0, 0, 0, nil, nil, 1, 10, 42)
+	g1, err1 := RandomGraph(50, 100, 0, false, false, nil, nil, 1, 10, 42)
+	g2, err2 := RandomGraph(50, 100, 0, false, false, nil, nil, 1, 10, 42)
 	if err1 != nil || err2 != nil {
 		t.Fatalf("RandomGraph returned error: %v / %v", err1, err2)
 	}
@@ -125,7 +125,7 @@ func TestRandomGraphReproducible(t *testing.T) {
 }
 
 func TestRandomGraphNoSelfLoops(t *testing.T) {
-	g, err := RandomGraph(20, 50, 1, 0, 1, nil, nil, 1, 1, 3)
+	g, err := RandomGraph(20, 50, 1, false, true, nil, nil, 1, 1, 3)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestRandomGraphNoSelfLoops(t *testing.T) {
 }
 
 func TestRandomGraphUndirectedSymmetric(t *testing.T) {
-	g, err := RandomGraph(20, 40, 0, 0, 0, nil, nil, 1, 1, 5)
+	g, err := RandomGraph(20, 40, 0, false, false, nil, nil, 1, 1, 5)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestRandomGraphUndirectedSymmetric(t *testing.T) {
 
 func TestRandomGraphNoDuplicates(t *testing.T) {
 	// multi=0, no duplicates allowed.
-	g, err := RandomGraph(10, 20, 0, 0, 1, nil, nil, 1, 1, 7)
+	g, err := RandomGraph(10, 20, 0, false, true, nil, nil, 1, 1, 7)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -182,7 +182,7 @@ func TestRandomGraphNoDuplicates(t *testing.T) {
 
 func TestRandomGraphMultiMinLen(t *testing.T) {
 	// multi=-1: duplicate arcs replaced by minimum length arc.
-	g, err := RandomGraph(5, 100, -1, 1, 1, nil, nil, 0, 100, 9)
+	g, err := RandomGraph(5, 100, -1, true, true, nil, nil, 0, 100, 9)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -195,7 +195,7 @@ func TestRandomGraphMultiMinLen(t *testing.T) {
 }
 
 func TestRandomGraphEdgeLengths(t *testing.T) {
-	g, err := RandomGraph(20, 50, 1, 1, 0, nil, nil, 5, 15, 3)
+	g, err := RandomGraph(20, 50, 1, true, false, nil, nil, 5, 15, 3)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestRandomGraphEdgeLengths(t *testing.T) {
 
 func TestRandomGraphUniformLengths(t *testing.T) {
 	// min_len == max_len → all edges have the same length.
-	g, err := RandomGraph(10, 20, 1, 1, 1, nil, nil, 7, 7, 1)
+	g, err := RandomGraph(10, 20, 1, true, true, nil, nil, 7, 7, 1)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -228,7 +228,7 @@ func TestRandomGraphDistFrom(t *testing.T) {
 	n := int64(5)
 	dist := make([]int64, n)
 	dist[0] = 0x40000000
-	g, err := RandomGraph(n, 20, 1, 1, 1, dist, nil, 1, 1, 1)
+	g, err := RandomGraph(n, 20, 1, true, true, dist, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("RandomGraph returned error: %v", err)
 	}
@@ -244,7 +244,7 @@ func TestRandomGraphInvalidDist(t *testing.T) {
 	// dist doesn't sum to 2^30.
 	dist := make([]int64, 5)
 	dist[0] = 0x10000000 // only 1/4 of 2^30
-	g, err := RandomGraph(5, 10, 0, 0, 0, dist, nil, 1, 1, 1)
+	g, err := RandomGraph(5, 10, 0, false, false, dist, nil, 1, 1, 1)
 	if g != nil {
 		t.Fatal("expected nil for invalid dist")
 	}
@@ -357,11 +357,11 @@ func TestRandomBigraphSymmetric(t *testing.T) {
 // ---- RandomLengths tests ----
 
 func TestRandomLengthsBasic(t *testing.T) {
-	g, err := RandomGraph(20, 40, 0, 0, 0, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(20, 40, 0, false, false, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("setup RandomGraph returned error: %v", err)
 	}
-	err = RandomLengths(g, 0, 1, 100, nil, 42)
+	err = RandomLengths(g, false, 1, 100, nil, 42)
 	if err != nil {
 		t.Fatalf("RandomLengths returned error: %v", err)
 	}
@@ -376,11 +376,11 @@ func TestRandomLengthsBasic(t *testing.T) {
 
 func TestRandomLengthsSymmetric(t *testing.T) {
 	// Undirected: arc u→v and v→u should have the same length.
-	g, err := RandomGraph(15, 30, 0, 0, 0, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(15, 30, 0, false, false, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
-	if err := RandomLengths(g, 0, 1, 50, nil, 7); err != nil {
+	if err := RandomLengths(g, false, 1, 50, nil, 7); err != nil {
 		t.Fatalf("RandomLengths failed: %v", err)
 	}
 	type edge struct{ a, b int64 }
@@ -409,11 +409,11 @@ func TestRandomLengthsSymmetric(t *testing.T) {
 
 func TestRandomLengthsDirected(t *testing.T) {
 	// Directed: arcs u→v and v→u can have different lengths.
-	g, err := RandomGraph(10, 30, 1, 1, 1, nil, nil, 1, 1, 2)
+	g, err := RandomGraph(10, 30, 1, true, true, nil, nil, 1, 1, 2)
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
-	if err := RandomLengths(g, 1, 10, 20, nil, 3); err != nil {
+	if err := RandomLengths(g, true, 10, 20, nil, 3); err != nil {
 		t.Fatalf("RandomLengths failed: %v", err)
 	}
 	for i := int64(0); i < g.N; i++ {
@@ -426,27 +426,27 @@ func TestRandomLengthsDirected(t *testing.T) {
 }
 
 func TestRandomLengthsNilGraph(t *testing.T) {
-	err := RandomLengths(nil, 0, 1, 10, nil, 1)
+	err := RandomLengths(nil, false, 1, 10, nil, 1)
 	if !errors.Is(err, graph.ErrMissingOperand) {
 		t.Errorf("want ErrMissingOperand, got %v", err)
 	}
 }
 
 func TestRandomLengthsVeryBadSpecs(t *testing.T) {
-	g, _ := RandomGraph(5, 5, 1, 1, 0, nil, nil, 1, 1, 1)
-	err := RandomLengths(g, 0, 10, 5, nil, 1)
+	g, _ := RandomGraph(5, 5, 1, true, false, nil, nil, 1, 1, 1)
+	err := RandomLengths(g, false, 10, 5, nil, 1)
 	if !errors.Is(err, graph.ErrVeryBadSpecs) {
 		t.Errorf("want ErrVeryBadSpecs, got %v", err)
 	}
 }
 
 func TestRandomLengthsID(t *testing.T) {
-	g, err := RandomGraph(5, 5, 1, 1, 0, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(5, 5, 1, true, false, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
 	origID := g.ID
-	if err := RandomLengths(g, 0, 1, 10, nil, 42); err != nil {
+	if err := RandomLengths(g, false, 1, 10, nil, 42); err != nil {
 		t.Fatalf("RandomLengths failed: %v", err)
 	}
 	want := fmt.Sprintf("random_lengths(%s,0,1,10,0,42)", origID)
@@ -456,13 +456,13 @@ func TestRandomLengthsID(t *testing.T) {
 }
 
 func TestRandomLengthsReproducible(t *testing.T) {
-	g1, err1 := RandomGraph(10, 20, 0, 0, 0, nil, nil, 1, 1, 1)
-	g2, err2 := RandomGraph(10, 20, 0, 0, 0, nil, nil, 1, 1, 1)
+	g1, err1 := RandomGraph(10, 20, 0, false, false, nil, nil, 1, 1, 1)
+	g2, err2 := RandomGraph(10, 20, 0, false, false, nil, nil, 1, 1, 1)
 	if err1 != nil || err2 != nil {
 		t.Fatalf("setup failed: %v / %v", err1, err2)
 	}
-	RandomLengths(g1, 0, 1, 100, nil, 7)
-	RandomLengths(g2, 0, 1, 100, nil, 7)
+	RandomLengths(g1, false, 1, 100, nil, 7)
+	RandomLengths(g2, false, 1, 100, nil, 7)
 	for i := int64(0); i < g1.N; i++ {
 		a1, a2 := g1.Vertices[i].Arcs, g2.Vertices[i].Arcs
 		for a1 != nil && a2 != nil {
@@ -476,11 +476,11 @@ func TestRandomLengthsReproducible(t *testing.T) {
 
 func TestRandomLengthsUniformLen(t *testing.T) {
 	// min_len == max_len → all arcs get same length.
-	g, err := RandomGraph(10, 15, 1, 1, 1, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(10, 15, 1, true, true, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
-	if err := RandomLengths(g, 1, 42, 42, nil, 1); err != nil {
+	if err := RandomLengths(g, true, 42, 42, nil, 1); err != nil {
 		t.Fatalf("RandomLengths failed: %v", err)
 	}
 	for i := int64(0); i < g.N; i++ {
@@ -495,11 +495,11 @@ func TestRandomLengthsUniformLen(t *testing.T) {
 func TestRandomLengthsNonuniform(t *testing.T) {
 	// Distribution: 3 values summing to 2^30.
 	dist := []int64{0x15555555, 0x15555556, 0x15555555} // roughly 1/3 each, sums to 0x40000000
-	g, err := RandomGraph(10, 20, 1, 1, 0, nil, nil, 1, 1, 1)
+	g, err := RandomGraph(10, 20, 1, true, false, nil, nil, 1, 1, 1)
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
-	if err := RandomLengths(g, 0, 0, 2, dist, 7); err != nil {
+	if err := RandomLengths(g, false, 0, 2, dist, 7); err != nil {
 		t.Fatalf("RandomLengths returned error: %v", err)
 	}
 	for i := int64(0); i < g.N; i++ {

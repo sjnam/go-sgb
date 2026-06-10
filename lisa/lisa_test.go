@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 // ---- Lisa tests ----
@@ -28,11 +28,14 @@ func TestLisaDefault(t *testing.T) {
 	}
 }
 
-func TestLisaID(t *testing.T) {
-	_, _ = Lisa(0, 0, 0, 0, 0, 0, 0, 0, 0)
+func TestLisaDefaultParams(t *testing.T) {
+	p, err := normalizeLisa(0, 0, 0, 0, 0, 0, 0, 0, 0)
+	if err != nil {
+		t.Fatalf("normalizeLisa(all defaults) returned error: %v", err)
+	}
 	want := "lisa(360,250,255,0,360,0,250,0,22950000)"
-	if LisaID != want {
-		t.Errorf("LisaID=%q, want %q", LisaID, want)
+	if p.id() != want {
+		t.Errorf("id=%q, want %q", p.id(), want)
 	}
 }
 
@@ -233,7 +236,7 @@ func TestPlaneLisaSymmetric(t *testing.T) {
 // ---- BiLisa tests ----
 
 func TestBiLisaDefault(t *testing.T) {
-	g, err := BiLisa(0, 0, 0, 0, 0, 0, 32768, 0)
+	g, err := BiLisa(0, 0, 0, 0, 0, 0, 32768, false)
 	if err != nil {
 		t.Fatalf("BiLisa returned error: %v", err)
 	}
@@ -243,7 +246,7 @@ func TestBiLisaDefault(t *testing.T) {
 }
 
 func TestBiLisaUtilTypes(t *testing.T) {
-	g, err := BiLisa(0, 0, 0, 0, 0, 0, 32768, 0)
+	g, err := BiLisa(0, 0, 0, 0, 0, 0, 32768, false)
 	if err != nil {
 		t.Fatalf("BiLisa returned error: %v", err)
 	}
@@ -253,7 +256,7 @@ func TestBiLisaUtilTypes(t *testing.T) {
 }
 
 func TestBiLisaVertexNames(t *testing.T) {
-	g, err := BiLisa(3, 4, 0, 0, 0, 0, 32768, 0)
+	g, err := BiLisa(3, 4, 0, 0, 0, 0, 32768, false)
 	if err != nil {
 		t.Fatalf("BiLisa returned error: %v", err)
 	}
@@ -272,7 +275,7 @@ func TestBiLisaVertexNames(t *testing.T) {
 }
 
 func TestBiLisaBipartite(t *testing.T) {
-	g, err := BiLisa(10, 10, 0, 0, 0, 0, 32768, 0)
+	g, err := BiLisa(10, 10, 0, 0, 0, 0, 32768, false)
 	if err != nil {
 		t.Fatalf("BiLisa returned error: %v", err)
 	}
@@ -282,7 +285,7 @@ func TestBiLisaBipartite(t *testing.T) {
 }
 
 func TestBiLisaPixelVal(t *testing.T) {
-	g, err := BiLisa(5, 5, 0, 0, 0, 0, 0, 0) // thresh=0 → include all
+	g, err := BiLisa(5, 5, 0, 0, 0, 0, 0, false) // thresh=0 → include all
 	if err != nil {
 		t.Fatalf("BiLisa returned error: %v", err)
 	}
@@ -298,8 +301,8 @@ func TestBiLisaPixelVal(t *testing.T) {
 
 func TestBiLisaThreshold(t *testing.T) {
 	// thresh=65535 → only pixels >= 65535 (i.e., max brightness); thresh=0 → all pixels included.
-	g0, err0 := BiLisa(10, 10, 0, 0, 0, 0, 0, 0)     // all pixels included
-	g1, err1 := BiLisa(10, 10, 0, 0, 0, 0, 65535, 0) // only fully white pixels
+	g0, err0 := BiLisa(10, 10, 0, 0, 0, 0, 0, false)     // all pixels included
+	g1, err1 := BiLisa(10, 10, 0, 0, 0, 0, 65535, false) // only fully white pixels
 	if err0 != nil || err1 != nil {
 		t.Fatalf("BiLisa returned error: %v / %v", err0, err1)
 	}
@@ -311,8 +314,8 @@ func TestBiLisaThreshold(t *testing.T) {
 func TestBiLisaDarkMode(t *testing.T) {
 	// c=1 selects dark pixels; c=0 selects light pixels. Together they should
 	// cover all pixel combinations.
-	g0, err0 := BiLisa(5, 5, 0, 0, 0, 0, 32768, 0) // light
-	g1, err1 := BiLisa(5, 5, 0, 0, 0, 0, 32768, 1) // dark
+	g0, err0 := BiLisa(5, 5, 0, 0, 0, 0, 32768, false) // light
+	g1, err1 := BiLisa(5, 5, 0, 0, 0, 0, 32768, true)  // dark
 	if err0 != nil || err1 != nil {
 		t.Fatalf("BiLisa returned error: %v / %v", err0, err1)
 	}

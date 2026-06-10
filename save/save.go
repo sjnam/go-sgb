@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 )
 
 // Anomaly bit flags returned by SaveGraph.
@@ -24,16 +24,17 @@ const (
 const maxSvString = 4095
 
 // SaveGraph writes graph g to the named file in GraphBase format.
-// Returns 0 on success, -1 if g is nil, -2 if the file cannot be opened,
-// or a bitmask of anomaly flags if the graph was saved with corrections.
-func SaveGraph(g *graph.Graph, filename string) int64 {
+// It returns a bitmask of anomaly flags (0 if the graph was saved verbatim;
+// nonzero if it was saved with corrections) and an error if g is nil or the
+// file could not be written.
+func SaveGraph(g *graph.Graph, filename string) (int64, error) {
 	if g == nil || g.Vertices == nil {
-		return -1
+		return 0, graph.ErrMissingOperand
 	}
 
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return -2
+		return 0, fmt.Errorf("save: cannot create %q: %w", filename, err)
 	}
 	defer f.Close()
 
@@ -165,8 +166,10 @@ func SaveGraph(g *graph.Graph, filename string) int64 {
 		}
 	}
 
-	w.Flush()
-	return anomalies
+	if err := w.Flush(); err != nil {
+		return anomalies, fmt.Errorf("save: cannot write %q: %w", filename, err)
+	}
+	return anomalies, nil
 }
 
 // RestoreGraph reads a graph from the named GraphBase-format file.

@@ -3,11 +3,11 @@ package books
 import (
 	"testing"
 
-	"github.com/sjnam/go-sgb/io"
+	"github.com/sjnam/go-sgb/gbio"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 // -----------------------------------------------------------------------
@@ -15,7 +15,7 @@ func init() {
 // -----------------------------------------------------------------------
 
 func TestBookAnnaAll(t *testing.T) {
-	g, err := Book("anna", 0, 0, 0, 0, 0, 0, 0)
+	g, _, err := Book("anna", 0, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Book(anna,all) returned error: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestBookAnnaAll(t *testing.T) {
 }
 
 func TestBookAnnaTop50(t *testing.T) {
-	g, err := Book("anna", 50, 0, 0, 0, 1, 1, 0)
+	g, _, err := Book("anna", 50, 0, 0, 0, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("Book(anna,50) returned error: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestBookAnnaTop50(t *testing.T) {
 
 func TestBookAnnaExclude1(t *testing.T) {
 	// x=1 drops the single highest-weight character
-	g, err := Book("anna", 50, 1, 0, 0, 1, 1, 0)
+	g, _, err := Book("anna", 50, 1, 0, 0, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("Book(anna,50,1) returned error: %v", err)
 	}
@@ -63,7 +63,7 @@ func TestBookAnnaExclude1(t *testing.T) {
 
 func TestBookAnnaChapterRange(t *testing.T) {
 	// Chapters 1-50 only
-	g, err := Book("anna", 0, 0, 1, 50, 1, 0, 0)
+	g, _, err := Book("anna", 0, 0, 1, 50, 1, 0, 0)
 	if err != nil {
 		t.Fatalf("Book(anna,chaps 1-50) returned error: %v", err)
 	}
@@ -77,17 +77,20 @@ func TestBookAnnaChapterRange(t *testing.T) {
 }
 
 func TestBookChapters(t *testing.T) {
-	Book("anna", 0, 0, 0, 0, 0, 0, 0)
-	if Chapters != 239 {
-		t.Errorf("Chapters = %d, want 239 for anna", Chapters)
+	_, chapNames, err := Book("anna", 0, 0, 0, 0, 0, 0, 0)
+	if err != nil {
+		t.Fatalf("Book(anna) returned error: %v", err)
 	}
-	if ChapName[1] == "" {
-		t.Errorf("ChapName[1] is empty")
+	if chapters := int64(len(chapNames) - 1); chapters != 239 {
+		t.Errorf("chapters = %d, want 239 for anna", chapters)
+	}
+	if chapNames[1] == "" {
+		t.Errorf("chapNames[1] is empty")
 	}
 }
 
 func TestBookDavid(t *testing.T) {
-	g, err := Book("david", 0, 1, 0, 0, 1, 1, 0)
+	g, _, err := Book("david", 0, 1, 0, 0, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("Book(david,x=1) returned error: %v", err)
 	}
@@ -101,7 +104,7 @@ func TestBookDavid(t *testing.T) {
 }
 
 func TestBookID(t *testing.T) {
-	g, err := Book("anna", 0, 0, 0, 0, 0, 0, 0)
+	g, _, err := Book("anna", 0, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Book(anna) returned error: %v", err)
 	}
@@ -114,7 +117,7 @@ func TestBookID(t *testing.T) {
 }
 
 func TestBookUtilFields(t *testing.T) {
-	g, err := Book("anna", 0, 0, 0, 0, 1, 1, 0)
+	g, _, err := Book("anna", 0, 0, 0, 0, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("Book(anna) returned error: %v", err)
 	}
@@ -133,7 +136,7 @@ func TestBookUtilFields(t *testing.T) {
 }
 
 func TestBookChapNo(t *testing.T) {
-	g, err := Book("anna", 0, 0, 0, 0, 1, 1, 0)
+	g, _, err := Book("anna", 0, 0, 0, 0, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("Book(anna) returned error: %v", err)
 	}
@@ -156,7 +159,7 @@ func TestBookChapNo(t *testing.T) {
 
 func TestBiBookAnna(t *testing.T) {
 	// bi_book("anna",50,0,10,120,1,1,0) → 50 characters + 111 chapters
-	g, err := BiBook("anna", 50, 0, 10, 120, 1, 1, 0)
+	g, _, err := BiBook("anna", 50, 0, 10, 120, 1, 1, 0)
 	if err != nil {
 		t.Fatalf("BiBook(anna,50,10,120) returned error: %v", err)
 	}
@@ -173,8 +176,11 @@ func TestBiBookAnna(t *testing.T) {
 }
 
 func TestBiBookChapterNames(t *testing.T) {
-	BiBook("anna", 0, 0, 0, 0, 0, 0, 0)
-	if Chapters != 239 {
-		t.Errorf("Chapters = %d, want 239", Chapters)
+	_, chapNames, err := BiBook("anna", 0, 0, 0, 0, 0, 0, 0)
+	if err != nil {
+		t.Fatalf("BiBook(anna) returned error: %v", err)
+	}
+	if chapters := int64(len(chapNames) - 1); chapters != 239 {
+		t.Errorf("chapters = %d, want 239", chapters)
 	}
 }

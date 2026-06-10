@@ -22,6 +22,7 @@ package gates
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/sjnam/go-sgb/flip"
 	"github.com/sjnam/go-sgb/graph"
@@ -55,114 +56,109 @@ func setBit(v *graph.Vertex, b int64)         { v.Z = b }
 func setBar(v *graph.Vertex, u *graph.Vertex) { v.W = u }
 func getBar(v *graph.Vertex) *graph.Vertex    { p, _ := v.W.(*graph.Vertex); return p }
 
-// ---- Internal gate-building state ----
+// ---- Gate-building state ----
 
-var (
-	gateGraph *graph.Graph
-	nextVI    int64  // index of next vertex to allocate
-	gPrefix   string // current naming prefix
-	gCount    int64  // serial number; -1 = no number (use prefix as-is)
-)
+// builder holds the working state used while constructing a gate graph.
+type builder struct {
+	g      *graph.Graph
+	nextVI int64  // index of next vertex to allocate
+	prefix string // current naming prefix
+	count  int64  // serial number; -1 = no number (use prefix as-is)
+}
 
-func vAt(i int64) *graph.Vertex { return &gateGraph.Vertices[i] }
+func (b *builder) vAt(i int64) *graph.Vertex { return &b.g.Vertices[i] }
 
-func newVert(t byte) *graph.Vertex {
-	v := vAt(nextVI)
-	nextVI++
-	if gCount < 0 {
-		v.Name = gPrefix
+func (b *builder) newVert(t byte) *graph.Vertex {
+	v := b.vAt(b.nextVI)
+	b.nextVI++
+	if b.count < 0 {
+		v.Name = b.prefix
 	} else {
-		v.Name = fmt.Sprintf("%s%d", gPrefix, gCount)
-		gCount++
+		v.Name = fmt.Sprintf("%s%d", b.prefix, b.count)
+		b.count++
 	}
 	setTyp(v, t)
 	return v
 }
 
-func startPrefix(s string) { gPrefix = s; gCount = 0 }
+func (b *builder) startPrefix(s string) { b.prefix = s; b.count = 0 }
 
-func numericPrefix(ch byte, k int64) {
-	gPrefix = fmt.Sprintf("%c%d:", ch, k)
-	gCount = 0
+// soloPrefix names the next vertex exactly s, with no serial number.
+func (b *builder) soloPrefix(s string) { b.prefix = s; b.count = -1 }
+
+func (b *builder) numericPrefix(ch byte, k int64) {
+	b.prefix = fmt.Sprintf("%c%d:", ch, k)
+	b.count = 0
 }
 
 // firstOf creates n vertices of type t and returns the index of the first.
-func firstOf(n int64, t byte) int64 {
-	idx := nextVI
+func (b *builder) firstOf(n int64, t byte) int64 {
+	idx := b.nextVI
 	for k := int64(0); k < n; k++ {
-		newVert(t)
+		b.newVert(t)
 	}
 	return idx
 }
 
-func make2(t byte, v1, v2 *graph.Vertex) *graph.Vertex {
-	v := newVert(t)
-	gateGraph.NewArc(v, v1, DELAY)
-	gateGraph.NewArc(v, v2, DELAY)
+func (b *builder) make2(t byte, v1, v2 *graph.Vertex) *graph.Vertex {
+	v := b.newVert(t)
+	b.g.NewArc(v, v1, DELAY)
+	b.g.NewArc(v, v2, DELAY)
 	return v
 }
 
-func make3(t byte, v1, v2, v3 *graph.Vertex) *graph.Vertex {
-	v := newVert(t)
-	gateGraph.NewArc(v, v1, DELAY)
-	gateGraph.NewArc(v, v2, DELAY)
-	gateGraph.NewArc(v, v3, DELAY)
+func (b *builder) make3(t byte, v1, v2, v3 *graph.Vertex) *graph.Vertex {
+	v := b.make2(t, v1, v2)
+	b.g.NewArc(v, v3, DELAY)
 	return v
 }
 
-func make4(t byte, v1, v2, v3, v4 *graph.Vertex) *graph.Vertex {
-	v := newVert(t)
-	gateGraph.NewArc(v, v1, DELAY)
-	gateGraph.NewArc(v, v2, DELAY)
-	gateGraph.NewArc(v, v3, DELAY)
-	gateGraph.NewArc(v, v4, DELAY)
+func (b *builder) make4(t byte, v1, v2, v3, v4 *graph.Vertex) *graph.Vertex {
+	v := b.make3(t, v1, v2, v3)
+	b.g.NewArc(v, v4, DELAY)
 	return v
 }
 
-func make5(t byte, v1, v2, v3, v4, v5 *graph.Vertex) *graph.Vertex {
-	v := newVert(t)
-	gateGraph.NewArc(v, v1, DELAY)
-	gateGraph.NewArc(v, v2, DELAY)
-	gateGraph.NewArc(v, v3, DELAY)
-	gateGraph.NewArc(v, v4, DELAY)
-	gateGraph.NewArc(v, v5, DELAY)
+func (b *builder) make5(t byte, v1, v2, v3, v4, v5 *graph.Vertex) *graph.Vertex {
+	v := b.make4(t, v1, v2, v3, v4)
+	b.g.NewArc(v, v5, DELAY)
 	return v
 }
 
 // comp returns the complement of v, creating a NOT gate if needed.
 // The complement is cached in v.W (bar field).
-func comp(v *graph.Vertex) *graph.Vertex {
-	if b := getBar(v); b != nil {
-		return b
+func (b *builder) comp(v *graph.Vertex) *graph.Vertex {
+	if u := getBar(v); u != nil {
+		return u
 	}
-	u := vAt(nextVI)
-	nextVI++
+	u := b.vAt(b.nextVI)
+	b.nextVI++
 	setBar(u, v)
 	setBar(v, u)
 	u.Name = v.Name + "~"
 	setTyp(u, NOT)
-	gateGraph.NewArc(u, v, 1)
+	b.g.NewArc(u, v, 1)
 	return u
 }
 
 // evenComp returns comp(v) if s is odd, v if s is even.
-func evenComp(s int64, v *graph.Vertex) *graph.Vertex {
+func (b *builder) evenComp(s int64, v *graph.Vertex) *graph.Vertex {
 	if s&1 != 0 {
-		return comp(v)
+		return b.comp(v)
 	}
 	return v
 }
 
 // makeXor constructs XOR(u,v) = OR(AND(u,comp(v)), AND(comp(u),v)).
-func makeXor(u, v *graph.Vertex) *graph.Vertex {
-	t1 := make2(AND, u, comp(v))
-	t2 := make2(AND, comp(u), v)
-	return make2(OR, t1, t2)
+func (b *builder) makeXor(u, v *graph.Vertex) *graph.Vertex {
+	t1 := b.make2(AND, u, b.comp(v))
+	t2 := b.make2(AND, b.comp(u), v)
+	return b.make2(OR, t1, t2)
 }
 
 // latchit sets latch.alt = AND(u, runBit).
-func latchit(u, latch, runBit *graph.Vertex) {
-	setAlt(latch, make2(AND, u, runBit))
+func (b *builder) latchit(u, latch, runBit *graph.Vertex) {
+	setAlt(latch, b.make2(AND, u, runBit))
 }
 
 // ---- GateEval ----
@@ -240,48 +236,45 @@ func tipValue(tip *graph.Vertex) byte {
 
 // ---- PrintGates ----
 
-// PrintGates prints a symbolic representation of gate graph g.
-func PrintGates(g *graph.Graph) {
+// PrintGates writes a symbolic representation of gate graph g to w.
+func PrintGates(w io.Writer, g *graph.Graph) {
 	for i := int64(0); i < g.N; i++ {
-		prGate(&g.Vertices[i])
+		prGate(w, &g.Vertices[i])
 	}
 	for a := Outs(g); a != nil; a = a.Next {
-		fmt.Printf("Output %s\n", a.Tip.Name)
+		fmt.Fprintf(w, "Output %s\n", a.Tip.Name)
 	}
 }
 
-func prGate(v *graph.Vertex) {
-	fmt.Printf("%s = ", v.Name)
+func prGate(w io.Writer, v *graph.Vertex) {
+	fmt.Fprintf(w, "%s = ", v.Name)
 	switch Typ(v) {
 	case INP:
-		fmt.Print("input")
+		fmt.Fprint(w, "input")
 	case LAT:
-		fmt.Print("latch")
+		fmt.Fprint(w, "latch")
 		if u := Alt(v); u != nil {
-			fmt.Printf("ed %s", u.Name)
+			fmt.Fprintf(w, "ed %s", u.Name)
 		}
 	case NOT:
-		fmt.Print("~ ")
+		fmt.Fprint(w, "~ ")
 	case CON:
-		fmt.Printf("constant %d", Bit(v))
+		fmt.Fprintf(w, "constant %d", Bit(v))
 	case EQL:
-		fmt.Printf("copy of %s", Alt(v).Name)
+		fmt.Fprintf(w, "copy of %s", Alt(v).Name)
 	}
 	first := true
 	for a := v.Arcs; a != nil; a = a.Next {
 		if !first {
-			fmt.Printf(" %c ", Typ(v))
+			fmt.Fprintf(w, " %c ", Typ(v))
 		}
-		fmt.Print(a.Tip.Name)
+		fmt.Fprint(w, a.Tip.Name)
 		first = false
 	}
-	fmt.Println()
+	fmt.Fprintln(w)
 }
 
 // ---- Risc ----
-
-// RiscState holds the register values after RunRisc terminates.
-var RiscState [18]uint64
 
 // Risc constructs a gate graph for a simple 16-bit RISC CPU.
 // regs must be 2..16; values outside this range are replaced with 16.
@@ -299,89 +292,81 @@ func Risc(regs int64) (*graph.Graph, error) {
 	g.ID = fmt.Sprintf("risc(%d)", regs)
 	g.UtilTypes = "ZZZIIVZZZZZZZA"
 
-	gateGraph = g
-	nextVI = 0
+	b := &builder{g: g}
+	b.buildRisc(regs)
 
-	buildRisc(regs)
-
-	g.N = nextVI
-	g.Vertices = g.Vertices[:nextVI+graph.ExtraN]
+	g.N = b.nextVI
+	g.Vertices = g.Vertices[:b.nextVI+graph.ExtraN]
 	return g, nil
 }
 
-func buildRisc(regs int64) {
+func (b *builder) buildRisc(regs int64) {
 	// ---- Inputs and latches ----
-	gPrefix = "RUN"
-	gCount = -1
-	runBit := newVert(INP)
+	b.soloPrefix("RUN")
+	runBit := b.newVert(INP)
 
-	startPrefix("M")
+	b.startPrefix("M")
 	var mem [16]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
-		mem[k] = newVert(INP)
+		mem[k] = b.newVert(INP)
 	}
 
-	startPrefix("P")
-	progIdx := firstOf(10, LAT)
+	b.startPrefix("P")
+	progIdx := b.firstOf(10, LAT)
 
-	gPrefix = "S"
-	gCount = -1
-	sign := newVert(LAT)
-	gPrefix = "N"
-	gCount = -1
-	nonzero := newVert(LAT)
-	gPrefix = "K"
-	gCount = -1
-	carry := newVert(LAT)
-	gPrefix = "V"
-	gCount = -1
-	overflow := newVert(LAT)
-	gPrefix = "X"
-	gCount = -1
-	extra := newVert(LAT)
+	b.soloPrefix("S")
+	sign := b.newVert(LAT)
+	b.soloPrefix("N")
+	nonzero := b.newVert(LAT)
+	b.soloPrefix("K")
+	carry := b.newVert(LAT)
+	b.soloPrefix("V")
+	overflow := b.newVert(LAT)
+	b.soloPrefix("X")
+	extra := b.newVert(LAT)
 
 	regIdx := make([]int64, regs)
 	for r := int64(0); r < regs; r++ {
-		numericPrefix('R', r)
-		regIdx[r] = firstOf(16, LAT)
+		b.numericPrefix('R', r)
+		regIdx[r] = b.firstOf(16, LAT)
 	}
 
 	// ---- Instruction decoding ----
-	startPrefix("D")
-	imm := make3(AND, comp(extra), comp(mem[4]), comp(mem[5])) // A=0
-	rel := make3(AND, comp(extra), mem[4], comp(mem[5]))       // A=1
-	dir := make3(AND, comp(extra), comp(mem[4]), mem[5])       // A=2
-	ind := make3(AND, comp(extra), mem[4], mem[5])             // A=3
+	b.startPrefix("D")
+	imm := b.make3(AND, b.comp(extra), b.comp(mem[4]), b.comp(mem[5])) // A=0
+	rel := b.make3(AND, b.comp(extra), mem[4], b.comp(mem[5]))         // A=1
+	dir := b.make3(AND, b.comp(extra), b.comp(mem[4]), mem[5])         // A=2
+	ind := b.make3(AND, b.comp(extra), mem[4], mem[5])                 // A=3
 
-	op := make2(OR, make2(AND, extra, vAt(progIdx)), make2(AND, comp(extra), mem[6]))
-	cond := make2(OR, make2(AND, extra, vAt(progIdx+1)), make2(AND, comp(extra), mem[7]))
+	op := b.make2(OR, b.make2(AND, extra, b.vAt(progIdx)), b.make2(AND, b.comp(extra), mem[6]))
+	cond := b.make2(OR, b.make2(AND, extra, b.vAt(progIdx+1)), b.make2(AND, b.comp(extra), mem[7]))
 
 	var mod [4]*graph.Vertex
 	var dest [4]*graph.Vertex
 	for k := int64(0); k < 4; k++ {
-		mod[k] = make2(OR, make2(AND, extra, vAt(progIdx+2+k)), make2(AND, comp(extra), mem[8+k]))
-		dest[k] = make2(OR, make2(AND, extra, vAt(progIdx+6+k)), make2(AND, comp(extra), mem[12+k]))
+		mod[k] = b.make2(OR, b.make2(AND, extra, b.vAt(progIdx+2+k)), b.make2(AND, b.comp(extra), mem[8+k]))
+		dest[k] = b.make2(OR, b.make2(AND, extra, b.vAt(progIdx+6+k)), b.make2(AND, b.comp(extra), mem[12+k]))
 	}
 
 	// ---- Fetch source value ----
-	startPrefix("F")
+	b.startPrefix("F")
 
 	// old_dest: present value of destination register
 	var destMatch [16]*graph.Vertex
 	for r := int64(0); r < regs; r++ {
-		destMatch[r] = make4(AND,
-			evenComp(r, dest[0]), evenComp(r>>1, dest[1]),
-			evenComp(r>>2, dest[2]), evenComp(r>>3, dest[3]))
+		destMatch[r] = b.make4(AND,
+			b.evenComp(r, dest[0]), b.evenComp(r>>1, dest[1]),
+			b.evenComp(r>>2, dest[2]), b.evenComp(r>>3, dest[3]))
 	}
 	var oldDest [16]*graph.Vertex
 	var tmp [16]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
 		for r := int64(0); r < regs; r++ {
-			tmp[r] = make2(AND, destMatch[r], vAt(regIdx[r]+k))
+			tmp[r] = b.make2(AND, destMatch[r], b.vAt(regIdx[r]+k))
 		}
-		oldDest[k] = newVert(OR)
+		oldDest[k] = b.newVert(OR)
 		for r := int64(0); r < regs; r++ {
-			gateGraph.NewArc(oldDest[k], tmp[r], DELAY)
+			b.g.NewArc(oldDest[k], tmp[r], DELAY)
 		}
 	}
 
@@ -389,31 +374,31 @@ func buildRisc(regs int64) {
 	var oldSrc [16]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
 		for r := int64(0); r < regs; r++ {
-			tmp[r] = make5(AND, vAt(regIdx[r]+k),
-				evenComp(r, mem[0]), evenComp(r>>1, mem[1]),
-				evenComp(r>>2, mem[2]), evenComp(r>>3, mem[3]))
+			tmp[r] = b.make5(AND, b.vAt(regIdx[r]+k),
+				b.evenComp(r, mem[0]), b.evenComp(r>>1, mem[1]),
+				b.evenComp(r>>2, mem[2]), b.evenComp(r>>3, mem[3]))
 		}
-		oldSrc[k] = newVert(OR)
+		oldSrc[k] = b.newVert(OR)
 		for r := int64(0); r < regs; r++ {
-			gateGraph.NewArc(oldSrc[k], tmp[r], DELAY)
+			b.g.NewArc(oldSrc[k], tmp[r], DELAY)
 		}
 	}
 
 	// inc_dest: old_dest + SRC (4-bit adder for low 4 bits)
 	var incDest [16]*graph.Vertex
-	makeAdder(4, oldDest[:], mem[:], incDest[:], nil, true)
-	up := make2(AND, incDest[4], comp(mem[3]))
-	down := make2(AND, comp(incDest[4]), mem[3])
+	b.makeAdder(4, oldDest[:], mem[:], incDest[:], nil, true)
+	up := b.make2(AND, incDest[4], b.comp(mem[3]))
+	down := b.make2(AND, b.comp(incDest[4]), mem[3])
 	for k := int64(4); ; k++ {
-		comp(up)
-		comp(down)
-		incDest[k] = make3(OR,
-			make2(AND, comp(oldDest[k]), up),
-			make2(AND, comp(oldDest[k]), down),
-			make3(AND, oldDest[k], comp(up), comp(down)))
+		b.comp(up)
+		b.comp(down)
+		incDest[k] = b.make3(OR,
+			b.make2(AND, b.comp(oldDest[k]), up),
+			b.make2(AND, b.comp(oldDest[k]), down),
+			b.make3(AND, oldDest[k], b.comp(up), b.comp(down)))
 		if k < 15 {
-			up = make2(AND, up, oldDest[k])
-			down = make2(AND, down, comp(oldDest[k]))
+			up = b.make2(AND, up, oldDest[k])
+			down = b.make2(AND, down, b.comp(oldDest[k]))
 		} else {
 			break
 		}
@@ -426,244 +411,244 @@ func buildRisc(regs int64) {
 		if k >= 4 {
 			immK = mem[3]
 		}
-		source[k] = make4(OR,
-			make2(AND, imm, immK),
-			make2(AND, rel, incDest[k]),
-			make2(AND, dir, oldSrc[k]),
-			make2(AND, extra, mem[k]))
+		source[k] = b.make4(OR,
+			b.make2(AND, imm, immK),
+			b.make2(AND, rel, incDest[k]),
+			b.make2(AND, dir, oldSrc[k]),
+			b.make2(AND, extra, mem[k]))
 	}
 
 	// ---- General logic operation ----
-	startPrefix("L")
+	b.startPrefix("L")
 	var logOp [16]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
-		logOp[k] = make4(OR,
-			make3(AND, mod[0], comp(oldDest[k]), comp(source[k])),
-			make3(AND, mod[1], comp(oldDest[k]), source[k]),
-			make3(AND, mod[2], oldDest[k], comp(source[k])),
-			make3(AND, mod[3], oldDest[k], source[k]))
+		logOp[k] = b.make4(OR,
+			b.make3(AND, mod[0], b.comp(oldDest[k]), b.comp(source[k])),
+			b.make3(AND, mod[1], b.comp(oldDest[k]), source[k]),
+			b.make3(AND, mod[2], oldDest[k], b.comp(source[k])),
+			b.make3(AND, mod[3], oldDest[k], source[k]))
 	}
 
 	// ---- Conditional load ----
-	startPrefix("C")
-	tmp[0] = make4(OR,
-		make3(AND, mod[0], comp(sign), comp(nonzero)),
-		make3(AND, mod[1], comp(sign), nonzero),
-		make3(AND, mod[2], sign, comp(nonzero)),
-		make3(AND, mod[3], sign, nonzero))
-	tmp[1] = make4(OR,
-		make3(AND, mod[0], comp(carry), comp(overflow)),
-		make3(AND, mod[1], comp(carry), overflow),
-		make3(AND, mod[2], carry, comp(overflow)),
-		make3(AND, mod[3], carry, overflow))
-	change := make3(OR, comp(cond), make2(AND, tmp[0], comp(op)), make2(AND, tmp[1], op))
+	b.startPrefix("C")
+	tmp[0] = b.make4(OR,
+		b.make3(AND, mod[0], b.comp(sign), b.comp(nonzero)),
+		b.make3(AND, mod[1], b.comp(sign), nonzero),
+		b.make3(AND, mod[2], sign, b.comp(nonzero)),
+		b.make3(AND, mod[3], sign, nonzero))
+	tmp[1] = b.make4(OR,
+		b.make3(AND, mod[0], b.comp(carry), b.comp(overflow)),
+		b.make3(AND, mod[1], b.comp(carry), overflow),
+		b.make3(AND, mod[2], carry, b.comp(overflow)),
+		b.make3(AND, mod[3], carry, overflow))
+	change := b.make3(OR, b.comp(cond), b.make2(AND, tmp[0], b.comp(op)), b.make2(AND, tmp[1], op))
 
 	// ---- Arithmetic ----
-	startPrefix("A")
+	b.startPrefix("A")
 
 	// Shift operations
 	var shift [18]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
 		var s0, s1, s2, s3 *graph.Vertex
 		if k == 0 {
-			s0 = make4(AND, source[15], mod[0], comp(mod[1]), comp(mod[2]))
+			s0 = b.make4(AND, source[15], mod[0], b.comp(mod[1]), b.comp(mod[2]))
 		} else {
-			s0 = make3(AND, source[k-1], comp(mod[1]), comp(mod[2]))
+			s0 = b.make3(AND, source[k-1], b.comp(mod[1]), b.comp(mod[2]))
 		}
 		if k < 4 {
-			s1 = make4(AND, source[k+12], mod[0], mod[1], comp(mod[2]))
+			s1 = b.make4(AND, source[k+12], mod[0], mod[1], b.comp(mod[2]))
 		} else {
-			s1 = make3(AND, source[k-4], mod[1], comp(mod[2]))
+			s1 = b.make3(AND, source[k-4], mod[1], b.comp(mod[2]))
 		}
 		if k == 15 {
-			s2 = make4(AND, source[15], comp(mod[0]), comp(mod[1]), mod[2])
+			s2 = b.make4(AND, source[15], b.comp(mod[0]), b.comp(mod[1]), mod[2])
 		} else {
-			s2 = make3(AND, source[k+1], comp(mod[1]), mod[2])
+			s2 = b.make3(AND, source[k+1], b.comp(mod[1]), mod[2])
 		}
 		if k > 11 {
-			s3 = make4(AND, source[15], comp(mod[0]), mod[1], mod[2])
+			s3 = b.make4(AND, source[15], b.comp(mod[0]), mod[1], mod[2])
 		} else {
-			s3 = make3(AND, source[k+4], mod[1], mod[2])
+			s3 = b.make3(AND, source[k+4], mod[1], mod[2])
 		}
-		shift[k] = make4(OR, s0, s1, s2, s3)
+		shift[k] = b.make4(OR, s0, s1, s2, s3)
 	}
-	shift[16] = make4(OR,
-		make2(AND, comp(mod[2]), source[15]),
-		make3(AND, comp(mod[2]), mod[1], make3(OR, source[14], source[13], source[12])),
-		make3(AND, mod[2], comp(mod[1]), source[0]),
-		make3(AND, mod[2], mod[1], source[3]))
-	shift[17] = make3(OR,
-		make3(AND, comp(mod[2]), comp(mod[1]), makeXor(source[15], source[14])),
-		make4(AND, comp(mod[2]), mod[1],
-			make5(OR, source[15], source[14], source[13], source[12], source[11]),
-			make5(OR, comp(source[15]), comp(source[14]), comp(source[13]), comp(source[12]), comp(source[11]))),
-		make3(AND, mod[2], mod[1], make3(OR, source[0], source[1], source[2])))
+	shift[16] = b.make4(OR,
+		b.make2(AND, b.comp(mod[2]), source[15]),
+		b.make3(AND, b.comp(mod[2]), mod[1], b.make3(OR, source[14], source[13], source[12])),
+		b.make3(AND, mod[2], b.comp(mod[1]), source[0]),
+		b.make3(AND, mod[2], mod[1], source[3]))
+	shift[17] = b.make3(OR,
+		b.make3(AND, b.comp(mod[2]), b.comp(mod[1]), b.makeXor(source[15], source[14])),
+		b.make4(AND, b.comp(mod[2]), mod[1],
+			b.make5(OR, source[15], source[14], source[13], source[12], source[11]),
+			b.make5(OR, b.comp(source[15]), b.comp(source[14]), b.comp(source[13]), b.comp(source[12]), b.comp(source[11]))),
+		b.make3(AND, mod[2], mod[1], b.make3(OR, source[0], source[1], source[2])))
 
 	var sum [18]*graph.Vertex
 	var diff [18]*graph.Vertex
-	makeAdder(16, oldDest[:], source[:], sum[:], make2(AND, carry, mod[0]), true)
-	makeAdder(16, oldDest[:], source[:], diff[:], make2(AND, carry, mod[0]), false)
-	sum[17] = make2(OR,
-		make3(AND, oldDest[15], source[15], comp(sum[15])),
-		make3(AND, comp(oldDest[15]), comp(source[15]), sum[15]))
-	diff[17] = make2(OR,
-		make3(AND, oldDest[15], comp(source[15]), comp(diff[15])),
-		make3(AND, comp(oldDest[15]), source[15], diff[15]))
+	b.makeAdder(16, oldDest[:], source[:], sum[:], b.make2(AND, carry, mod[0]), true)
+	b.makeAdder(16, oldDest[:], source[:], diff[:], b.make2(AND, carry, mod[0]), false)
+	sum[17] = b.make2(OR,
+		b.make3(AND, oldDest[15], source[15], b.comp(sum[15])),
+		b.make3(AND, b.comp(oldDest[15]), b.comp(source[15]), sum[15]))
+	diff[17] = b.make2(OR,
+		b.make3(AND, oldDest[15], b.comp(source[15]), b.comp(diff[15])),
+		b.make3(AND, b.comp(oldDest[15]), source[15], diff[15]))
 
 	// ---- Bring everything together ----
-	startPrefix("Z")
+	b.startPrefix("Z")
 
 	// next_loc and next_next_loc (reg[0] + 1 and + 2)
 	var nextLoc [16]*graph.Vertex
 	var nextNextLoc [16]*graph.Vertex
-	nextLoc[0] = comp(vAt(regIdx[0]))
-	nextNextLoc[0] = vAt(regIdx[0])
-	nextLoc[1] = makeXor(vAt(regIdx[0]+1), vAt(regIdx[0]))
-	nextNextLoc[1] = comp(vAt(regIdx[0] + 1))
-	t5 := vAt(regIdx[0] + 1)
+	nextLoc[0] = b.comp(b.vAt(regIdx[0]))
+	nextNextLoc[0] = b.vAt(regIdx[0])
+	nextLoc[1] = b.makeXor(b.vAt(regIdx[0]+1), b.vAt(regIdx[0]))
+	nextNextLoc[1] = b.comp(b.vAt(regIdx[0] + 1))
+	t5 := b.vAt(regIdx[0] + 1)
 	for k := int64(2); k < 16; k++ {
-		nextLoc[k] = makeXor(vAt(regIdx[0]+k), make2(AND, vAt(regIdx[0]), t5))
-		nextNextLoc[k] = makeXor(vAt(regIdx[0]+k), t5)
+		nextLoc[k] = b.makeXor(b.vAt(regIdx[0]+k), b.make2(AND, b.vAt(regIdx[0]), t5))
+		nextNextLoc[k] = b.makeXor(b.vAt(regIdx[0]+k), t5)
 		if k < 15 {
-			t5 = make2(AND, t5, vAt(regIdx[0]+k))
+			t5 = b.make2(AND, t5, b.vAt(regIdx[0]+k))
 		}
 	}
 
 	// result bits
-	jump := make5(AND, op, mod[0], mod[1], mod[2], mod[3])
+	jump := b.make5(AND, op, mod[0], mod[1], mod[2], mod[3])
 	var result [18]*graph.Vertex
 	for k := int64(0); k < 16; k++ {
-		result[k] = make5(OR,
-			make2(AND, comp(op), logOp[k]),
-			make2(AND, jump, nextLoc[k]),
-			make3(AND, op, comp(mod[3]), shift[k]),
-			make5(AND, op, mod[3], comp(mod[2]), comp(mod[1]), sum[k]),
-			make5(AND, op, mod[3], comp(mod[2]), mod[1], diff[k]))
-		result[k] = make2(OR,
-			make3(AND, cond, change, source[k]),
-			make2(AND, comp(cond), result[k]))
+		result[k] = b.make5(OR,
+			b.make2(AND, b.comp(op), logOp[k]),
+			b.make2(AND, jump, nextLoc[k]),
+			b.make3(AND, op, b.comp(mod[3]), shift[k]),
+			b.make5(AND, op, mod[3], b.comp(mod[2]), b.comp(mod[1]), sum[k]),
+			b.make5(AND, op, mod[3], b.comp(mod[2]), mod[1], diff[k]))
+		result[k] = b.make2(OR,
+			b.make3(AND, cond, change, source[k]),
+			b.make2(AND, b.comp(cond), result[k]))
 	}
 	for k := int64(16); k < 18; k++ {
-		result[k] = make3(OR,
-			make3(AND, op, comp(mod[3]), shift[k]),
-			make5(AND, op, mod[3], comp(mod[2]), comp(mod[1]), sum[k]),
-			make5(AND, op, mod[3], comp(mod[2]), mod[1], diff[k]))
+		result[k] = b.make3(OR,
+			b.make3(AND, op, b.comp(mod[3]), shift[k]),
+			b.make5(AND, op, mod[3], b.comp(mod[2]), b.comp(mod[1]), sum[k]),
+			b.make5(AND, op, mod[3], b.comp(mod[2]), mod[1], diff[k]))
 	}
 
 	// Program register and extra bit
 	for k := int64(0); k < 10; k++ {
-		latchit(mem[k+6], vAt(progIdx+k), runBit)
+		b.latchit(mem[k+6], b.vAt(progIdx+k), runBit)
 	}
-	nextra := make2(OR, make2(AND, ind, comp(cond)), make2(AND, ind, change))
-	latchit(nextra, extra, runBit)
-	nzs := make4(OR, mem[0], mem[1], mem[2], mem[3])
-	nzd := make4(OR, dest[0], dest[1], dest[2], dest[3])
+	nextra := b.make2(OR, b.make2(AND, ind, b.comp(cond)), b.make2(AND, ind, change))
+	b.latchit(nextra, extra, runBit)
+	nzs := b.make4(OR, mem[0], mem[1], mem[2], mem[3])
+	nzd := b.make4(OR, dest[0], dest[1], dest[2], dest[3])
 
 	// New values for registers 1..regs-1
-	t5chg := make2(AND, change, comp(ind))
+	t5chg := b.make2(AND, change, b.comp(ind))
 	for r := int64(1); r < regs; r++ {
-		t4 := make2(AND, t5chg, destMatch[r])
+		t4 := b.make2(AND, t5chg, destMatch[r])
 		for k := int64(0); k < 16; k++ {
-			t3 := make2(OR, make2(AND, t4, result[k]), make2(AND, comp(t4), vAt(regIdx[r]+k)))
-			latchit(t3, vAt(regIdx[r]+k), runBit)
+			t3 := b.make2(OR, b.make2(AND, t4, result[k]), b.make2(AND, b.comp(t4), b.vAt(regIdx[r]+k)))
+			b.latchit(t3, b.vAt(regIdx[r]+k), runBit)
 		}
 	}
 
 	// New values of S, N, K, V
-	t5 = make4(OR,
-		make2(AND, sign, cond),
-		make2(AND, sign, jump),
-		make2(AND, sign, ind),
-		make4(AND, result[15], comp(cond), comp(jump), comp(ind)))
-	latchit(t5, sign, runBit)
+	t5 = b.make4(OR,
+		b.make2(AND, sign, cond),
+		b.make2(AND, sign, jump),
+		b.make2(AND, sign, ind),
+		b.make4(AND, result[15], b.comp(cond), b.comp(jump), b.comp(ind)))
+	b.latchit(t5, sign, runBit)
 
-	t5 = make4(OR,
-		make4(OR, result[0], result[1], result[2], result[3]),
-		make4(OR, result[4], result[5], result[6], result[7]),
-		make4(OR, result[8], result[9], result[10], result[11]),
-		make4(OR, result[12], result[13], result[14],
-			make5(AND, make2(OR, nonzero, sign), op, mod[0], comp(mod[2]), mod[3])))
-	t5 = make4(OR,
-		make2(AND, nonzero, cond),
-		make2(AND, nonzero, jump),
-		make2(AND, nonzero, ind),
-		make4(AND, t5, comp(cond), comp(jump), comp(ind)))
-	latchit(t5, nonzero, runBit)
+	t5 = b.make4(OR,
+		b.make4(OR, result[0], result[1], result[2], result[3]),
+		b.make4(OR, result[4], result[5], result[6], result[7]),
+		b.make4(OR, result[8], result[9], result[10], result[11]),
+		b.make4(OR, result[12], result[13], result[14],
+			b.make5(AND, b.make2(OR, nonzero, sign), op, mod[0], b.comp(mod[2]), mod[3])))
+	t5 = b.make4(OR,
+		b.make2(AND, nonzero, cond),
+		b.make2(AND, nonzero, jump),
+		b.make2(AND, nonzero, ind),
+		b.make4(AND, t5, b.comp(cond), b.comp(jump), b.comp(ind)))
+	b.latchit(t5, nonzero, runBit)
 
-	t5 = make5(OR,
-		make2(AND, overflow, cond),
-		make2(AND, overflow, jump),
-		make2(AND, overflow, comp(op)),
-		make2(AND, overflow, ind),
-		make5(AND, result[17], comp(cond), comp(jump), comp(ind), op))
-	latchit(t5, overflow, runBit)
+	t5 = b.make5(OR,
+		b.make2(AND, overflow, cond),
+		b.make2(AND, overflow, jump),
+		b.make2(AND, overflow, b.comp(op)),
+		b.make2(AND, overflow, ind),
+		b.make5(AND, result[17], b.comp(cond), b.comp(jump), b.comp(ind), op))
+	b.latchit(t5, overflow, runBit)
 
-	t5 = make5(OR,
-		make2(AND, carry, cond),
-		make2(AND, carry, jump),
-		make2(AND, carry, comp(op)),
-		make2(AND, carry, ind),
-		make5(AND, result[16], comp(cond), comp(jump), comp(ind), op))
-	latchit(t5, carry, runBit)
+	t5 = b.make5(OR,
+		b.make2(AND, carry, cond),
+		b.make2(AND, carry, jump),
+		b.make2(AND, carry, b.comp(op)),
+		b.make2(AND, carry, ind),
+		b.make5(AND, result[16], b.comp(cond), b.comp(jump), b.comp(ind), op))
+	b.latchit(t5, carry, runBit)
 
 	// New values of register 0 and memory address register (outputs)
-	skip := make2(AND, cond, comp(change))
-	hop := make2(AND, comp(cond), jump)
-	normal := make4(OR,
-		make2(AND, skip, comp(ind)),
-		make2(AND, skip, nzs),
-		make3(AND, comp(skip), ind, comp(nzs)),
-		make3(AND, comp(skip), comp(hop), nzd))
-	special := make3(AND, comp(skip), ind, nzs)
+	skip := b.make2(AND, cond, b.comp(change))
+	hop := b.make2(AND, b.comp(cond), jump)
+	normal := b.make4(OR,
+		b.make2(AND, skip, b.comp(ind)),
+		b.make2(AND, skip, nzs),
+		b.make3(AND, b.comp(skip), ind, b.comp(nzs)),
+		b.make3(AND, b.comp(skip), b.comp(hop), nzd))
+	special := b.make3(AND, b.comp(skip), ind, nzs)
 
 	for k := int64(0); k < 16; k++ {
-		t5 = make4(OR,
-			make2(AND, normal, nextLoc[k]),
-			make4(AND, skip, ind, comp(nzs), nextNextLoc[k]),
-			make3(AND, hop, comp(ind), source[k]),
-			make5(AND, comp(skip), comp(hop), comp(ind), comp(nzd), result[k]))
-		t4 := make2(OR,
-			make2(AND, special, vAt(regIdx[0]+k)),
-			make2(AND, comp(special), t5))
-		latchit(t4, vAt(regIdx[0]+k), runBit)
-		t4 = make2(OR,
-			make2(AND, special, oldSrc[k]),
-			make2(AND, comp(special), t5))
+		t5 = b.make4(OR,
+			b.make2(AND, normal, nextLoc[k]),
+			b.make4(AND, skip, ind, b.comp(nzs), nextNextLoc[k]),
+			b.make3(AND, hop, b.comp(ind), source[k]),
+			b.make5(AND, b.comp(skip), b.comp(hop), b.comp(ind), b.comp(nzd), result[k]))
+		t4 := b.make2(OR,
+			b.make2(AND, special, b.vAt(regIdx[0]+k)),
+			b.make2(AND, b.comp(special), t5))
+		b.latchit(t4, b.vAt(regIdx[0]+k), runBit)
+		t4 = b.make2(OR,
+			b.make2(AND, special, oldSrc[k]),
+			b.make2(AND, b.comp(special), t5))
 		// output arc (big-endian order: prepend)
 		a := &graph.Arc{}
-		a.Tip = make2(AND, t4, runBit)
-		a.Next, _ = gateGraph.ZZ.(*graph.Arc)
-		gateGraph.ZZ = a
+		a.Tip = b.make2(AND, t4, runBit)
+		a.Next, _ = b.g.ZZ.(*graph.Arc)
+		b.g.ZZ = a
 	}
 }
 
 // makeAdder builds an n-bit ripple-carry adder (add=true) or subtracter (add=false).
 // x[0..n-1], y[0..n-1] are input gate pointer slices; z[0..n] receives output gate pointers.
 // carry is an optional incoming carry gate (nil = no incoming carry).
-func makeAdder(n int64, x, y, z []*graph.Vertex, carry *graph.Vertex, add bool) {
+func (b *builder) makeAdder(n int64, x, y, z []*graph.Vertex, carry *graph.Vertex, add bool) {
 	k := int64(0)
 	if carry == nil {
-		z[0] = makeXor(x[0], y[0])
+		z[0] = b.makeXor(x[0], y[0])
 		if add {
-			carry = make2(AND, x[0], y[0])
+			carry = b.make2(AND, x[0], y[0])
 		} else {
-			carry = make2(AND, comp(x[0]), y[0])
+			carry = b.make2(AND, b.comp(x[0]), y[0])
 		}
 		k = 1
 	}
 	for ; k < n; k++ {
-		comp(x[k])
-		comp(y[k])
-		comp(carry)
-		z[k] = make4(OR,
-			make3(AND, x[k], comp(y[k]), comp(carry)),
-			make3(AND, comp(x[k]), y[k], comp(carry)),
-			make3(AND, comp(x[k]), comp(y[k]), carry),
-			make3(AND, x[k], y[k], carry))
-		carry = make3(OR,
-			make2(AND, evenComp(boolInt(!add), x[k]), y[k]),
-			make2(AND, evenComp(boolInt(!add), x[k]), carry),
-			make2(AND, y[k], carry))
+		b.comp(x[k])
+		b.comp(y[k])
+		b.comp(carry)
+		z[k] = b.make4(OR,
+			b.make3(AND, x[k], b.comp(y[k]), b.comp(carry)),
+			b.make3(AND, b.comp(x[k]), y[k], b.comp(carry)),
+			b.make3(AND, b.comp(x[k]), b.comp(y[k]), carry),
+			b.make3(AND, x[k], y[k], carry))
+		carry = b.make3(OR,
+			b.make2(AND, b.evenComp(boolInt(!add), x[k]), y[k]),
+			b.make2(AND, b.evenComp(boolInt(!add), x[k]), carry),
+			b.make2(AND, y[k], carry))
 	}
 	z[n] = carry
 }
@@ -679,22 +664,26 @@ func boolInt(b bool) int64 {
 
 // RunRisc simulates the RISC CPU built by Risc().
 // g is the gate graph, rom is the read-only memory, size is its length.
-// traceRegs, if >0, prints register state each cycle.
-// Returns 0 on success, negative on error.
-func RunRisc(g *graph.Graph, rom []uint64, size, traceRegs int64) int64 {
+// traceRegs, if >0, writes the register state to w each cycle (w may be nil
+// when traceRegs is 0).
+//
+// Returns the final machine state and a status code (0 on success, negative
+// on error): state[0..15] hold the registers and state[16] packs the program
+// counter and the X, S, N, K, V flags.
+func RunRisc(w io.Writer, g *graph.Graph, rom []uint64, size, traceRegs int64) (state [18]uint64, status int64) {
 	if g == nil {
-		return -2
+		return state, -2
 	}
 	if traceRegs > 0 {
 		for r := int64(0); r < traceRegs; r++ {
-			fmt.Printf(" r%-2d ", r)
+			fmt.Fprintf(w, " r%-2d ", r)
 		}
-		fmt.Println(" P XSNKV MEM")
+		fmt.Fprintln(w, " P XSNKV MEM")
 	}
 
 	r := GateEval(g, "0", nil) // reset: RUN=0
 	if r < 0 {
-		return r
+		return state, r
 	}
 	g.Vertices[0].X = int64(1) // RUN=1
 
@@ -706,7 +695,7 @@ func RunRisc(g *graph.Graph, rom []uint64, size, traceRegs int64) int64 {
 			l = 2*l + uint64(Val(a.Tip))
 		}
 		if traceRegs > 0 {
-			printRiscState(g, traceRegs, l, rom, size)
+			printRiscState(w, g, traceRegs, l, rom, size)
 		}
 		if l >= uint64(size) {
 			break
@@ -719,10 +708,9 @@ func RunRisc(g *graph.Graph, rom []uint64, size, traceRegs int64) int64 {
 		GateEval(g, "", nil)
 	}
 	if traceRegs > 0 {
-		fmt.Printf("Execution terminated with memory address %d.\n", l)
+		fmt.Fprintf(w, "Execution terminated with memory address %d.\n", l)
 	}
-	dumpRiscState(g)
-	return 0
+	return dumpRiscState(g), 0
 }
 
 // RISC vertex layout (from buildRisc):
@@ -740,9 +728,9 @@ func riscRegVal(g *graph.Graph, r int64) uint64 {
 	return m
 }
 
-func printRiscState(g *graph.Graph, traceRegs int64, l uint64, rom []uint64, size int64) {
+func printRiscState(w io.Writer, g *graph.Graph, traceRegs int64, l uint64, rom []uint64, size int64) {
 	for r := int64(0); r < traceRegs; r++ {
-		fmt.Printf("%04x ", riscRegVal(g, r))
+		fmt.Fprintf(w, "%04x ", riscRegVal(g, r))
 	}
 	// prog register P0..P9, MSB (P9) first
 	var m uint64
@@ -770,17 +758,17 @@ func printRiscState(g *graph.Graph, traceRegs int64, l uint64, rom []uint64, siz
 	if o != 0 {
 		oc = 'V'
 	}
-	fmt.Printf("%03x%c%c%c%c%c ", m, xc, sc, nc, cc, oc)
+	fmt.Fprintf(w, "%03x%c%c%c%c%c ", m, xc, sc, nc, cc, oc)
 	if l >= uint64(size) {
-		fmt.Println("????")
+		fmt.Fprintln(w, "????")
 	} else {
-		fmt.Printf("%04x\n", rom[l])
+		fmt.Fprintf(w, "%04x\n", rom[l])
 	}
 }
 
-func dumpRiscState(g *graph.Graph) {
+func dumpRiscState(g *graph.Graph) (state [18]uint64) {
 	for r := int64(0); r < 16; r++ {
-		RiscState[r] = riscRegVal(g, r)
+		state[r] = riscRegVal(g, r)
 	}
 	var m uint64
 	for k := int64(9); k >= 0; k-- {
@@ -791,7 +779,8 @@ func dumpRiscState(g *graph.Graph) {
 	m = 2*m + uint64(Val(&g.Vertices[28]))
 	m = 2*m + uint64(Val(&g.Vertices[29]))
 	m = 2*m + uint64(Val(&g.Vertices[30]))
-	RiscState[16] = m
+	state[16] = m
+	return state
 }
 
 // ---- Prod ----
@@ -827,12 +816,10 @@ func Prod(m, n int64) (*graph.Graph, error) {
 	g.ID = fmt.Sprintf("prod(%d,%d)", m, n)
 	g.UtilTypes = "ZZZIIVZZZZZZZA"
 
-	gateGraph = g
-	nextVI = 0
+	b := &builder{g: g}
+	b.buildProd(m, n, mPlusN, f)
 
-	buildProd(m, n, mPlusN, f)
-
-	g.N = nextVI // actual number of gates used
+	g.N = b.nextVI // actual number of gates used
 	g.Vertices = g.Vertices[:g.N+graph.ExtraN]
 
 	g, err := reduce(g)
@@ -850,24 +837,24 @@ func aPos(j, m int64) int64 {
 	return m + 5*(jj>>1) + 3 + ((jj & 1) << 1)
 }
 
-func buildProd(m, n, mPlusN, f int64) {
-	startPrefix("X")
-	xIdx := firstOf(m, INP)
-	startPrefix("Y")
-	yIdx := firstOf(n, INP)
+func (b *builder) buildProd(m, n, mPlusN, f int64) {
+	b.startPrefix("X")
+	xIdx := b.firstOf(m, INP)
+	b.startPrefix("Y")
+	yIdx := b.firstOf(n, INP)
 
 	// Define A_j for 0 <= j < m
 	for j := int64(0); j < m; j++ {
-		numericPrefix('A', j)
+		b.numericPrefix('A', j)
 		for k := int64(0); k < j; k++ {
-			v := newVert(CON)
+			v := b.newVert(CON)
 			setBit(v, 0)
 		}
 		for k := int64(0); k < n; k++ {
-			make2(AND, vAt(xIdx+j), vAt(yIdx+k))
+			b.make2(AND, b.vAt(xIdx+j), b.vAt(yIdx+k))
 		}
 		for k := j + n; k < mPlusN; k++ {
-			v := newVert(CON)
+			v := b.newVert(CON)
 			setBit(v, 0)
 		}
 	}
@@ -876,49 +863,49 @@ func buildProd(m, n, mPlusN, f int64) {
 	for j := int64(0); j < m-2; j++ {
 		alpha := aPos(3*j, m) * mPlusN
 		beta := aPos(3*j+1, m) * mPlusN
-		numericPrefix('P', j)
+		b.numericPrefix('P', j)
 		for k := int64(0); k < mPlusN; k++ {
-			make2(XOR, vAt(alpha+k), vAt(beta+k))
+			b.make2(XOR, b.vAt(alpha+k), b.vAt(beta+k))
 		}
-		numericPrefix('Q', j)
+		b.numericPrefix('Q', j)
 		for k := int64(0); k < mPlusN; k++ {
-			make2(AND, vAt(alpha+k), vAt(beta+k))
+			b.make2(AND, b.vAt(alpha+k), b.vAt(beta+k))
 		}
-		alpha2 := nextVI - 2*mPlusN
+		alpha2 := b.nextVI - 2*mPlusN
 		beta2 := aPos(3*j+2, m) * mPlusN
-		numericPrefix('A', m+2*j)
+		b.numericPrefix('A', m+2*j)
 		for k := int64(0); k < mPlusN; k++ {
-			make2(XOR, vAt(alpha2+k), vAt(beta2+k))
+			b.make2(XOR, b.vAt(alpha2+k), b.vAt(beta2+k))
 		}
-		numericPrefix('R', j)
+		b.numericPrefix('R', j)
 		for k := int64(0); k < mPlusN; k++ {
-			make2(AND, vAt(alpha2+k), vAt(beta2+k))
+			b.make2(AND, b.vAt(alpha2+k), b.vAt(beta2+k))
 		}
-		alpha3 := nextVI - 3*mPlusN
-		beta3 := nextVI - mPlusN
-		numericPrefix('A', m+2*j+1)
-		v := newVert(CON)
+		alpha3 := b.nextVI - 3*mPlusN
+		beta3 := b.nextVI - mPlusN
+		b.numericPrefix('A', m+2*j+1)
+		v := b.newVert(CON)
 		setBit(v, 0)
 		for k := int64(0); k < mPlusN-1; k++ {
-			make2(OR, vAt(alpha3+k), vAt(beta3+k))
+			b.make2(OR, b.vAt(alpha3+k), b.vAt(beta3+k))
 		}
 	}
 
 	// Define U and V
 	alpha := aPos(3*m-6, m) * mPlusN
 	beta := aPos(3*m-5, m) * mPlusN
-	startPrefix("U")
+	b.startPrefix("U")
 	for k := int64(0); k < mPlusN; k++ {
-		make2(XOR, vAt(alpha+k), vAt(beta+k))
+		b.make2(XOR, b.vAt(alpha+k), b.vAt(beta+k))
 	}
-	startPrefix("V")
+	b.startPrefix("V")
 	for k := int64(0); k < mPlusN; k++ {
-		make2(AND, vAt(alpha+k), vAt(beta+k))
+		b.make2(AND, b.vAt(alpha+k), b.vAt(beta+k))
 	}
 
 	// Parallel addition: compute Z = U ⊕ W
-	uu := nextVI - mPlusN - mPlusN // points to U[0]
-	vv := nextVI - mPlusN          // points to V[0]
+	uu := b.nextVI - mPlusN - mPlusN // points to U[0]
+	vv := b.nextVI - mPlusN          // points to V[0]
 
 	// Build flog and down tables
 	flogT := make([]int64, mPlusN+1)
@@ -943,12 +930,12 @@ func buildProd(m, n, mPlusN, f int64) {
 	w := make([]*graph.Vertex, mPlusN)
 	cT := make([]*graph.Vertex, f*mPlusN)
 
-	startPrefix("W")
-	v0 := newVert(CON)
+	b.startPrefix("W")
+	v0 := b.newVert(CON)
 	setBit(v0, 0)
 	w[0] = v0
-	v1 := newVert(EQL)
-	setAlt(v1, vAt(vv))
+	v1 := b.newVert(EQL)
+	setAlt(v1, b.vAt(vv))
 	w[1] = v1
 
 	anc := make([]int64, f+2)
@@ -964,39 +951,39 @@ func buildProd(m, n, mPlusN, f int64) {
 		}
 
 		i := int64(1)
-		cc := vAt(vv + k - 1)
-		dd := vAt(uu + k - 1)
+		cc := b.vAt(vv + k - 1)
+		dd := b.vAt(uu + k - 1)
 
 		for {
 			j := anc[l]
 			// gate b_k^j = d_k^i AND c_{k-i}^{j-i}
-			bv := vAt(nextVI)
-			nextVI++
+			bv := b.vAt(b.nextVI)
+			b.nextVI++
 			bv.Name = fmt.Sprintf("B%d:%d", k, j)
 			setTyp(bv, AND)
-			gateGraph.NewArc(bv, dd, DELAY)
+			b.g.NewArc(bv, dd, DELAY)
 			ji := j - i
 			fl := flogT[ji]
 			var cArg *graph.Vertex
 			if fl > 0 {
 				cArg = cT[(k-i)+(fl-2)*mPlusN]
 			} else {
-				cArg = vAt(vv + k - i - 1)
+				cArg = b.vAt(vv + k - i - 1)
 			}
-			gateGraph.NewArc(bv, cArg, DELAY)
+			b.g.NewArc(bv, cArg, DELAY)
 
 			// gate c_k^j = c_k^i OR b_k^j
 			var cv *graph.Vertex
 			if l != 0 {
-				cv = vAt(nextVI)
-				nextVI++
+				cv = b.vAt(b.nextVI)
+				b.nextVI++
 				cv.Name = fmt.Sprintf("C%d:%d", k, j)
 				setTyp(cv, OR)
 			} else {
-				cv = newVert(OR)
+				cv = b.newVert(OR)
 			}
-			gateGraph.NewArc(cv, cc, DELAY)
-			gateGraph.NewArc(cv, bv, DELAY)
+			b.g.NewArc(cv, cc, DELAY)
+			b.g.NewArc(cv, bv, DELAY)
 
 			if flogT[j] < flogT[j+1] { // j is a Fibonacci number
 				cT[k+(flogT[j]-2)*mPlusN] = cv
@@ -1007,33 +994,33 @@ func buildProd(m, n, mPlusN, f int64) {
 			cc = cv
 
 			// gate d_k^j = d_k^i AND d_{k-i}^{j-i}
-			dv := vAt(nextVI)
-			nextVI++
+			dv := b.vAt(b.nextVI)
+			b.nextVI++
 			dv.Name = fmt.Sprintf("D%d:%d", k, j)
 			setTyp(dv, AND)
-			gateGraph.NewArc(dv, dd, DELAY)
+			b.g.NewArc(dv, dd, DELAY)
 			var dArg *graph.Vertex
 			if fl > 0 {
 				dArg = cT[(k-i)+(fl-2)*mPlusN+1]
 			} else {
-				dArg = vAt(uu + k - i - 1)
+				dArg = b.vAt(uu + k - i - 1)
 			}
-			gateGraph.NewArc(dv, dArg, DELAY)
+			b.g.NewArc(dv, dArg, DELAY)
 			dd = dv
 			i = j
 			l--
 		}
-		w[k] = vAt(nextVI - 1)
+		w[k] = b.vAt(b.nextVI - 1)
 	}
 
 	// Compute Z = U XOR W, record outputs
-	startPrefix("Z")
+	b.startPrefix("Z")
 	for k := int64(0); k < mPlusN; k++ {
-		zv := make2(XOR, vAt(uu+k), w[k])
+		zv := b.make2(XOR, b.vAt(uu+k), w[k])
 		a := &graph.Arc{}
 		a.Tip = zv
-		a.Next, _ = gateGraph.ZZ.(*graph.Arc)
-		gateGraph.ZZ = a
+		a.Next, _ = b.g.ZZ.(*graph.Arc)
+		b.g.ZZ = a
 	}
 }
 
@@ -1046,13 +1033,16 @@ func reduce(g *graph.Graph) (*graph.Graph, error) {
 		return nil, graph.ErrMissingOperand
 	}
 	sentinel := g.N
+	// Builder over the old graph: reduceXor may append fresh NOT gates after
+	// the existing ones (the slack comes from the graph's shadow vertices).
+	b := &builder{g: g, nextVI: sentinel}
 
 	// Iterate until no more constant latches are produced.
 	for {
 		latchPtr := []*graph.Vertex(nil) // list of latches linked via V
 		for i := int64(0); i < sentinel; i++ {
 			v := &g.Vertices[i]
-			reduceGate(v, &latchPtr)
+			b.reduceGate(v, &latchPtr)
 		}
 		changed := false
 		for _, v := range latchPtr {
@@ -1104,9 +1094,6 @@ func reduce(g *graph.Graph) (*graph.Graph, error) {
 	// Build mapping from old to new vertices (stored in old vertex's V field after marking)
 	newVI := int64(0)
 	var latchList []*graph.Vertex // old latch vertices to fix up
-
-	gateGraph = newG
-	nextVI = 0
 
 	for i := int64(0); i < sentinel; i++ {
 		v := &g.Vertices[i]
@@ -1185,7 +1172,7 @@ func reduce(g *graph.Graph) (*graph.Graph, error) {
 }
 
 // reduceGate simplifies gate v in place using identity rules.
-func reduceGate(v *graph.Vertex, latchPtr *[]*graph.Vertex) {
+func (b *builder) reduceGate(v *graph.Vertex, latchPtr *[]*graph.Vertex) {
 	switch Typ(v) {
 	case LAT:
 		*latchPtr = append(*latchPtr, v)
@@ -1225,7 +1212,7 @@ func reduceGate(v *graph.Vertex, latchPtr *[]*graph.Vertex) {
 	case OR:
 		reduceOr(v)
 	case XOR:
-		reduceXor(v)
+		b.reduceXor(v)
 	}
 	// test_single_arg
 	if v.Arcs != nil && v.Arcs.Next == nil {
@@ -1349,7 +1336,7 @@ func reduceOr(v *graph.Vertex) {
 	}
 }
 
-func reduceXor(v *graph.Vertex) {
+func (b *builder) reduceXor(v *graph.Vertex) {
 	cmp := int64(0)
 	var prev *graph.Arc
 	a := v.Arcs
@@ -1430,11 +1417,11 @@ func reduceXor(v *graph.Vertex) {
 			}
 			if a.Next == nil {
 				// create new NOT gate
-				nb := vAt(nextVI)
-				nextVI++
+				nb := b.vAt(b.nextVI)
+				b.nextVI++
 				nb.Name = u.Name + "~"
 				setTyp(nb, NOT)
-				gateGraph.NewArc(nb, u, 1)
+				b.g.NewArc(nb, u, 1)
 				setBar(u, nb)
 				setBar(nb, u)
 				a.Tip = nb

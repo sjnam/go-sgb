@@ -1,30 +1,33 @@
 // Package miles implements GB_MILES from Stanford GraphBase.
 // Miles constructs graphs based on highway mileage data between 128 North
-// American cities. MilesDistance provides direct access to the distance matrix.
+// American cities, returning the graph together with a DistanceMatrix that
+// provides direct access to the mileage data.
 package miles
 
 import (
 	"fmt"
 
 	"github.com/sjnam/go-sgb/flip"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/sort"
 )
 
 // MaxN is the number of cities in miles.dat (also the default value of n).
 const MaxN = 128
 
-var (
+// Extreme values present in miles.dat, used to validate the data.
+const (
 	minLat, maxLat int64 = 2672, 5042
 	minLon, maxLon int64 = 7180, 12312
 	minPop, maxPop int64 = 2521, 875538
 )
 
-// distance[MaxN*j+k] holds the highway distance (in miles) between cities j and k.
-// Negative values indicate edges suppressed by max_distance or max_degree.
-// Valid for the most recently completed Miles call.
-var distance [MaxN * MaxN]int64
+// DistanceMatrix records the highway distances (in miles) between the cities
+// of miles.dat for one Miles graph. Entry [MaxN*j+k] is the distance between
+// cities j and k; negative values indicate edges suppressed by the
+// maxDistance or maxDegree constraints of the Miles call that produced it.
+type DistanceMatrix [MaxN * MaxN]int64
 
 type cityData struct {
 	kk       int64
@@ -42,12 +45,10 @@ func XCoord(v *graph.Vertex) int64  { i, _ := v.X.(int64); return i }
 func YCoord(v *graph.Vertex) int64  { i, _ := v.Y.(int64); return i }
 func IndexNo(v *graph.Vertex) int64 { i, _ := v.Z.(int64); return i }
 
-// MilesDistance returns the recorded highway distance between u and v.
-// The result may be negative when the edge was suppressed by max_distance
-// or max_degree constraints. Valid only for the most recently created graph
-// whose aux_data (i.e., the distance table) has not been replaced.
-func MilesDistance(u, v *graph.Vertex) int64 {
-	return distance[MaxN*IndexNo(u)+IndexNo(v)]
+// Distance returns the recorded highway distance between u and v, which must
+// be vertices of the graph this matrix was returned with.
+func (d *DistanceMatrix) Distance(u, v *graph.Vertex) int64 {
+	return d[MaxN*IndexNo(u)+IndexNo(v)]
 }
 
 // Miles constructs a graph based on highway distances between North American cities.
@@ -64,8 +65,12 @@ func MilesDistance(u, v *graph.Vertex) int64 {
 // Vertex utility fields: W=population(I), X=x_coord(I), Y=y_coord(I), Z=index(I).
 // Edge lengths equal highway distances in miles.
 // UtilTypes = "ZZIIIIZZZZZZZZ".
-func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64) (*graph.Graph, error) {
+//
+// The returned DistanceMatrix records the mileage data for the new graph,
+// including distances suppressed by maxDistance or maxDegree.
+func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64) (*graph.Graph, *DistanceMatrix, error) {
 	var nodeBlock [MaxN]cityNode
+	dm := &DistanceMatrix{}
 
 	rng := flip.New(seed)
 
@@ -79,7 +84,7 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 	if northWeight > 100000 || northWeight < -100000 ||
 		westWeight > 100000 || westWeight < -100000 ||
 		popWeight > 100 || popWeight < -100 {
-		return nil, graph.ErrBadSpecs
+		return nil, nil, graph.ErrBadSpecs
 	}
 
 	g := graph.NewGraph(n)
@@ -88,9 +93,9 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 	g.UtilTypes = "ZZIIIIZZZZZZZZ"
 
 	// Read miles.dat. Cities appear in reverse alphabetical order (k=127 first).
-	r, err := io.Open("miles.dat")
+	r, err := gbio.Open("miles.dat")
 	if err != nil {
-		return nil, graph.ErrEarlyDataFault
+		return nil, nil, graph.ErrEarlyDataFault
 	}
 
 	for k := int64(MaxN - 1); k >= 0; k-- {
@@ -105,22 +110,22 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 		p.Val.name = r.GbString('[')
 		if r.GbChar() != '[' {
 			r.RawClose()
-			return nil, graph.ErrSyntaxError
+			return nil, nil, graph.ErrSyntaxError
 		}
 		p.Val.lat = int64(r.GbNumber(10))
 		if p.Val.lat < minLat || p.Val.lat > maxLat || r.GbChar() != ',' {
 			r.RawClose()
-			return nil, graph.ErrSyntaxError
+			return nil, nil, graph.ErrSyntaxError
 		}
 		p.Val.lon = int64(r.GbNumber(10))
 		if p.Val.lon < minLon || p.Val.lon > maxLon || r.GbChar() != ']' {
 			r.RawClose()
-			return nil, graph.ErrSyntaxError
+			return nil, nil, graph.ErrSyntaxError
 		}
 		p.Val.pop = int64(r.GbNumber(10))
 		if p.Val.pop < minPop || p.Val.pop > maxPop {
 			r.RawClose()
-			return nil, graph.ErrSyntaxError
+			return nil, nil, graph.ErrSyntaxError
 		}
 
 		p.Key = northWeight*(p.Val.lat-minLat) +
@@ -134,14 +139,14 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 				r.GbNewline()
 			}
 			dist := int64(r.GbNumber(10))
-			distance[MaxN*j+k] = dist
-			distance[MaxN*k+j] = dist
+			dm[MaxN*j+k] = dist
+			dm[MaxN*k+j] = dist
 		}
 		r.GbNewline()
 	}
 
 	if err := r.Close(); err != nil {
-		return nil, graph.ErrLateDataFault
+		return nil, nil, graph.ErrLateDataFault
 	}
 
 	// Sort cities by weight; assign the top n to graph vertices.
@@ -167,7 +172,7 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 
 	// Prune edges if max_distance or max_degree was specified.
 	if maxDistance > 0 || origMaxDegree > 0 {
-		pruneEdges(nodeBlock[:], maxDistance, maxDegree, origMaxDegree, rng)
+		pruneEdges(dm, nodeBlock[:], maxDistance, maxDegree, origMaxDegree, rng)
 	}
 
 	// Add edges between every pair of selected vertices with positive distances.
@@ -177,18 +182,18 @@ func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed i
 		for vi2 := ui + 1; vi2 < n; vi2++ {
 			v := &g.Vertices[vi2]
 			k := IndexNo(v)
-			if distance[MaxN*j+k] > 0 && distance[MaxN*k+j] > 0 {
-				g.NewEdge(u, v, distance[MaxN*j+k])
+			if dm[MaxN*j+k] > 0 && dm[MaxN*k+j] > 0 {
+				g.NewEdge(u, v, dm[MaxN*j+k])
 			}
 		}
 	}
 
-	return g, nil
+	return g, dm, nil
 }
 
 // pruneEdges negates distances for edges that exceed maxDist or fall outside
 // the top maxDeg closest neighbors of each city.
-func pruneEdges(nodeBlock []cityNode, maxDist, maxDeg, origMaxDeg int64, rng *flip.RNG) {
+func pruneEdges(dm *DistanceMatrix, nodeBlock []cityNode, maxDist, maxDeg, origMaxDeg int64, rng *flip.RNG) {
 	localMaxDist := maxDist
 	localMaxDeg := maxDeg
 	if origMaxDeg == 0 {
@@ -212,9 +217,9 @@ func pruneEdges(nodeBlock []cityNode, maxDist, maxDeg, origMaxDeg int64, rng *fl
 			if q.Val.pop == 0 || q == p {
 				continue
 			}
-			j := distance[MaxN*cityK+q.Val.kk]
+			j := dm[MaxN*cityK+q.Val.kk]
 			if j > localMaxDist {
-				distance[MaxN*cityK+q.Val.kk] = -j
+				dm[MaxN*cityK+q.Val.kk] = -j
 			} else {
 				q.Key = localMaxDist - j
 				q.Link = s
@@ -231,7 +236,7 @@ func pruneEdges(nodeBlock []cityNode, maxDist, maxDeg, origMaxDeg int64, rng *fl
 				for q := nearby[qi]; q != nil; q = q.Link {
 					count++
 					if count > localMaxDeg {
-						distance[MaxN*cityK+q.Val.kk] = -distance[MaxN*cityK+q.Val.kk]
+						dm[MaxN*cityK+q.Val.kk] = -dm[MaxN*cityK+q.Val.kk]
 					}
 				}
 			}

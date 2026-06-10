@@ -6,7 +6,6 @@ package graph
 import (
 	"errors"
 	"fmt"
-	"unsafe"
 )
 
 // Sentinel errors returned by graph generators.
@@ -33,6 +32,8 @@ type Vertex struct {
 	Arcs             *Arc   // linked list of outgoing arcs (nil if none)
 	Name             string // symbolic identifier
 	U, V, W, X, Y, Z Util   // multipurpose fields (see Graph.UtilTypes)
+
+	idx int64 // position within the owning Graph's Vertices (set by NewGraph)
 }
 
 // Arc is a directed arc with three standard fields, two utility fields, and
@@ -75,6 +76,9 @@ func NewGraph(n int64) *Graph {
 		ID:        fmt.Sprintf("gb_new_graph(%d)", n),
 		UtilTypes: "ZZZZZZZZZZZZZZ",
 		arcBlock:  make([]Arc, arcsPerBlock),
+	}
+	for i := range g.Vertices {
+		g.Vertices[i].idx = int64(i)
 	}
 	return g
 }
@@ -137,23 +141,17 @@ func (g *Graph) NewEdge(u, v *Vertex, length int64) {
 
 // --- Vertex index helpers ---
 
-var vertexSz = unsafe.Sizeof(Vertex{})
-
-// VertexIndex returns the 0-based index of v within g.Vertices.
-// v must be a pointer into g.Vertices; behavior is undefined otherwise.
+// VertexIndex returns the 0-based index of v within the vertex array it was
+// allocated in. v must come from a Graph's Vertices; results are meaningless
+// for vertices constructed directly.
 func VertexIndex(g *Graph, v *Vertex) int64 {
-	return int64((uintptr(unsafe.Pointer(v)) - uintptr(unsafe.Pointer(&g.Vertices[0]))) / vertexSz)
+	return v.idx
 }
 
-// VertexIn reports whether v points into slice (a sub-slice of a Graph's Vertices).
+// VertexIn reports whether v is an element of slice, which must be a prefix
+// of some Graph's Vertices array.
 func VertexIn(v *Vertex, slice []Vertex) bool {
-	if len(slice) == 0 {
-		return false
-	}
-	lo := uintptr(unsafe.Pointer(&slice[0]))
-	hi := lo + uintptr(len(slice))*vertexSz
-	addr := uintptr(unsafe.Pointer(v))
-	return addr >= lo && addr < hi
+	return v.idx >= 0 && v.idx < int64(len(slice)) && &slice[v.idx] == v
 }
 
 // --- ID helpers ---

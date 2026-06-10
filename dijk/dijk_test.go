@@ -1,15 +1,16 @@
 package dijk
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/miles"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 // smallGraph builds a hand-crafted directed graph for unit tests:
@@ -35,7 +36,7 @@ func smallGraph() *graph.Graph {
 func TestDijkstraBasic(t *testing.T) {
 	g := smallGraph()
 	a, d := &g.Vertices[0], &g.Vertices[3]
-	dist := Dijkstra(a, d, g, nil, nil, false)
+	dist := Dijkstra(a, d, g, nil, nil, nil)
 	if dist != 4 {
 		t.Errorf("A→D: want 4, got %d", dist)
 	}
@@ -44,7 +45,7 @@ func TestDijkstraBasic(t *testing.T) {
 func TestDijkstraBacklinks(t *testing.T) {
 	g := smallGraph()
 	a, d := &g.Vertices[0], &g.Vertices[3]
-	Dijkstra(a, d, g, nil, nil, false)
+	Dijkstra(a, d, g, nil, nil, nil)
 
 	// Expected path: A→B→C→D
 	path := []string{}
@@ -68,7 +69,7 @@ func TestDijkstraBacklinks(t *testing.T) {
 func TestDijkstraUnreachable(t *testing.T) {
 	g := smallGraph()
 	b, a := &g.Vertices[1], &g.Vertices[0] // no arc B→A
-	dist := Dijkstra(b, a, g, nil, nil, false)
+	dist := Dijkstra(b, a, g, nil, nil, nil)
 	if dist != -1 {
 		t.Errorf("B→A: want -1 (unreachable), got %d", dist)
 	}
@@ -77,7 +78,7 @@ func TestDijkstraUnreachable(t *testing.T) {
 func TestDijkstraSelfLoop(t *testing.T) {
 	g := smallGraph()
 	a := &g.Vertices[0]
-	dist := Dijkstra(a, a, g, nil, nil, false)
+	dist := Dijkstra(a, a, g, nil, nil, nil)
 	if dist != 0 {
 		t.Errorf("A→A: want 0, got %d", dist)
 	}
@@ -93,7 +94,7 @@ func TestDijkstraHeuristic(t *testing.T) {
 		}
 		return 0
 	}
-	dist := Dijkstra(a, d, g, hh, nil, false)
+	dist := Dijkstra(a, d, g, hh, nil, nil)
 	if dist != 4 {
 		t.Errorf("A→D with heuristic: want 4, got %d", dist)
 	}
@@ -103,14 +104,14 @@ func TestDijkstra128Queue(t *testing.T) {
 	// Use the 128-bucket wheel (valid since all arc lengths ≤ 5 < 128).
 	g := smallGraph()
 	a, d := &g.Vertices[0], &g.Vertices[3]
-	dist := Dijkstra(a, d, g, nil, NewWheelQueue(), false)
+	dist := Dijkstra(a, d, g, nil, NewWheelQueue(), nil)
 	if dist != 4 {
 		t.Errorf("128-queue A→D: want 4, got %d", dist)
 	}
 }
 
 func TestDijkstraMilesShortPath(t *testing.T) {
-	g, err := miles.Miles(128, 0, 0, 0, 0, 0, 0)
+	g, _, err := miles.Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("miles.Miles returned error: %v", err)
 	}
@@ -120,7 +121,7 @@ func TestDijkstraMilesShortPath(t *testing.T) {
 	// Run from vertex 0 to vertex 127 (arbitrary endpoints).
 	uu := &g.Vertices[0]
 	vv := &g.Vertices[127]
-	dist := Dijkstra(uu, vv, g, nil, nil, false)
+	dist := Dijkstra(uu, vv, g, nil, nil, nil)
 	if dist <= 0 {
 		t.Errorf("miles Dijkstra: want positive distance, got %d", dist)
 	}
@@ -158,7 +159,7 @@ func TestDijkstraMilesShortPath(t *testing.T) {
 func TestDijkstraMilesHeuristic(t *testing.T) {
 	// With a consistent heuristic based on x-coord distance,
 	// result should match plain Dijkstra.
-	g, err := miles.Miles(128, 0, 0, 0, 0, 0, 0)
+	g, _, err := miles.Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("miles.Miles returned error: %v", err)
 	}
@@ -167,10 +168,10 @@ func TestDijkstraMilesHeuristic(t *testing.T) {
 	}
 	uu, vv := &g.Vertices[0], &g.Vertices[127]
 
-	plain := Dijkstra(uu, vv, g, nil, nil, false)
+	plain := Dijkstra(uu, vv, g, nil, nil, nil)
 
 	// Admissible heuristic: 0 for all vertices.
-	withHH := Dijkstra(uu, vv, g, func(v *graph.Vertex) int64 { return 0 }, nil, false)
+	withHH := Dijkstra(uu, vv, g, func(v *graph.Vertex) int64 { return 0 }, nil, nil)
 	if plain != withHH {
 		t.Errorf("heuristic=0 should match plain: plain=%d, hh=%d", plain, withHH)
 	}
@@ -179,16 +180,23 @@ func TestDijkstraMilesHeuristic(t *testing.T) {
 func TestPrintDijkstraResult(t *testing.T) {
 	g := smallGraph()
 	a, d := &g.Vertices[0], &g.Vertices[3]
-	Dijkstra(a, d, g, nil, nil, false)
-	// Just check it doesn't panic; output goes to stdout.
-	PrintDijkstraResult(d)
+	Dijkstra(a, d, g, nil, nil, nil)
+	var buf strings.Builder
+	PrintDijkstraResult(&buf, d)
+	if buf.Len() == 0 {
+		t.Error("PrintDijkstraResult wrote nothing")
+	}
 }
 
 func TestPrintDijkstraUnreachable(t *testing.T) {
 	g := smallGraph()
 	b, a := &g.Vertices[1], &g.Vertices[0]
-	Dijkstra(b, a, g, nil, nil, false) // returns -1
-	PrintDijkstraResult(a)             // should print "unreachable"
+	Dijkstra(b, a, g, nil, nil, nil) // returns -1
+	var buf strings.Builder
+	PrintDijkstraResult(&buf, a)
+	if !strings.Contains(buf.String(), "unreachable") {
+		t.Errorf("expected unreachable message, got %q", buf.String())
+	}
 }
 
 func TestDijkstraDistFields(t *testing.T) {
@@ -196,7 +204,7 @@ func TestDijkstraDistFields(t *testing.T) {
 	g := smallGraph()
 	a, d := &g.Vertices[0], &g.Vertices[3]
 	b, c := &g.Vertices[1], &g.Vertices[2]
-	Dijkstra(a, d, g, nil, nil, false)
+	Dijkstra(a, d, g, nil, nil, nil)
 	if Dist(b) != 1 {
 		t.Errorf("dist(B)=%d, want 1", Dist(b))
 	}

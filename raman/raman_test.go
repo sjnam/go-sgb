@@ -39,7 +39,7 @@ func checkSymmetric(t *testing.T, g *graph.Graph) {
 
 func TestRamanType1N(t *testing.T) {
 	// type 1 has q+1 vertices
-	g, err := Raman(2, 3, 1, 0)
+	g, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman(2,3,1,0) error: %v", err)
 	}
@@ -53,7 +53,7 @@ func TestRamanType1N(t *testing.T) {
 
 func TestRamanType1Arcs(t *testing.T) {
 	// Knuth's note: p=2, q=3, type=1 has 14 arcs (not 12) due to self-inverse generators
-	g, err := Raman(2, 3, 1, 0)
+	g, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman(2,3,1,0) error: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestRamanType1Arcs(t *testing.T) {
 }
 
 func TestRamanID(t *testing.T) {
-	g, err := Raman(2, 3, 1, 0)
+	g, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestRamanID(t *testing.T) {
 }
 
 func TestRamanType1UtilTypes(t *testing.T) {
-	g, err := Raman(2, 3, 1, 0)
+	g, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestRamanType1UtilTypes(t *testing.T) {
 }
 
 func TestRamanType1Symmetric(t *testing.T) {
-	g, err := Raman(3, 5, 1, 0)
+	g, err := Raman(3, 5, 1, false)
 	if err != nil {
 		t.Fatalf("Raman(3,5,1,0) error: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestRamanType1Symmetric(t *testing.T) {
 }
 
 func TestRamanType1VertexNames(t *testing.T) {
-	g, err := Raman(2, 3, 1, 0)
+	g, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestRamanType1VertexNames(t *testing.T) {
 func TestRamanType2N(t *testing.T) {
 	// type 2: q*(q+1)/2 vertices
 	// p=5, q=3: n=3*4/2=6
-	g, err := Raman(5, 3, 2, 0)
+	g, err := Raman(5, 3, 2, false)
 	if err != nil {
 		t.Fatalf("Raman(5,3,2,0) error: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestRamanType2N(t *testing.T) {
 }
 
 func TestRamanType2UtilTypes(t *testing.T) {
-	g, err := Raman(5, 3, 2, 0)
+	g, err := Raman(5, 3, 2, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestRamanType2UtilTypes(t *testing.T) {
 }
 
 func TestRamanType2Symmetric(t *testing.T) {
-	g, err := Raman(5, 3, 2, 0)
+	g, err := Raman(5, 3, 2, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestRamanType2Symmetric(t *testing.T) {
 }
 
 func TestRamanType2VertexNames(t *testing.T) {
-	g, err := Raman(5, 3, 2, 0)
+	g, err := Raman(5, 3, 2, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -185,7 +185,7 @@ func TestRamanType2VertexNames(t *testing.T) {
 func TestRamanType3N(t *testing.T) {
 	// p=5, q=11: 5 is a QR mod 11 (4^2=16≡5), so type 3 works
 	// nFactor=(11-1)/2=5, n=5*11*12=660
-	g, err := Raman(5, 11, 3, 0)
+	g, err := Raman(5, 11, 3, false)
 	if err != nil {
 		t.Fatalf("Raman(5,11,3,0) error: %v", err)
 	}
@@ -198,7 +198,7 @@ func TestRamanType3N(t *testing.T) {
 }
 
 func TestRamanType3UtilTypes(t *testing.T) {
-	g, err := Raman(5, 11, 3, 0)
+	g, err := Raman(5, 11, 3, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -212,7 +212,7 @@ func TestRamanType3UtilTypes(t *testing.T) {
 }
 
 func TestRamanType3HasEdges(t *testing.T) {
-	g, err := Raman(5, 11, 3, 0)
+	g, err := Raman(5, 11, 3, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestRamanType3HasEdges(t *testing.T) {
 func TestRamanType4N(t *testing.T) {
 	// p=5, q=3: 5%3=2, not QR mod 3 (QR={1}), so type 4 works
 	// nFactor=3-1=2, n=2*3*4=24
-	g, err := Raman(5, 3, 4, 0)
+	g, err := Raman(5, 3, 4, false)
 	if err != nil {
 		t.Fatalf("Raman(5,3,4,0) error: %v", err)
 	}
@@ -242,7 +242,7 @@ func TestRamanType4N(t *testing.T) {
 }
 
 func TestRamanType4Symmetric(t *testing.T) {
-	g, err := Raman(5, 3, 4, 0)
+	g, err := Raman(5, 3, 4, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -257,7 +257,7 @@ func TestRamanType4Symmetric(t *testing.T) {
 func TestRamanType0SelectsType4(t *testing.T) {
 	// p=2, q=43: 2 is not QR mod 43 → type 4
 	// but first verify p=2, q=43 is valid: q%8=3 ✓, q%13=4 ✓
-	g, err := Raman(2, 43, 0, 0)
+	g, err := Raman(2, 43, 0, false)
 	if err != nil {
 		t.Fatalf("Raman(2,43,0,0) error: %v", err)
 	}
@@ -272,7 +272,7 @@ func TestRamanType0SelectsType4(t *testing.T) {
 
 func TestRamanType0SelectsType3(t *testing.T) {
 	// p=5, q=11: 5 is QR mod 11 → type 3
-	g, err := Raman(5, 11, 0, 0)
+	g, err := Raman(5, 11, 0, false)
 	if err != nil {
 		t.Fatalf("Raman(5,11,0,0) error: %v", err)
 	}
@@ -288,11 +288,11 @@ func TestRamanType0SelectsType3(t *testing.T) {
 
 func TestRamanReduceFewerArcs(t *testing.T) {
 	// p=2, q=3, type=1: reduce removes self-loops, should give M<14
-	g0, err := Raman(2, 3, 1, 0)
+	g0, err := Raman(2, 3, 1, false)
 	if err != nil {
 		t.Fatalf("Raman(reduce=0) error: %v", err)
 	}
-	g1, err := Raman(2, 3, 1, 1)
+	g1, err := Raman(2, 3, 1, true)
 	if err != nil {
 		t.Fatalf("Raman(reduce=1) error: %v", err)
 	}
@@ -307,7 +307,7 @@ func TestRamanReduceFewerArcs(t *testing.T) {
 // ---- Bad specs tests ----
 
 func TestRamanBadSpecsQTooSmall(t *testing.T) {
-	g, err := Raman(2, 2, 1, 0) // q must be >= 3
+	g, err := Raman(2, 2, 1, false) // q must be >= 3
 	if g != nil {
 		t.Fatal("expected nil for q=2")
 	}
@@ -317,7 +317,7 @@ func TestRamanBadSpecsQTooSmall(t *testing.T) {
 }
 
 func TestRamanBadSpecsQTooLarge(t *testing.T) {
-	g, err := Raman(2, 50000, 1, 0) // q > 46337
+	g, err := Raman(2, 50000, 1, false) // q > 46337
 	if g != nil {
 		t.Fatal("expected nil for q>46337")
 	}
@@ -327,7 +327,7 @@ func TestRamanBadSpecsQTooLarge(t *testing.T) {
 }
 
 func TestRamanBadSpecsPTooSmall(t *testing.T) {
-	g, err := Raman(1, 5, 1, 0) // p must be >= 2
+	g, err := Raman(1, 5, 1, false) // p must be >= 2
 	if g != nil {
 		t.Fatal("expected nil for p=1")
 	}
@@ -338,7 +338,7 @@ func TestRamanBadSpecsPTooSmall(t *testing.T) {
 
 func TestRamanBadSpecsP2QMod8(t *testing.T) {
 	// p=2, q=5: q%8=5, not in {1,3} → bad specs
-	g, err := Raman(2, 5, 1, 0)
+	g, err := Raman(2, 5, 1, false)
 	if g != nil {
 		t.Fatal("expected nil for p=2,q=5")
 	}
@@ -349,7 +349,7 @@ func TestRamanBadSpecsP2QMod8(t *testing.T) {
 
 func TestRamanBadSpecsQNotPrime(t *testing.T) {
 	// q=15 is not prime
-	g, err := Raman(5, 15, 1, 0)
+	g, err := Raman(5, 15, 1, false)
 	if g != nil {
 		t.Fatal("expected nil for q=15 (not prime)")
 	}
@@ -360,7 +360,7 @@ func TestRamanBadSpecsQNotPrime(t *testing.T) {
 
 func TestRamanBadSpecsWrongType3(t *testing.T) {
 	// p=5, q=3: 5%3=2 is NOT QR mod 3, so type=3 should fail
-	g, err := Raman(5, 3, 3, 0)
+	g, err := Raman(5, 3, 3, false)
 	if g != nil {
 		t.Fatal("expected nil: p=5 not QR mod q=3, type=3 invalid")
 	}
@@ -371,7 +371,7 @@ func TestRamanBadSpecsWrongType3(t *testing.T) {
 
 func TestRamanBadSpecsWrongType4(t *testing.T) {
 	// p=5, q=11: 5 IS QR mod 11, so type=4 should fail
-	g, err := Raman(5, 11, 4, 0)
+	g, err := Raman(5, 11, 4, false)
 	if g != nil {
 		t.Fatal("expected nil: p=5 is QR mod q=11, type=4 invalid")
 	}
@@ -383,7 +383,7 @@ func TestRamanBadSpecsWrongType4(t *testing.T) {
 func TestRamanBadSpecsType34QTooLarge(t *testing.T) {
 	// p=2, q=1291 > 1289; p=2 special conditions pass for q=1291
 	// (13 and -2 are both QR mod 1291), and 2 is not QR mod 1291 → type 4
-	g, err := Raman(2, 1291, 0, 0)
+	g, err := Raman(2, 1291, 0, false)
 	if g != nil {
 		t.Fatal("expected nil for q>1289 with type 3/4")
 	}
@@ -397,7 +397,7 @@ func TestRamanBadSpecsType34QTooLarge(t *testing.T) {
 func TestRamanType1Degree(t *testing.T) {
 	// p=3, q=5, type=1: N=6, degree should be p+1=4 for all vertices
 	// (p=3%4=3 so pp=1; all generators are self-inverse with no fixed points for q=5)
-	g, err := Raman(3, 5, 1, 0)
+	g, err := Raman(3, 5, 1, false)
 	if err != nil {
 		t.Fatalf("Raman(3,5,1,0) error: %v", err)
 	}
@@ -417,7 +417,7 @@ func TestRamanType1Degree(t *testing.T) {
 
 func TestRamanType2Degree(t *testing.T) {
 	// p=5, q=3: N=6, degree=p+1=6
-	g, err := Raman(5, 3, 2, 0)
+	g, err := Raman(5, 3, 2, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}
@@ -438,7 +438,7 @@ func TestRamanType2Degree(t *testing.T) {
 // ---- Edge lengths ----
 
 func TestRamanAllLengthsOne(t *testing.T) {
-	g, err := Raman(3, 5, 1, 0)
+	g, err := Raman(3, 5, 1, false)
 	if err != nil {
 		t.Fatalf("Raman returned error: %v", err)
 	}

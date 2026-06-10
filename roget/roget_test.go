@@ -3,11 +3,11 @@ package roget
 import (
 	"testing"
 
-	"github.com/sjnam/go-sgb/io"
+	"github.com/sjnam/go-sgb/gbio"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 func TestRogetDefault(t *testing.T) {

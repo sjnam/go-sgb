@@ -23,8 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/roget"
 	"github.com/sjnam/go-sgb/save"
 )

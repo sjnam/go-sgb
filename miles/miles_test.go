@@ -4,16 +4,16 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 func TestMiles128(t *testing.T) {
-	g, err := Miles(128, 0, 0, 0, 0, 0, 0)
+	g, _, err := Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles(128,...) failed: %v", err)
 	}
@@ -27,7 +27,7 @@ func TestMiles128(t *testing.T) {
 
 func TestMilesDefault(t *testing.T) {
 	// n=0 → defaults to 128
-	g, err := Miles(0, 0, 0, 0, 0, 0, 0)
+	g, _, err := Miles(0, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles(0,...) failed: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestMilesDefault(t *testing.T) {
 
 func TestMiles100PopWeight(t *testing.T) {
 	// 100 most populous cities
-	g, err := Miles(100, 0, 0, 1, 0, 0, 0)
+	g, _, err := Miles(100, 0, 0, 1, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles(100,pop) failed: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestMiles100PopWeight(t *testing.T) {
 }
 
 func TestMilesVertexFields(t *testing.T) {
-	g, err := Miles(128, 0, 0, 0, 0, 0, 0)
+	g, _, err := Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles failed: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestMilesVertexFields(t *testing.T) {
 
 func TestMilesTriangleInequality(t *testing.T) {
 	// The CWEB docs say miles.dat satisfies the triangle inequality.
-	g, err := Miles(128, 0, 0, 0, 0, 0, 0)
+	g, dm, err := Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles failed: %v", err)
 	}
@@ -85,9 +85,9 @@ func TestMilesTriangleInequality(t *testing.T) {
 			v := &g.Vertices[j]
 			for k := int64(0); k < n; k++ {
 				w := &g.Vertices[k]
-				duv := MilesDistance(u, v)
-				dvw := MilesDistance(v, w)
-				duw := MilesDistance(u, w)
+				duv := dm.Distance(u, v)
+				dvw := dm.Distance(v, w)
+				duw := dm.Distance(u, w)
 				if duv > 0 && dvw > 0 && duw > 0 {
 					if duv+dvw < duw {
 						t.Errorf("triangle inequality violated: %s-%s=%d, %s-%s=%d, %s-%s=%d",
@@ -102,7 +102,7 @@ func TestMilesTriangleInequality(t *testing.T) {
 }
 
 func TestMilesEdgeLengths(t *testing.T) {
-	g, err := Miles(128, 0, 0, 0, 0, 0, 0)
+	g, dm, err := Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles failed: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestMilesEdgeLengths(t *testing.T) {
 		u := &g.Vertices[i]
 		for a := u.Arcs; a != nil; a = a.Next {
 			v := a.Tip
-			expected := MilesDistance(u, v)
+			expected := dm.Distance(u, v)
 			if a.Len != expected {
 				t.Errorf("%s→%s: arc len=%d but MilesDistance=%d",
 					u.Name, v.Name, a.Len, expected)
@@ -122,7 +122,7 @@ func TestMilesEdgeLengths(t *testing.T) {
 
 func TestMilesMaxDistance(t *testing.T) {
 	const limit = 500
-	g, err := Miles(128, 0, 0, 0, limit, 0, 0)
+	g, _, err := Miles(128, 0, 0, 0, limit, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles(maxDist=%d) failed: %v", limit, err)
 	}
@@ -139,7 +139,7 @@ func TestMilesMaxDistance(t *testing.T) {
 
 func TestMilesMaxDegree(t *testing.T) {
 	const deg = 3
-	g, err := Miles(128, 0, 0, 0, 0, deg, 0)
+	g, _, err := Miles(128, 0, 0, 0, 0, deg, 0)
 	if err != nil {
 		t.Fatalf("Miles(maxDeg=%d) failed: %v", deg, err)
 	}
@@ -159,7 +159,7 @@ func TestMilesMaxDegree(t *testing.T) {
 }
 
 func TestMilesID(t *testing.T) {
-	g, err := Miles(100, 0, 0, 1, 0, 0, 0)
+	g, _, err := Miles(100, 0, 0, 1, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles failed: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestMilesID(t *testing.T) {
 }
 
 func TestMilesBadSpecs(t *testing.T) {
-	_, err := Miles(10, 200000, 0, 0, 0, 0, 0)
+	_, _, err := Miles(10, 200000, 0, 0, 0, 0, 0)
 	if err == nil {
 		t.Fatal("expected error for bad north_weight")
 	}
@@ -179,7 +179,7 @@ func TestMilesBadSpecs(t *testing.T) {
 }
 
 func TestMilesDistance(t *testing.T) {
-	g, err := Miles(128, 0, 0, 0, 0, 0, 0)
+	g, dm, err := Miles(128, 0, 0, 0, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("Miles failed: %v", err)
 	}
@@ -188,8 +188,8 @@ func TestMilesDistance(t *testing.T) {
 		u := &g.Vertices[i]
 		for j := i + 1; j < g.N; j++ {
 			v := &g.Vertices[j]
-			duv := MilesDistance(u, v)
-			dvu := MilesDistance(v, u)
+			duv := dm.Distance(u, v)
+			dvu := dm.Distance(v, u)
 			if duv != dvu {
 				t.Errorf("%s↔%s: asymmetric (%d vs %d)", u.Name, v.Name, duv, dvu)
 			}

@@ -22,8 +22,8 @@ import (
 	"fmt"
 
 	"github.com/sjnam/go-sgb/flip"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/sort"
 )
 
@@ -89,7 +89,7 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, s
 	var nodeBlock [MaxN]teamNode
 	var htab [hashPrime]*teamNode
 
-	teamLookup := func(r *io.Reader) *graph.Vertex {
+	teamLookup := func(r *gbio.Reader) *graph.Vertex {
 		h := int64(0)
 		var buf []byte
 		for r.GbDigit(10) < 0 {
@@ -130,7 +130,7 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, s
 		n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, seed)
 	g.UtilTypes = "IIZSSSIIZZZZZZ"
 
-	r, err := io.Open("games.dat")
+	r, err := gbio.Open("games.dat")
 	if err != nil {
 		return nil, graph.ErrEarlyDataFault
 	}

@@ -30,24 +30,25 @@ func tmpFile(t *testing.T) string {
 
 // ---- SaveGraph tests ----
 
-func TestSaveGraphNilReturnsNeg1(t *testing.T) {
-	if got := SaveGraph(nil, "/tmp/never.gb"); got != -1 {
-		t.Errorf("SaveGraph(nil,...) = %d, want -1", got)
+func TestSaveGraphNilGraph(t *testing.T) {
+	_, err := SaveGraph(nil, "/tmp/never.gb")
+	if !errors.Is(err, graph.ErrMissingOperand) {
+		t.Errorf("SaveGraph(nil,...) error = %v, want ErrMissingOperand", err)
 	}
 }
 
-func TestSaveGraphBadPathReturnsNeg2(t *testing.T) {
+func TestSaveGraphBadPath(t *testing.T) {
 	g := makeSimpleGraph()
-	if got := SaveGraph(g, "/no/such/directory/x.gb"); got != -2 {
-		t.Errorf("SaveGraph(bad path) = %d, want -2", got)
+	if _, err := SaveGraph(g, "/no/such/directory/x.gb"); err == nil {
+		t.Error("SaveGraph(bad path) returned nil error")
 	}
 }
 
 func TestSaveGraphCreatesFile(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	if ret := SaveGraph(g, path); ret != 0 {
-		t.Fatalf("SaveGraph returned %d", ret)
+	if anomalies, err := SaveGraph(g, path); err != nil || anomalies != 0 {
+		t.Fatalf("SaveGraph = (%d, %v), want (0, nil)", anomalies, err)
 	}
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("file not created: %v", err)
@@ -57,7 +58,9 @@ func TestSaveGraphCreatesFile(t *testing.T) {
 func TestSaveGraphFileHasHeader(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	data, _ := os.ReadFile(path)
 	content := string(data)
 	if len(content) < 30 || content[:30] != "* GraphBase graph (util_types " {
@@ -68,8 +71,8 @@ func TestSaveGraphFileHasHeader(t *testing.T) {
 func TestSaveGraphReturnsZeroOnSuccess(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	if ret := SaveGraph(g, path); ret != 0 {
-		t.Errorf("SaveGraph returned anomaly %d, want 0", ret)
+	if anomalies, err := SaveGraph(g, path); err != nil || anomalies != 0 {
+		t.Errorf("SaveGraph = (%d, %v), want (0, nil)", anomalies, err)
 	}
 }
 
@@ -78,7 +81,9 @@ func TestSaveGraphReturnsZeroOnSuccess(t *testing.T) {
 func TestRoundTripN(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -91,7 +96,9 @@ func TestRoundTripN(t *testing.T) {
 func TestRoundTripM(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -104,7 +111,9 @@ func TestRoundTripM(t *testing.T) {
 func TestRoundTripID(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -117,7 +126,9 @@ func TestRoundTripID(t *testing.T) {
 func TestRoundTripUtilTypes(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -130,7 +141,9 @@ func TestRoundTripUtilTypes(t *testing.T) {
 func TestRoundTripVertexNames(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -145,7 +158,9 @@ func TestRoundTripVertexNames(t *testing.T) {
 func TestRoundTripArcLengths(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -172,7 +187,9 @@ func TestRoundTripArcLengths(t *testing.T) {
 func TestRoundTripArcTips(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -216,7 +233,9 @@ func TestRestoreGraphBadFile(t *testing.T) {
 func TestRestoreGraphBadChecksum(t *testing.T) {
 	g := makeSimpleGraph()
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	// Corrupt one byte in the data (not in comment lines).
 	data, _ := os.ReadFile(path)
 	// Find the graph record line (second line, not starting with *).
@@ -249,8 +268,8 @@ func TestRoundTripIntUtilField(t *testing.T) {
 	g.Vertices[1].X = int64(-7)
 
 	path := tmpFile(t)
-	if ret := SaveGraph(g, path); ret != 0 {
-		t.Fatalf("SaveGraph returned anomaly %d", ret)
+	if anomalies, err := SaveGraph(g, path); err != nil || anomalies != 0 {
+		t.Fatalf("SaveGraph = (%d, %v), want (0, nil)", anomalies, err)
 	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
@@ -274,7 +293,9 @@ func TestRoundTripStringUtilField(t *testing.T) {
 	g.Vertices[0].U = "hello world"
 
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -294,7 +315,9 @@ func TestRoundTripGraphUtilInt(t *testing.T) {
 	g.UU = int64(999)
 
 	path := tmpFile(t)
-	SaveGraph(g, path)
+	if _, err := SaveGraph(g, path); err != nil {
+		t.Fatalf("SaveGraph failed: %v", err)
+	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
 		t.Fatalf("RestoreGraph failed: %v", err)
@@ -308,8 +331,8 @@ func TestRoundTripEmptyGraph(t *testing.T) {
 	g := graph.NewGraph(0)
 	g.ID = "empty"
 	path := tmpFile(t)
-	if ret := SaveGraph(g, path); ret != 0 {
-		t.Fatalf("SaveGraph(empty) = %d", ret)
+	if anomalies, err := SaveGraph(g, path); err != nil || anomalies != 0 {
+		t.Fatalf("SaveGraph(empty) = (%d, %v), want (0, nil)", anomalies, err)
 	}
 	g2, err := RestoreGraph(path)
 	if err != nil {
@@ -332,9 +355,12 @@ func TestSaveGraphAnomalyBadTypeCode(t *testing.T) {
 	g.UtilTypes = "XXXXXXXXXXXXXX" // all invalid
 
 	path := tmpFile(t)
-	ret := SaveGraph(g, path)
-	if ret&BadTypeCode == 0 {
-		t.Errorf("expected BadTypeCode anomaly, got %d", ret)
+	anomalies, err := SaveGraph(g, path)
+	if err != nil {
+		t.Fatalf("SaveGraph returned error: %v", err)
+	}
+	if anomalies&BadTypeCode == 0 {
+		t.Errorf("expected BadTypeCode anomaly, got %d", anomalies)
 	}
 	// File should still be readable.
 	g2, err := RestoreGraph(path)

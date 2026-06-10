@@ -3,16 +3,16 @@ package words
 import (
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 func init() {
-	io.DataDirectory = "../data/"
+	gbio.DataDirectory = "../data/"
 }
 
 func TestWords2000(t *testing.T) {
-	g, err := Words(2000, nil, 0, 0)
+	g, _, err := Words(2000, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words(2000,nil,0,0) returned error: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestWords2000(t *testing.T) {
 }
 
 func TestWordsAllQualifying(t *testing.T) {
-	g, err := Words(0, nil, 0, 0)
+	g, _, err := Words(0, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words(0,nil,0,0) returned error: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestWordsCommonOnly(t *testing.T) {
 	// a=1, b=0, w1..w7=0 → only common words (weight=1) qualify at threshold=1.
 	wt := make([]int64, 9)
 	wt[0] = 1
-	g, err := Words(0, wt, 1, 0)
+	g, _, err := Words(0, wt, 1, 0)
 	if err != nil {
 		t.Fatalf("Words(common only) returned error: %v", err)
 	}
@@ -57,7 +57,7 @@ func TestWordsCommonOnly(t *testing.T) {
 }
 
 func TestWordsWeightSorted(t *testing.T) {
-	g, err := Words(2000, nil, 0, 0)
+	g, _, err := Words(2000, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words returned error: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestWordsWeightSorted(t *testing.T) {
 }
 
 func TestWordsEdgesLoc(t *testing.T) {
-	g, err := Words(2000, nil, 0, 0)
+	g, _, err := Words(2000, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words returned error: %v", err)
 	}
@@ -112,7 +112,7 @@ func TestWordsEdgesLoc(t *testing.T) {
 }
 
 func TestWordsWordsVertex(t *testing.T) {
-	g, err := Words(2000, nil, 0, 0)
+	g, _, err := Words(2000, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words returned error: %v", err)
 	}
@@ -150,9 +150,12 @@ func TestWordsWordsVertex(t *testing.T) {
 }
 
 func TestFindWordExact(t *testing.T) {
-	Words(2000, nil, 0, 0)
+	_, ix, err := Words(2000, nil, 0, 0)
+	if err != nil {
+		t.Fatalf("Words returned error: %v", err)
+	}
 
-	v := FindWord("words", nil)
+	v := ix.FindWord("words", nil)
 	if v == nil {
 		t.Fatal(`FindWord("words") returned nil`)
 	}
@@ -162,8 +165,11 @@ func TestFindWordExact(t *testing.T) {
 }
 
 func TestFindWordMissing(t *testing.T) {
-	Words(2000, nil, 0, 0)
-	v := FindWord("zzzzz", nil)
+	_, ix, err := Words(2000, nil, 0, 0)
+	if err != nil {
+		t.Fatalf("Words returned error: %v", err)
+	}
+	v := ix.FindWord("zzzzz", nil)
 	if v != nil {
 		t.Errorf("expected nil for absent word, got %q", v.Name)
 	}
@@ -172,11 +178,14 @@ func TestFindWordMissing(t *testing.T) {
 func TestFindWordNeighbors(t *testing.T) {
 	// FindWord only calls f when the query word is NOT in the graph.
 	// Use "wordz" (not a real word) so f is invoked for near-matches like "words".
-	Words(2000, nil, 0, 0)
+	_, ix, err := Words(2000, nil, 0, 0)
+	if err != nil {
+		t.Fatalf("Words returned error: %v", err)
+	}
 
 	query := "wordz"
 	var neighbors []string
-	v := FindWord(query, func(v *graph.Vertex) {
+	v := ix.FindWord(query, func(v *graph.Vertex) {
 		neighbors = append(neighbors, v.Name)
 	})
 	if v != nil {
@@ -199,7 +208,7 @@ func TestFindWordNeighbors(t *testing.T) {
 }
 
 func TestWordsID(t *testing.T) {
-	g, err := Words(2000, nil, 0, 0)
+	g, _, err := Words(2000, nil, 0, 0)
 	if err != nil {
 		t.Fatalf("Words returned error: %v", err)
 	}
@@ -214,7 +223,7 @@ func TestWordsID(t *testing.T) {
 func TestWordsBadSpecs(t *testing.T) {
 	wt := make([]int64, 9)
 	wt[2] = 0x40000000
-	g, err := Words(10, wt, 0, 0)
+	g, _, err := Words(10, wt, 0, 0)
 	if err == nil {
 		t.Fatal("expected error for bad weight vector")
 	}

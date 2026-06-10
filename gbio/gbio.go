@@ -1,7 +1,7 @@
-// Package io implements the GB_IO input module from Stanford GraphBase.
+// Package gbio implements the GB_IO input module from Stanford GraphBase.
 // It provides system-independent file I/O with checksum validation for
 // GraphBase data files.
-package io
+package gbio
 
 import (
 	"bufio"

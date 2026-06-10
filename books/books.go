@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/sjnam/go-sgb/flip"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/sort"
 )
 
@@ -21,13 +21,6 @@ const (
 	maxChars = 600
 	maxCode  = 1296 // 36×36
 )
-
-// Chapters is the total number of chapters in the most recently processed book.
-var Chapters int64
-
-// ChapName contains the structured chapter-number strings after a successful call.
-// ChapName[0] is always ""; ChapName[k] is the label of chapter k.
-var ChapName [MaxChaps]string
 
 // charData holds per-character statistics accumulated during the first pass.
 type charData struct {
@@ -51,16 +44,21 @@ func ShortCode(v *graph.Vertex) int64 { i, _ := v.U.(int64); return i }
 func ChapNo(a *graph.Arc) int64       { i, _ := a.A.(int64); return i }
 
 // Book creates an undirected character-encounter graph.
-func Book(title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, error) {
+//
+// The returned slice holds the structured chapter-number strings of the book:
+// chapNames[0] is always "" and chapNames[k] is the label of chapter k, so the
+// book has len(chapNames)-1 chapters.
+func Book(title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, []string, error) {
 	return bgraph(false, title, n, x, firstChap, lastChap, inWeight, outWeight, seed)
 }
 
 // BiBook creates a bipartite character×chapter graph.
-func BiBook(title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, error) {
+// The returned chapter-name slice has the same form as for Book.
+func BiBook(title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, []string, error) {
 	return bgraph(true, title, n, x, firstChap, lastChap, inWeight, outWeight, seed)
 }
 
-func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, error) {
+func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, outWeight, seed int64) (*graph.Graph, []string, error) {
 	var nodeBlock [maxChars]charNode
 	var xnode [maxCode]*charNode
 
@@ -77,13 +75,13 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 	}
 	if inWeight > 1_000_000 || inWeight < -1_000_000 ||
 		outWeight > 1_000_000 || outWeight < -1_000_000 {
-		return nil, graph.ErrBadSpecs
+		return nil, nil, graph.ErrBadSpecs
 	}
 
 	fileName := fmt.Sprintf("%.6s.dat", title)
-	r1, err := io.Open(fileName)
+	r1, err := gbio.Open(fileName)
 	if err != nil {
-		return nil, graph.ErrEarlyDataFault
+		return nil, nil, graph.ErrEarlyDataFault
 	}
 
 	// =========================================================
@@ -106,11 +104,11 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 			}
 			if c >= maxCode || r1.GbChar() != ' ' {
 				r1.RawClose()
-				return nil, graph.ErrSyntaxError
+				return nil, nil, graph.ErrSyntaxError
 			}
 			if p >= maxChars {
 				r1.RawClose()
-				return nil, graph.ErrSyntaxError
+				return nil, nil, graph.ErrSyntaxError
 			}
 			nd := &nodeBlock[p]
 			if p == 0 {
@@ -130,6 +128,7 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 	}
 
 	// Skim chapter data, tallying per-character chapter counts.
+	var chapters int64
 	{
 		k := int64(1)
 		for ; k < MaxChaps && !r1.GbEof(); k++ {
@@ -141,12 +140,12 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 				c := int64(r1.GbNumber(36))
 				if c >= maxCode {
 					r1.RawClose()
-					return nil, graph.ErrSyntaxError
+					return nil, nil, graph.ErrSyntaxError
 				}
 				p := xnode[c]
 				if p == nil {
 					r1.RawClose()
-					return nil, graph.ErrSyntaxError
+					return nil, nil, graph.ErrSyntaxError
 				}
 				if p.Val.chap != k {
 					p.Val.chap = k
@@ -161,13 +160,14 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 		}
 		if k == MaxChaps {
 			r1.RawClose()
-			return nil, graph.ErrSyntaxError
+			return nil, nil, graph.ErrSyntaxError
 		}
-		Chapters = k - 1
+		chapters = k - 1
 	}
+	chapName := make([]string, chapters+1) // chapName[0] stays ""
 
 	if err := r1.Close(); err != nil {
-		return nil, graph.ErrLateDataFault
+		return nil, nil, graph.ErrLateDataFault
 	}
 
 	// =========================================================
@@ -180,8 +180,8 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 	if x > n {
 		x = n
 	}
-	if lastChap > Chapters {
-		lastChap = Chapters
+	if lastChap > chapters {
+		lastChap = chapters
 	}
 	if firstChap > lastChap {
 		firstChap = lastChap + 1
@@ -244,9 +244,9 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 	// Second pass: read names/descriptions, then build edges
 	// =========================================================
 
-	r2, err := io.Open(fileName)
+	r2, err := gbio.Open(fileName)
 	if err != nil {
-		return nil, graph.ErrImpossible
+		return nil, nil, graph.ErrImpossible
 	}
 
 	// Re-read character definitions to fill in vertex names and descriptions.
@@ -259,16 +259,16 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 		if v != nil {
 			if r2.GbChar() != ' ' {
 				r2.RawClose()
-				return nil, graph.ErrImpossible
+				return nil, nil, graph.ErrImpossible
 			}
 			v.Name = r2.GbString(',')
 			if r2.GbChar() != ',' {
 				r2.RawClose()
-				return nil, graph.ErrSyntaxError
+				return nil, nil, graph.ErrSyntaxError
 			}
 			if r2.GbChar() != ' ' {
 				r2.RawClose()
-				return nil, graph.ErrSyntaxError
+				return nil, nil, graph.ErrSyntaxError
 			}
 			v.Z = r2.GbString('\n')
 			v.Y = xnode[c].Val.in
@@ -292,12 +292,12 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 			if isCont {
 				k--
 			} else {
-				ChapName[k] = strings.TrimSuffix(chapStr, "\n")
+				chapName[k] = strings.TrimSuffix(chapStr, "\n")
 			}
 			if k >= firstChap && k <= lastChap {
 				u := &g.Vertices[chapBase+k]
 				if !isCont {
-					u.Name = ChapName[k]
+					u.Name = chapName[k]
 					u.Z = ""
 					u.Y = int64(0)
 					u.X = int64(0)
@@ -328,7 +328,7 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 			if len(chapStr) > 0 && chapStr[0] == '&' {
 				k--
 			} else {
-				ChapName[k] = strings.TrimSuffix(chapStr, "\n")
+				chapName[k] = strings.TrimSuffix(chapStr, "\n")
 			}
 			if k >= firstChap && k <= lastChap {
 				c := r2.GbChar() // consume ':' (or get '\n' for empty chapter)
@@ -371,7 +371,7 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 	}
 
 	if err := r2.Close(); err != nil {
-		return nil, graph.ErrImpossible
+		return nil, nil, graph.ErrImpossible
 	}
-	return g, nil
+	return g, chapName, nil
 }

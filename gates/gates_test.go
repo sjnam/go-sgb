@@ -246,8 +246,11 @@ func TestPrintGates(t *testing.T) {
 	if g == nil {
 		t.Skip("Prod(2,2) returned nil")
 	}
-	// Just verify it doesn't panic; output is to stdout.
-	PrintGates(g)
+	var buf strings.Builder
+	PrintGates(&buf, g)
+	if !strings.Contains(buf.String(), "Output") {
+		t.Errorf("PrintGates output missing output lines: %q", buf.String())
+	}
 }
 
 // TestPartialGatesReduces verifies PartialGates returns a smaller or equal graph.

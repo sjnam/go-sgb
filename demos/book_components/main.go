@@ -27,8 +27,8 @@ import (
 	"strings"
 
 	"github.com/sjnam/go-sgb/books"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/save"
 )
 
@@ -116,7 +116,7 @@ func main() {
 		}
 	} else {
 		var err error
-		g, err = books.Book(title, int64(n), int64(x), int64(f), int64(l), inWeight, outWeight, seed)
+		g, _, err = books.Book(title, int64(n), int64(x), int64(f), int64(l), inWeight, outWeight, seed)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Sorry, can't create the graph (%v)!\n", err)
 			os.Exit(1)

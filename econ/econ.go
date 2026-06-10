@@ -18,8 +18,8 @@ import (
 	"fmt"
 
 	"github.com/sjnam/go-sgb/flip"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 const (
@@ -116,8 +116,8 @@ func Econ(n, omit, threshold, seed int64) (*graph.Graph, error) {
 // readEconDat opens econ.dat, populates nodeBlock/nodeIndex with the tree
 // structure and output-coefficient matrix, and returns the open reader.
 // The caller is responsible for closing the reader.
-func (s *econState) readEconDat() (*io.Reader, error) {
-	r, err := io.Open("econ.dat")
+func (s *econState) readEconDat() (*gbio.Reader, error) {
+	r, err := gbio.Open("econ.dat")
 	if err != nil {
 		return nil, graph.ErrEarlyDataFault
 	}

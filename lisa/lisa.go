@@ -24,8 +24,8 @@ package lisa
 import (
 	"fmt"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 const (
@@ -34,9 +34,53 @@ const (
 	MaxD = 255 // maximum pixel value in lisa.dat
 )
 
-// LisaID records the actual parameters used by the most recent Lisa call,
-// after default substitution.
-var LisaID string
+// lisaParams holds the parameters of a Lisa call after default substitution.
+type lisaParams struct {
+	m, n, d, m0, m1, n0, n1, d0, d1 int64
+}
+
+// id returns the identification string for these parameters, matching the
+// lisa_id string of the original SGB.
+func (p lisaParams) id() string {
+	return fmt.Sprintf("lisa(%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+		p.m, p.n, p.d, p.m0, p.m1, p.n0, p.n1, p.d0, p.d1)
+}
+
+// normalizeLisa validates the parameters of a Lisa call and applies the
+// documented default substitutions.
+func normalizeLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) (lisaParams, error) {
+	if m1 == 0 || m1 > MaxM {
+		m1 = MaxM
+	}
+	if m1 <= m0 {
+		return lisaParams{}, graph.ErrBadSpecs
+	}
+	if n1 == 0 || n1 > MaxN {
+		n1 = MaxN
+	}
+	if n1 <= n0 {
+		return lisaParams{}, graph.ErrBadSpecs
+	}
+	if m == 0 {
+		m = m1 - m0
+	}
+	if n == 0 {
+		n = n1 - n0
+	}
+	if d == 0 {
+		d = MaxD
+	}
+	if d1 == 0 {
+		d1 = MaxD * (m1 - m0) * (n1 - n0)
+	}
+	if d1 <= d0 {
+		return lisaParams{}, graph.ErrBadSpecs
+	}
+	if d1 >= 0x80000000 {
+		return lisaParams{}, graph.ErrBadSpecs
+	}
+	return lisaParams{m, n, d, m0, m1, n0, n1, d0, d1}, nil
+}
 
 // Vertex utility-field accessors for PlaneLisa.
 func PixelValue(v *graph.Vertex) int64 { i, _ := v.X.(int64); return i }
@@ -101,7 +145,7 @@ func naOverB(n, a, b int64) int64 {
 // Each row occupies 5 data lines: the first 4 lines have 15 groups of 5
 // radix-85 digits (60 pixels per line), and the 5th line has 5+5+3 digits
 // (10 more pixels).
-func readLisaRow(r *io.Reader, inRow []int64) {
+func readLisaRow(r *gbio.Reader, inRow []int64) {
 	j := 15
 	var dd int64
 	for cp := 0; ; cp += 4 {
@@ -136,46 +180,25 @@ func readLisaRow(r *io.Reader, inRow []int64) {
 // region rows [m0..m1) × columns [n0..n1) of lisa.dat.
 // Returns (nil, error) on bad parameters or I/O error.
 func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) ([]int64, error) {
+	p, err := normalizeLisa(m, n, d, m0, m1, n0, n1, d0, d1)
+	if err != nil {
+		return nil, err
+	}
+	return lisa(p)
+}
+
+// lisa builds the pixel matrix for already-normalized parameters.
+func lisa(p lisaParams) ([]int64, error) {
 	var inRow [MaxN]int64
 
-	// Apply defaults.
-	if m1 == 0 || m1 > MaxM {
-		m1 = MaxM
-	}
-	if m1 <= m0 {
-		return nil, graph.ErrBadSpecs
-	}
-	if n1 == 0 || n1 > MaxN {
-		n1 = MaxN
-	}
-	if n1 <= n0 {
-		return nil, graph.ErrBadSpecs
-	}
+	m, n, d := p.m, p.n, p.d
+	m0, m1, n0, n1 := p.m0, p.m1, p.n0, p.n1
+	d0, d1 := p.d0, p.d1
 	capM := m1 - m0
 	capN := n1 - n0
-	if m == 0 {
-		m = capM
-	}
-	if n == 0 {
-		n = capN
-	}
-	if d == 0 {
-		d = MaxD
-	}
-	if d1 == 0 {
-		d1 = MaxD * capM * capN
-	}
-	if d1 <= d0 {
-		return nil, graph.ErrBadSpecs
-	}
-	if d1 >= 0x80000000 {
-		return nil, graph.ErrBadSpecs
-	}
 	capD := d1 - d0
 
-	LisaID = fmt.Sprintf("lisa(%d,%d,%d,%d,%d,%d,%d,%d,%d)", m, n, d, m0, m1, n0, n1, d0, d1)
-
-	r, err := io.Open("lisa.dat")
+	r, err := gbio.Open("lisa.dat")
 	if err != nil {
 		return nil, graph.ErrEarlyDataFault
 	}
@@ -271,12 +294,15 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) ([]int64, error) {
 // regions of equal pixel value in the m×n digitization produced by Lisa.
 // UtilTypes = "ZZZIIIZZIIZZZZ".
 func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) (*graph.Graph, error) {
-	a, err := Lisa(m, n, d, m0, m1, n0, n1, d0, d1)
+	p, err := normalizeLisa(m, n, d, m0, m1, n0, n1, d0, d1)
 	if err != nil {
 		return nil, err
 	}
-	// Re-read actual m, n from LisaID (in case defaults were applied).
-	fmt.Sscanf(LisaID, "lisa(%d,%d,", &m, &n)
+	a, err := lisa(p)
+	if err != nil {
+		return nil, err
+	}
+	m, n = p.m, p.n // actual dimensions after default substitution
 
 	// ---- Pass 1: bottom-right to top-left, label regions ----
 
@@ -319,7 +345,7 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) (*graph.Graph, error) {
 
 	// ---- Set up the graph ----
 	g := graph.NewGraph(regs)
-	g.ID = fmt.Sprintf("plane_%s", LisaID)
+	g.ID = "plane_" + p.id()
 	g.UtilTypes = "ZZZIIIZZIIZZZZ"
 	g.UU = m
 	g.VV = n
@@ -370,19 +396,23 @@ func adjac(g *graph.Graph, u, v *graph.Vertex) {
 
 // BiLisa constructs an undirected bipartite graph with m row-vertices and
 // n column-vertices. Row k and column l are adjacent when the pixel value
-// in the m×n digitization is >= thresh (or < thresh when c != 0).
+// in the m×n digitization is >= thresh (or < thresh when c is true).
 // UtilTypes = "ZZZZZZZIIZZZZZ".
-func BiLisa(m, n, m0, m1, n0, n1, thresh, c int64) (*graph.Graph, error) {
-	a, err := Lisa(m, n, 65535, m0, m1, n0, n1, 0, 0)
+func BiLisa(m, n, m0, m1, n0, n1, thresh int64, c bool) (*graph.Graph, error) {
+	p, err := normalizeLisa(m, n, 65535, m0, m1, n0, n1, 0, 0)
 	if err != nil {
 		return nil, err
 	}
-	// Re-read actual m, n, m0, m1, n0, n1 from LisaID.
-	fmt.Sscanf(LisaID, "lisa(%d,%d,65535,%d,%d,%d,%d", &m, &n, &m0, &m1, &n0, &n1)
+	a, err := lisa(p)
+	if err != nil {
+		return nil, err
+	}
+	// Actual parameters after default substitution.
+	m, n, m0, m1, n0, n1 = p.m, p.n, p.m0, p.m1, p.n0, p.n1
 
 	g := graph.NewGraph(m + n)
 	cChar := byte('0')
-	if c != 0 {
+	if c {
 		cChar = '1'
 	}
 	g.ID = fmt.Sprintf("bi_lisa(%d,%d,%d,%d,%d,%d,%d,%c)", m, n, m0, m1, n0, n1, thresh, cChar)
@@ -406,7 +436,7 @@ func BiLisa(m, n, m0, m1, n0, n1, thresh, c int64) (*graph.Graph, error) {
 		for l := int64(0); l < n; l++ {
 			pix := a[k*n+l]
 			include := pix >= thresh
-			if c != 0 {
+			if c {
 				include = pix < thresh
 			}
 			if include {

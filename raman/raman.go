@@ -19,8 +19,8 @@ type quaternion struct {
 //
 // p and q must be distinct primes; q must be odd and satisfy additional
 // constraints depending on typeVal. typeVal=0 selects the largest permissible
-// type (3 or 4). If reduce is nonzero, self-loops and multi-edges are removed.
-func Raman(p, q, typeVal, reduce int64) (*graph.Graph, error) {
+// type (3 or 4). If reduce is true, self-loops and multi-edges are removed.
+func Raman(p, q, typeVal int64, reduce bool) (*graph.Graph, error) {
 	if q < 3 || q > 46337 {
 		return nil, graph.ErrVeryBadSpecs
 	}
@@ -123,7 +123,7 @@ func Raman(p, q, typeVal, reduce int64) (*graph.Graph, error) {
 	if newGraph == nil {
 		return nil, graph.ErrNoRoom
 	}
-	newGraph.ID = fmt.Sprintf("raman(%d,%d,%d,%d)", p, q, typeVal, reduce)
+	newGraph.ID = fmt.Sprintf("raman(%d,%d,%d,%d)", p, q, typeVal, boolInt(reduce))
 	newGraph.UtilTypes = "ZZZIIZIZZZZZZZ"
 
 	switch typeVal {
@@ -449,7 +449,7 @@ func Raman(p, q, typeVal, reduce int64) (*graph.Graph, error) {
 			}
 
 			if u == v {
-				if reduce == 0 {
+				if !reduce {
 					newGraph.NewEdge(v, v, 1)
 					v.Arcs.A = kk
 					v.Arcs.Next.A = int64(k)
@@ -461,7 +461,7 @@ func Raman(p, q, typeVal, reduce int64) (*graph.Graph, error) {
 						continue
 					}
 				}
-				if reduce != 0 {
+				if reduce {
 					skip := false
 					for ap := v.Arcs; ap != nil; ap = ap.Next {
 						if ap.Tip == u {
@@ -489,4 +489,12 @@ func Raman(p, q, typeVal, reduce int64) (*graph.Graph, error) {
 	}
 
 	return newGraph, nil
+}
+
+// boolInt renders a flag as 0 or 1, matching the C-style ID strings of SGB.
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

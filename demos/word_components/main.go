@@ -13,8 +13,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	gbio "github.com/sjnam/go-sgb/io"
 	"github.com/sjnam/go-sgb/words"
 )
 
@@ -30,7 +30,7 @@ func main() {
 	}
 	gbio.DataDirectory = dataDir
 
-	g, err := words.Words(0, nil, 0, 0)
+	g, _, err := words.Words(0, nil, 0, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, can't build dictionary (%v)!\n", err)

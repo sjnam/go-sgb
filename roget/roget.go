@@ -13,8 +13,8 @@ import (
 	"fmt"
 
 	"github.com/sjnam/go-sgb/flip"
+	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/graph"
-	"github.com/sjnam/go-sgb/io"
 )
 
 const MaxN = 1022 // number of categories in Roget's Thesaurus (1879 edition)
@@ -59,7 +59,7 @@ func Roget(n, minDistance, prob, seed int64) (*graph.Graph, error) {
 	}
 
 	// Read roget.dat and build arcs.
-	r, err := io.Open("roget.dat")
+	r, err := gbio.Open("roget.dat")
 	if err != nil {
 		return nil, graph.ErrEarlyDataFault
 	}

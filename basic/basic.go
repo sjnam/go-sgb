@@ -41,8 +41,9 @@ type basicState struct {
 
 const shortImap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_^~&@,;.:?!%#$+-*/|<=>()[]{}`'"
 
-func boolInt(b int64) int {
-	if b != 0 {
+// boolInt renders a flag as 0 or 1, matching the C-style ID strings of SGB.
+func boolInt(b bool) int {
+	if b {
 		return 1
 	}
 	return 0
@@ -105,7 +106,7 @@ func SetSubst(v *graph.Vertex, g *graph.Graph) { v.Y = g }
 
 // Board constructs a graph based on moves of a generalized chesspiece on a
 // d-dimensional rectangular board.
-func Board(n1, n2, n3, n4, piece, wrap, directed int64) *graph.Graph {
+func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	if piece == 0 {
 		piece = 1
@@ -148,7 +149,7 @@ func Board(n1, n2, n3, n4, piece, wrap, directed int64) *graph.Graph {
 	}
 	if periodic {
 		if d > maxD {
-			return nil
+			return nil, graph.ErrBadSpecs
 		}
 		for j := int64(1); k <= d; j, k = j+1, k+1 {
 			st.nn[k] = st.nn[j]
@@ -161,13 +162,13 @@ func Board(n1, n2, n3, n4, piece, wrap, directed int64) *graph.Graph {
 	for j := int64(1); j <= d; j++ {
 		nnn *= float64(st.nn[j])
 		if nnn > maxNNN {
-			return nil
+			return nil, graph.ErrVeryBadSpecs
 		}
 		n *= st.nn[j]
 	}
 	g := graph.NewGraph(n)
 	if g == nil {
-		return nil
+		return nil, graph.ErrNoRoom
 	}
 	g.ID = fmt.Sprintf("board(%d,%d,%d,%d,%d,%d,%d)", n1, n2, n3, n4, piece, wrap, boolInt(directed))
 	g.UtilTypes = "ZZZIIIZZZZZZZZ"
@@ -287,7 +288,7 @@ func Board(n1, n2, n3, n4, piece, wrap, directed int64) *graph.Graph {
 					for k := int64(2); k <= d; k++ {
 						j = st.nn[k]*j + st.yy[k]
 					}
-					if directed != 0 {
+					if directed {
 						g.NewArc(v, &g.Vertices[j], l)
 					} else {
 						g.NewEdge(v, &g.Vertices[j], l)
@@ -320,7 +321,7 @@ func Board(n1, n2, n3, n4, piece, wrap, directed int64) *graph.Graph {
 			st.del[k] = -st.del[k]
 		}
 	}
-	return g
+	return g, nil
 }
 
 // =========================================================================
@@ -440,7 +441,7 @@ func (st *basicState) completeSimplex(k, d int64) bool {
 }
 
 // Simplex creates a graph based on generalized triangular configurations.
-func Simplex(n, n0, n1, n2, n3, n4, directed int64) (*graph.Graph, error) {
+func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	d, k, periodic := st.normalizeSimplex(n, n0, n1, n2, n3, n4)
 	if periodic {
@@ -517,7 +518,7 @@ func Simplex(n, n0, n1, n2, n3, n4, directed int64) (*graph.Graph, error) {
 							g.Recycle()
 							return nil, graph.ErrImpossible
 						}
-						if directed != 0 {
+						if directed {
 							g.NewArc(u, v, 1)
 						} else {
 							g.NewEdge(u, v, 1)
@@ -555,7 +556,7 @@ func Simplex(n, n0, n1, n2, n3, n4, directed int64) (*graph.Graph, error) {
 
 // Subsets creates a graph with the same vertices as Simplex but with
 // adjacency defined by intersection size matching sizeBits.
-func Subsets(n, n0, n1, n2, n3, n4, sizeBits, directed int64) (*graph.Graph, error) {
+func Subsets(n, n0, n1, n2, n3, n4, sizeBits int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	d, k, periodic := st.normalizeSimplex(n, n0, n1, n2, n3, n4)
 	if periodic {
@@ -628,7 +629,7 @@ func Subsets(n, n0, n1, n2, n3, n4, sizeBits, directed int64) (*graph.Graph, err
 					}
 				}
 				if ss < 64 && (sizeBits>>uint(ss))&1 != 0 {
-					if directed != 0 {
+					if directed {
 						g.NewArc(u, v, 1)
 					} else {
 						g.NewEdge(u, v, 1)
@@ -663,7 +664,7 @@ func Subsets(n, n0, n1, n2, n3, n4, sizeBits, directed int64) (*graph.Graph, err
 // Perms creates a graph whose vertices are permutations of a multiset with
 // at most maxInv inversions; edges connect permutations that differ by one
 // adjacent transposition.
-func Perms(n0, n1, n2, n3, n4, maxInv, directed int64) (*graph.Graph, error) {
+func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	if n0 == 0 {
 		n0 = 1
@@ -774,7 +775,7 @@ func Perms(n0, n1, n2, n3, n4, maxInv, directed int64) (*graph.Graph, error) {
 					g.Recycle()
 					return nil, graph.ErrImpossible
 				}
-				if directed != 0 {
+				if directed {
 					g.NewArc(u, v, 1)
 				} else {
 					g.NewEdge(u, v, 1)
@@ -824,7 +825,7 @@ func Perms(n0, n1, n2, n3, n4, maxInv, directed int64) (*graph.Graph, error) {
 
 // Parts creates a graph whose vertices are partitions of n into at most
 // maxParts parts of size at most maxSize.
-func Parts(n, maxParts, maxSize, directed int64) (*graph.Graph, error) {
+func Parts(n, maxParts, maxSize int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	if maxParts == 0 || maxParts > n {
 		maxParts = n
@@ -940,7 +941,7 @@ func Parts(n, maxParts, maxSize, directed int64) (*graph.Graph, error) {
 								g.Recycle()
 								return nil, graph.ErrImpossible
 							}
-							if directed != 0 {
+							if directed {
 								g.NewArc(v, u, 1)
 							} else {
 								g.NewEdge(v, u, 1)
@@ -979,7 +980,7 @@ func Parts(n, maxParts, maxSize, directed int64) (*graph.Graph, error) {
 
 // Binary creates a graph whose vertices are binary trees with n internal
 // nodes and all leaves at height ≤ maxHeight.
-func Binary(n, maxHeight, directed int64) (*graph.Graph, error) {
+func Binary(n, maxHeight int64, directed bool) (*graph.Graph, error) {
 	var st basicState
 	if 2*n+2 > bufSz {
 		return nil, graph.ErrBadSpecs
@@ -1127,7 +1128,7 @@ func Binary(n, maxHeight, directed int64) (*graph.Graph, error) {
 					}
 					u := g.HashOut(string(rotBuf))
 					if u != nil {
-						if directed != 0 {
+						if directed {
 							g.NewArc(v, u, 1)
 						} else {
 							g.NewEdge(v, u, 1)
@@ -1177,9 +1178,9 @@ func Binary(n, maxHeight, directed int64) (*graph.Graph, error) {
 // Complement
 // =========================================================================
 
-// Complement creates the complement of g. If copy!=0 it makes a copy
-// instead. self controls self-loops; directed controls arc direction.
-func Complement(g *graph.Graph, copy, self, directed int64) (*graph.Graph, error) {
+// Complement creates the complement of g. If copy is true it makes a copy
+// instead. self allows self-loops; directed selects arcs over edges.
+func Complement(g *graph.Graph, copy, self, directed bool) (*graph.Graph, error) {
 	if g == nil {
 		return nil, graph.ErrMissingOperand
 	}
@@ -1201,25 +1202,25 @@ func Complement(g *graph.Graph, copy, self, directed int64) (*graph.Graph, error
 		for a := v.Arcs; a != nil; a = a.Next {
 			setTmp(vMap(a.Tip, g, newG), u)
 		}
-		if directed != 0 {
+		if directed {
 			for vvi := int64(0); vvi < n; vvi++ {
 				vv := &newG.Vertices[vvi]
-				if (getTmp(vv) == u && copy != 0) || (getTmp(vv) != u && copy == 0) {
-					if vv != u || self != 0 {
+				if (getTmp(vv) == u && copy) || (getTmp(vv) != u && !copy) {
+					if vv != u || self {
 						newG.NewArc(u, vv, 1)
 					}
 				}
 			}
 		} else {
 			start := int64(0)
-			if self != 0 {
+			if self {
 				start = vi
 			} else {
 				start = vi + 1
 			}
 			for vvi := start; vvi < n; vvi++ {
 				vv := &newG.Vertices[vvi]
-				if (getTmp(vv) == u && copy != 0) || (getTmp(vv) != u && copy == 0) {
+				if (getTmp(vv) == u && copy) || (getTmp(vv) != u && !copy) {
 					newG.NewEdge(u, vv, 1)
 				}
 			}
@@ -1236,7 +1237,7 @@ func Complement(g *graph.Graph, copy, self, directed int64) (*graph.Graph, error
 // =========================================================================
 
 // Gunion creates the union of graphs g and gg.
-func Gunion(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, error) {
+func Gunion(g, gg *graph.Graph, multi, directed bool) (*graph.Graph, error) {
 	if g == nil || gg == nil {
 		return nil, graph.ErrMissingOperand
 	}
@@ -1277,8 +1278,8 @@ func Gunion(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, error) {
 			if u == nil || vIdx(newG, u) >= n {
 				return
 			}
-			if directed != 0 {
-				if multi != 0 || getTmp(u) != vv {
+			if directed {
+				if multi || getTmp(u) != vv {
 					newG.NewArc(vv, u, a.Len)
 				} else {
 					b := getTlen(u)
@@ -1292,7 +1293,7 @@ func Gunion(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, error) {
 				if vIdx(newG, u) < vIdx(newG, vv) {
 					return
 				}
-				if multi != 0 || getTmp(u) != vv {
+				if multi || getTmp(u) != vv {
 					newG.NewEdge(vv, u, a.Len)
 				} else {
 					b := getTlen(u)
@@ -1330,7 +1331,7 @@ func Gunion(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, error) {
 // =========================================================================
 
 // Intersection creates the intersection of graphs g and gg.
-func Intersection(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, error) {
+func Intersection(g, gg *graph.Graph, multi, directed bool) (*graph.Graph, error) {
 	if g == nil || gg == nil {
 		return nil, graph.ErrMissingOperand
 	}
@@ -1367,7 +1368,7 @@ func Intersection(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, erro
 				setMinlen(u, a.Len)
 			}
 			// skip self-loop partner in undirected
-			if u == vv && directed == 0 && a.Next == a.Partner {
+			if u == vv && !directed && a.Next == a.Partner {
 				a = a.Next
 			}
 		}
@@ -1392,13 +1393,13 @@ func Intersection(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, erro
 				b := getTlen(u)
 				if b != nil && l < b.Len {
 					b.Len = l
-					if directed == 0 {
+					if !directed {
 						b.Partner.Len = l
 					}
 				}
 			} else {
 				// generate new arc/edge
-				if directed != 0 {
+				if directed {
 					newG.NewArc(vv, u, l)
 				} else {
 					if vIdx(newG, vv) <= vIdx(newG, u) {
@@ -1408,7 +1409,7 @@ func Intersection(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, erro
 						a = a.Next
 					}
 				}
-				if multi == 0 {
+				if !multi {
 					setTlen(u, vv.Arcs)
 					setMult(u, -1)
 				} else if mult == 0 {
@@ -1434,12 +1435,12 @@ func Intersection(g, gg *graph.Graph, multi, directed int64) (*graph.Graph, erro
 // =========================================================================
 
 // Lines creates the line graph of g.
-func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
+func Lines(g *graph.Graph, directed bool) (*graph.Graph, error) {
 	if g == nil {
 		return nil, graph.ErrMissingOperand
 	}
 	var m int64
-	if directed != 0 {
+	if directed {
 		m = g.M
 	} else {
 		m = g.M / 2
@@ -1448,12 +1449,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 	if newG == nil {
 		return nil, graph.ErrNoRoom
 	}
-	graph.MakeCompoundID(newG, "lines(", g, func() string {
-		if directed != 0 {
-			return ",1)"
-		}
-		return ",0)"
-	}())
+	graph.MakeCompoundID(newG, "lines(", g, fmt.Sprintf(",%d)", boolInt(directed)))
 
 	// build line-graph vertices: one per arc (directed) or edge (undirected)
 	ui := int64(0)
@@ -1469,7 +1465,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 				vOrig.Z = u.Z
 				u.Z = nil
 			}
-			if directed == 0 {
+			if !directed {
 				uwA, _ := u.W.(*graph.Arc)
 				if uwA != nil {
 					uwA.Partner.Tip = vOrig
@@ -1485,7 +1481,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 		mapped := false
 		for a := v.Arcs; a != nil; a = a.Next {
 			vv := a.Tip
-			if directed == 0 {
+			if !directed {
 				if vIdx(g, vv) < vi {
 					continue
 				}
@@ -1501,7 +1497,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 			u.V = vv // u.V.V = second vertex
 			u.W = a  // u.W.A = arc from v to vv
 
-			if directed == 0 {
+			if !directed {
 				if ui >= m || a.Partner.Tip != v {
 					return panicRestore()
 				}
@@ -1514,7 +1510,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 
 			// vertex name: "v--vv" (undirected) or "v->vv" (directed)
 			sep := "--"
-			if directed != 0 {
+			if directed {
 				sep = "->"
 			}
 			vName := v.Name
@@ -1542,7 +1538,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 	}
 
 	// insert arcs/edges of line graph
-	if directed != 0 {
+	if directed {
 		for i := int64(0); i < m; i++ {
 			u := &newG.Vertices[i]
 			v, _ := u.V.(*graph.Vertex) // second endpoint in g
@@ -1614,7 +1610,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 				vOrig.Z = u.Z // restore original Z
 				u.Z = nil
 			}
-			if directed == 0 {
+			if !directed {
 				uwA, _ := u.W.(*graph.Arc)
 				if uwA != nil {
 					uwA.Partner.Tip = vOrig
@@ -1631,7 +1627,7 @@ func Lines(g *graph.Graph, directed int64) (*graph.Graph, error) {
 
 // Product creates the Cartesian (type=0), direct (type=1), or strong (type=2)
 // product of g and gg.
-func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
+func Product(g, gg *graph.Graph, typ int64, directed bool) (*graph.Graph, error) {
 	if g == nil || gg == nil {
 		return nil, graph.ErrMissingOperand
 	}
@@ -1674,7 +1670,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 			for a := u.Arcs; a != nil; a = a.Next {
 				v2 := a.Tip
 				v2i := vIdx(gg, v2)
-				if directed == 0 {
+				if !directed {
 					if ui > v2i {
 						continue
 					}
@@ -1686,7 +1682,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 				for wi := int64(0); wi < g.N; wi++ {
 					src := &newG.Vertices[wi*gg.N+ui]
 					dst := &newG.Vertices[wi*gg.N+int64(v2i)]
-					if directed != 0 {
+					if directed {
 						newG.NewArc(src, dst, a.Len)
 					} else {
 						newG.NewEdge(src, dst, a.Len)
@@ -1700,7 +1696,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 			for a := u.Arcs; a != nil; a = a.Next {
 				v2 := a.Tip
 				v2i := vIdx(g, v2)
-				if directed == 0 {
+				if !directed {
 					if ui > int64(v2i) {
 						continue
 					}
@@ -1712,7 +1708,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 				for wi := int64(0); wi < gg.N; wi++ {
 					src := &newG.Vertices[ui*gg.N+wi]
 					dst := &newG.Vertices[int64(v2i)*gg.N+wi]
-					if directed != 0 {
+					if directed {
 						newG.NewArc(src, dst, a.Len)
 					} else {
 						newG.NewEdge(src, dst, a.Len)
@@ -1729,7 +1725,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 			for a := uu.Arcs; a != nil; a = a.Next {
 				vvv := a.Tip
 				vvi := vIdx(g, vvv)
-				if directed == 0 {
+				if !directed {
 					if ui > int64(vvi) {
 						continue
 					}
@@ -1748,7 +1744,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 						wwi := vIdx(gg, wwv)
 						src := &newG.Vertices[ui*gg.N+wi]
 						dst := &newG.Vertices[int64(vvi)*gg.N+int64(wwi)]
-						if directed != 0 {
+						if directed {
 							newG.NewArc(src, dst, length)
 						} else {
 							newG.NewEdge(src, dst, length)
@@ -1767,7 +1763,7 @@ func Product(g, gg *graph.Graph, typ, directed int64) (*graph.Graph, error) {
 
 // Induced builds the graph induced from g according to the ind (z.I) field
 // of each vertex.  Call SetInd / SetSubst on g's vertices before calling Induced.
-func Induced(g *graph.Graph, description string, self, multi, directed int64) (*graph.Graph, error) {
+func Induced(g *graph.Graph, description string, self, multi, directed bool) (*graph.Graph, error) {
 	if g == nil {
 		return nil, graph.ErrMissingOperand
 	}
@@ -1868,17 +1864,17 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 					for a := sub.Vertices[j].Arcs; a != nil; a = a.Next {
 						tipJ := vIdx(sub, a.Tip)
 						dst := &newG.Vertices[int64(subBase)+int64(tipJ)]
-						if uu == dst && self == 0 {
+						if uu == dst && !self {
 							continue
 						}
-						if directed == 0 {
+						if !directed {
 							if j > tipJ {
 								continue
 							}
 							if j == tipJ && a.Next == a.Partner {
 								a = a.Partner
 							}
-							if getTmp(dst) == uu && multi == 0 {
+							if getTmp(dst) == uu && !multi {
 								b := getTlen(dst)
 								if b != nil && a.Len < b.Len {
 									b.Len = a.Len
@@ -1888,7 +1884,7 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 							}
 							newG.NewEdge(uu, dst, a.Len)
 						} else {
-							if getTmp(dst) == uu && multi == 0 {
+							if getTmp(dst) == uu && !multi {
 								b := getTlen(dst)
 								if b != nil && a.Len < b.Len {
 									b.Len = a.Len
@@ -1920,13 +1916,13 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 		}
 		for clone := int64(0); clone < k; clone++ {
 			uu := &newG.Vertices[int64(vIdx(newG, u))+clone]
-			if multi == 0 {
+			if !multi {
 				// note existing edges touching uu
 				for a := uu.Arcs; a != nil; a = a.Next {
 					setTmp(a.Tip, uu)
 					uuIdx := vIdx(newG, uu)
 					tipIdx := vIdx(newG, a.Tip)
-					if directed != 0 || tipIdx > uuIdx || a.Next == a.Partner {
+					if directed || tipIdx > uuIdx || a.Next == a.Partner {
 						setTlen(a.Tip, a)
 					} else {
 						setTlen(a.Tip, a.Partner)
@@ -1945,7 +1941,7 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 				} else if j >= IndGraph {
 					j = getSubst(vv).N
 				}
-				if directed == 0 {
+				if !directed {
 					if vIdx(g, vv) < vi {
 						continue
 					}
@@ -1959,26 +1955,26 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 				}
 				for ji := int64(0); ji < j; ji++ {
 					dst := &newG.Vertices[int64(vIdx(newG, uu2))+ji]
-					if uu == dst && self == 0 {
+					if uu == dst && !self {
 						continue
 					}
-					if getTmp(dst) == uu && multi == 0 {
+					if getTmp(dst) == uu && !multi {
 						b := getTlen(dst)
 						if b != nil && a.Len < b.Len {
 							b.Len = a.Len
-							if directed == 0 {
+							if !directed {
 								b.Partner.Len = a.Len
 							}
 						}
 						continue
 					}
-					if directed != 0 {
+					if directed {
 						newG.NewArc(uu, dst, a.Len)
 					} else {
 						newG.NewEdge(uu, dst, a.Len)
 					}
 					setTmp(dst, uu)
-					if directed != 0 || vIdx(newG, uu) <= vIdx(newG, dst) {
+					if directed || vIdx(newG, uu) <= vIdx(newG, dst) {
 						setTlen(dst, uu.Arcs)
 					} else {
 						setTlen(dst, dst.Arcs)
@@ -2009,14 +2005,14 @@ func Induced(g *graph.Graph, description string, self, multi, directed int64) (*
 // =========================================================================
 
 // BiComplete creates a complete bipartite graph K_{n1,n2}.
-func BiComplete(n1, n2, directed int64) (*graph.Graph, error) {
-	g := Board(2, 0, 0, 0, 1, 0, directed)
-	if g == nil {
-		return nil, graph.ErrNoRoom
+func BiComplete(n1, n2 int64, directed bool) (*graph.Graph, error) {
+	g, err := Board(2, 0, 0, 0, 1, 0, directed)
+	if err != nil {
+		return nil, err
 	}
 	setInd(&g.Vertices[0], n1)
 	setInd(&g.Vertices[1], n2)
-	result, err := Induced(g, "", 0, 0, directed)
+	result, err := Induced(g, "", false, false, directed)
 	if err != nil {
 		return nil, err
 	}
@@ -2026,15 +2022,19 @@ func BiComplete(n1, n2, directed int64) (*graph.Graph, error) {
 }
 
 // Wheel creates a wheel with n rim vertices and n1 center points.
-func Wheel(n, n1, directed int64) (*graph.Graph, error) {
-	g := Board(2, 0, 0, 0, 1, 0, directed)
-	if g == nil {
-		return nil, graph.ErrNoRoom
+func Wheel(n, n1 int64, directed bool) (*graph.Graph, error) {
+	g, err := Board(2, 0, 0, 0, 1, 0, directed)
+	if err != nil {
+		return nil, err
 	}
 	setInd(&g.Vertices[0], n1)
 	setInd(&g.Vertices[1], IndGraph)
-	g.Vertices[1].Y = Board(n, 0, 0, 0, 1, 1, directed)
-	result, err := Induced(g, "", 0, 0, directed)
+	rim, err := Board(n, 0, 0, 0, 1, 1, directed)
+	if err != nil {
+		return nil, err
+	}
+	g.Vertices[1].Y = rim
+	result, err := Induced(g, "", false, false, directed)
 	if err != nil {
 		return nil, err
 	}

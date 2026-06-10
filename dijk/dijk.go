@@ -15,6 +15,7 @@ package dijk
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/sjnam/go-sgb/graph"
 )
@@ -175,11 +176,13 @@ func (q *wheelQueue) DelMin() *graph.Vertex {
 // q selects the priority queue implementation; pass nil to use the default
 // doubly-linked list queue.  Pass NewWheelQueue() when all arc lengths are < 128.
 //
+// trace, if non-nil, receives a line for every vertex as it is settled.
+//
 // Returns the length of the shortest path, or -1 if vv is unreachable.
 // After returning, v.Z (Dist) holds the shortest modified distance for every
 // vertex v reachable from uu; the true distance is Dist(v) - HhVal(v) + HhVal(uu).
 // Backlink(v) (v.Y) holds the previous vertex on the shortest path tree.
-func Dijkstra(uu, vv *graph.Vertex, gg *graph.Graph, hh func(*graph.Vertex) int64, q Queue, verbose bool) int64 {
+func Dijkstra(uu, vv *graph.Vertex, gg *graph.Graph, hh func(*graph.Vertex) int64, q Queue, trace io.Writer) int64 {
 	if q == nil {
 		q = NewDlistQueue()
 	}
@@ -196,8 +199,8 @@ func Dijkstra(uu, vv *graph.Vertex, gg *graph.Graph, hh func(*graph.Vertex) int6
 	setHhVal(uu, hh(uu))
 	q.Init(0)
 
-	if verbose {
-		fmt.Printf("Distances from %s [%d]:\n", uu.Name, HhVal(uu))
+	if trace != nil {
+		fmt.Fprintf(trace, "Distances from %s [%d]:\n", uu.Name, HhVal(uu))
 	}
 
 	t := uu
@@ -225,21 +228,21 @@ func Dijkstra(uu, vv *graph.Vertex, gg *graph.Graph, hh func(*graph.Vertex) int6
 		if t == nil {
 			return -1 // vv unreachable
 		}
-		if verbose {
-			fmt.Printf(" %d to %s via %s\n",
+		if trace != nil {
+			fmt.Fprintf(trace, " %d to %s via %s\n",
 				Dist(t)-HhVal(t)+HhVal(uu), t.Name, Backlink(t).Name)
 		}
 	}
 	return Dist(vv) - HhVal(vv) + HhVal(uu)
 }
 
-// PrintDijkstraResult prints the shortest path to vv found by the most recent
-// Dijkstra call.  If vv is unreachable it prints a sorry message.
+// PrintDijkstraResult writes to w the shortest path to vv found by the most
+// recent Dijkstra call.  If vv is unreachable it writes a sorry message.
 // The backlinks are temporarily reversed to print in forward order, then restored.
-func PrintDijkstraResult(vv *graph.Vertex) {
+func PrintDijkstraResult(w io.Writer, vv *graph.Vertex) {
 	p := vv
 	if Backlink(p) == nil {
-		fmt.Printf("Sorry, %s is unreachable.\n", p.Name)
+		fmt.Fprintf(w, "Sorry, %s is unreachable.\n", p.Name)
 		return
 	}
 
@@ -257,7 +260,7 @@ func PrintDijkstraResult(vv *graph.Vertex) {
 	// Now t = uu, backlinks form a forward chain.
 	uu := t
 	for t != nil {
-		fmt.Printf("%10d %s\n", Dist(t)-HhVal(t)+HhVal(uu), t.Name)
+		fmt.Fprintf(w, "%10d %s\n", Dist(t)-HhVal(t)+HhVal(uu), t.Name)
 		t = Backlink(t)
 	}
 

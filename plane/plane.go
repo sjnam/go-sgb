@@ -539,10 +539,10 @@ func Delaunay(g *graph.Graph, f func(*graph.Vertex, *graph.Vertex)) {
 
 // Plane constructs a planar graph with n vertices uniformly distributed in
 // [0,xRange) × [0,yRange), connected by their Delaunay triangulation.
-// Each edge is retained with probability 1 - prob/65536. If extend != 0,
+// Each edge is retained with probability 1 - prob/65536. If extend is true,
 // an extra vertex representing infinity is included, connected by INFTY-length
 // edges to all convex hull vertices. UtilTypes = "ZZZIIIZZZZZZZZ".
-func Plane(n, xRange, yRange, extend, prob, seed int64) (*graph.Graph, error) {
+func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*graph.Graph, error) {
 	rng := flip.New(seed)
 	if xRange > 16384 || yRange > 16384 {
 		return nil, graph.ErrBadSpecs
@@ -558,7 +558,7 @@ func Plane(n, xRange, yRange, extend, prob, seed int64) (*graph.Graph, error) {
 	}
 
 	g := graph.NewGraph(n)
-	g.ID = fmt.Sprintf("plane(%d,%d,%d,%d,%d,%d)", n, xRange, yRange, extend, prob, seed)
+	g.ID = fmt.Sprintf("plane(%d,%d,%d,%d,%d,%d)", n, xRange, yRange, boolInt(extend), prob, seed)
 	g.UtilTypes = "ZZZIIIZZZZZZZZ"
 
 	for k := int64(0); k < n; k++ {
@@ -570,7 +570,7 @@ func Plane(n, xRange, yRange, extend, prob, seed int64) (*graph.Graph, error) {
 	}
 
 	var infVertex *graph.Vertex
-	if extend != 0 {
+	if extend {
 		infVertex = &g.Vertices[n]
 		infVertex.Name = "INF"
 		infVertex.X = int64(-1)
@@ -594,7 +594,7 @@ func Plane(n, xRange, yRange, extend, prob, seed int64) (*graph.Graph, error) {
 		}
 	})
 
-	if extend != 0 {
+	if extend {
 		g.N++
 	}
 	return g, nil
@@ -606,21 +606,21 @@ func Plane(n, xRange, yRange, extend, prob, seed int64) (*graph.Graph, error) {
 // up to n cities from miles.dat. Vertices and coordinates are the same as
 // those produced by miles.Miles with max_distance=1 (no edges). Edge lengths
 // are highway distances in miles. UtilTypes = "ZZZIIIZZZZZZZZ".
-func PlaneMiles(n, northWeight, westWeight, popWeight, extend, prob, seed int64) (*graph.Graph, error) {
+func PlaneMiles(n, northWeight, westWeight, popWeight int64, extend bool, prob, seed int64) (*graph.Graph, error) {
 	if n == 0 || n > miles.MaxN {
 		n = miles.MaxN
 	}
-	g, err := miles.Miles(n, northWeight, westWeight, popWeight, 1, 0, seed)
+	g, dm, err := miles.Miles(n, northWeight, westWeight, popWeight, 1, 0, seed)
 	if err != nil {
 		return nil, err
 	}
 	rng := flip.New(seed)
 	g.ID = fmt.Sprintf("plane_miles(%d,%d,%d,%d,%d,%d,%d)",
-		n, northWeight, westWeight, popWeight, extend, prob, seed)
+		n, northWeight, westWeight, popWeight, boolInt(extend), prob, seed)
 	g.UtilTypes = "ZZZIIIZZZZZZZZ"
 
 	var infVertex *graph.Vertex
-	if extend != 0 {
+	if extend {
 		infVertex = &g.Vertices[g.N]
 		infVertex.Name = "INF"
 		infVertex.X = int64(-1)
@@ -632,7 +632,7 @@ func PlaneMiles(n, northWeight, westWeight, popWeight, extend, prob, seed int64)
 		if rng.Next()>>15 >= prob {
 			if u != nil {
 				if v != nil {
-					g.NewEdge(u, v, -miles.MilesDistance(u, v))
+					g.NewEdge(u, v, -dm.Distance(u, v))
 				} else if infVertex != nil {
 					g.NewEdge(u, infVertex, Infty)
 				}
@@ -642,8 +642,16 @@ func PlaneMiles(n, northWeight, westWeight, popWeight, extend, prob, seed int64)
 		}
 	})
 
-	if extend != 0 {
+	if extend {
 		g.N++
 	}
 	return g, nil
+}
+
+// boolInt renders a flag as 0 or 1, matching the C-style ID strings of SGB.
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

@@ -13,9 +13,9 @@ import (
 
 func TestBoardDefaultChessboard(t *testing.T) {
 	// board(0,0,0,0,0,0,0) → default 8×8 wazir (piece=1)
-	g := Board(0, 0, 0, 0, 0, 0, 0)
-	if g == nil {
-		t.Fatal("Board returned nil")
+	g, err := Board(0, 0, 0, 0, 0, 0, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if g.N != 64 {
 		t.Errorf("N = %d, want 64", g.N)
@@ -28,9 +28,9 @@ func TestBoardDefaultChessboard(t *testing.T) {
 
 func TestBoardCompletePath(t *testing.T) {
 	// board(5,0,0,0,-1,0,0) → complete graph K5 (piece=-1 = rook on 1D)
-	g := Board(5, 0, 0, 0, -1, 0, 0)
-	if g == nil {
-		t.Fatal("Board returned nil")
+	g, err := Board(5, 0, 0, 0, -1, 0, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if g.N != 5 {
 		t.Errorf("N = %d, want 5", g.N)
@@ -43,9 +43,9 @@ func TestBoardCompletePath(t *testing.T) {
 
 func TestBoardCircuit(t *testing.T) {
 	// board(6,0,0,0,1,1,0) → undirected circuit of length 6
-	g := Board(6, 0, 0, 0, 1, 1, 0)
-	if g == nil {
-		t.Fatal("Board returned nil")
+	g, err := Board(6, 0, 0, 0, 1, 1, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if g.N != 6 {
 		t.Errorf("N = %d, want 6", g.N)
@@ -67,9 +67,9 @@ func TestBoardCircuit(t *testing.T) {
 
 func TestBoardKnightMoves(t *testing.T) {
 	// board(8,8,0,0,5,0,0) → 8×8 knight graph
-	g := Board(8, 8, 0, 0, 5, 0, 0)
-	if g == nil {
-		t.Fatal("Board returned nil")
+	g, err := Board(8, 8, 0, 0, 5, 0, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if g.N != 64 {
 		t.Errorf("N = %d, want 64", g.N)
@@ -81,7 +81,10 @@ func TestBoardKnightMoves(t *testing.T) {
 }
 
 func TestBoardID(t *testing.T) {
-	g := Board(4, 4, 0, 0, 1, 0, 0)
+	g, err := Board(4, 4, 0, 0, 1, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !strings.HasPrefix(g.ID, "board(") {
 		t.Errorf("ID = %q, want board(...)", g.ID)
 	}
@@ -95,7 +98,7 @@ func TestSimplexTriangle(t *testing.T) {
 	// simplex(1,-2,0,0,0,0,0) → d=2, triangle (3 vertices, 3 edges)
 	// n=1, n0=-2 → d=2, nn[0]=nn[1]=nn[2]=1
 	// vertices: (1,0,0),(0,1,0),(0,0,1)
-	g, err := Simplex(1, -2, 0, 0, 0, 0, 0)
+	g, err := Simplex(1, -2, 0, 0, 0, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +115,7 @@ func TestSimplexTriangle(t *testing.T) {
 
 func TestSimplexTetrahedral(t *testing.T) {
 	// simplex(3,-2,0,0,0,0,0) → n=3,d=2, triangular array with 10 vertices
-	g, err := Simplex(3, -2, 0, 0, 0, 0, 0)
+	g, err := Simplex(3, -2, 0, 0, 0, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +133,7 @@ func TestSimplexTetrahedral(t *testing.T) {
 
 func TestPartsOf5(t *testing.T) {
 	// all_parts(5,0) → 7 partitions of 5
-	g, err := Parts(5, 0, 0, 0)
+	g, err := Parts(5, 0, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +146,7 @@ func TestPartsOf5(t *testing.T) {
 }
 
 func TestPartsVertexNames(t *testing.T) {
-	g, err := Parts(4, 0, 0, 0)
+	g, err := Parts(4, 0, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +172,7 @@ func TestPartsVertexNames(t *testing.T) {
 
 func TestBinaryN3(t *testing.T) {
 	// binary(3,0,0) → all binary trees with 3 internal nodes → Catalan(3)=5
-	g, err := Binary(3, 0, 0)
+	g, err := Binary(3, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +196,7 @@ func TestBinaryN3(t *testing.T) {
 
 func TestBinaryN1(t *testing.T) {
 	// binary(1,0,0) → single tree (root only) → 1 vertex, 0 edges
-	g, err := Binary(1, 0, 0)
+	g, err := Binary(1, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,11 +215,11 @@ func TestBinaryN1(t *testing.T) {
 func TestComplementK3(t *testing.T) {
 	// complement of triangle (K3) with no self-loops, undirected
 	// K3 has 3 edges; complement of K3 on 3 vertices (no self-loops) has 0 edges
-	tri := Board(3, 0, 0, 0, -1, 0, 0) // K3
-	if tri == nil {
-		t.Fatal("Board(K3) nil")
+	tri, err := Board(3, 0, 0, 0, -1, 0, false) // K3
+	if err != nil {
+		t.Fatal(err)
 	}
-	comp, err := Complement(tri, 0, 0, 0)
+	comp, err := Complement(tri, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,8 +236,11 @@ func TestComplementK3(t *testing.T) {
 
 func TestComplementCopy(t *testing.T) {
 	// copy=1 → double complement = copy without duplicate arcs
-	g := Board(4, 0, 0, 0, -1, 0, 0) // K4
-	cp, err := Complement(g, 1, 0, 0)
+	g, err := Board(4, 0, 0, 0, -1, 0, false) // K4
+	if err != nil {
+		t.Fatal(err)
+	}
+	cp, err := Complement(g, true, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,9 +262,15 @@ func TestComplementCopy(t *testing.T) {
 
 func TestGunionPath(t *testing.T) {
 	// union of wazir (piece=1) and fers (piece=2) on 3×3 board = king moves
-	wazir := Board(3, 3, 0, 0, 1, 0, 0)
-	fers := Board(3, 3, 0, 0, 2, 0, 0)
-	king, err := Gunion(wazir, fers, 0, 0)
+	wazir, err := Board(3, 3, 0, 0, 1, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fers, err := Board(3, 3, 0, 0, 2, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	king, err := Gunion(wazir, fers, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -291,9 +303,15 @@ func TestGunionPath(t *testing.T) {
 func TestProductCartesian(t *testing.T) {
 	// Cartesian product of P2 × P3  (path of 2 × path of 3)
 	// = grid 2×3 = 6 vertices
-	p2 := Board(2, 0, 0, 0, 1, 0, 0)
-	p3 := Board(3, 0, 0, 0, 1, 0, 0)
-	grid, err := Product(p2, p3, Cartesian, 0)
+	p2, err := Board(2, 0, 0, 0, 1, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p3, err := Board(3, 0, 0, 0, 1, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grid, err := Product(p2, p3, Cartesian, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -314,7 +332,7 @@ func TestProductCartesian(t *testing.T) {
 // -----------------------------------------------------------------------
 
 func TestBiComplete(t *testing.T) {
-	g, err := BiComplete(3, 4, 0)
+	g, err := BiComplete(3, 4, false)
 	if err != nil {
 		t.Fatal(err)
 	}
