@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/sjnam/go-sgb/gbbasic"
+	"github.com/sjnam/go-sgb/gbsave"
 )
 
 func main() {
@@ -26,6 +27,11 @@ func main() {
 		os.Exit(1)
 	}
 	if ggg == nil {
+		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
+		os.Exit(1)
+	}
+
+	if _, err = gbsave.SaveGraph(ggg, "queen.gb"); err != nil {
 		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
 		os.Exit(1)
 	}

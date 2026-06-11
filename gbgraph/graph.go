@@ -77,8 +77,9 @@ type Graph struct {
 	UtilTypes              string   // 14-char descriptor for utility-field usage
 	UU, VV, WW, XX, YY, ZZ Util
 
-	arcBlock []Arc // current slab of pre-allocated Arc records
-	nextArc  int   // index of next free slot in arcBlock
+	arcBlock  []Arc   // current slab of pre-allocated Arc records
+	arcBlocks [][]Arc // every slab ever allocated, in allocation order
+	nextArc   int     // index of next free slot in arcBlock
 }
 
 // NewGraph allocates a Graph with n real vertices (plus ExtraN shadow
@@ -89,12 +90,20 @@ func NewGraph(n int64) *Graph {
 		N:         n,
 		ID:        fmt.Sprintf("gb_new_graph(%d)", n),
 		UtilTypes: "ZZZZZZZZZZZZZZ",
-		arcBlock:  make([]Arc, arcsPerBlock),
 	}
+	g.addArcBlock()
 	for i := range g.Vertices {
 		g.Vertices[i].idx = int64(i)
 	}
 	return g
+}
+
+// addArcBlock allocates a fresh slab of arcsPerBlock arcs, makes it current,
+// and records it for serialization.
+func (g *Graph) addArcBlock() {
+	g.arcBlock = make([]Arc, arcsPerBlock)
+	g.arcBlocks = append(g.arcBlocks, g.arcBlock)
+	g.nextArc = 0
 }
 
 // Recycle is a no-op; Go's garbage collector reclaims the graph automatically.
@@ -110,8 +119,7 @@ func (g *Graph) SaveString(s string) string { return s }
 // allocating a fresh block of arcsPerBlock arcs when the current one is full.
 func (g *Graph) virginArc() *Arc {
 	if g.nextArc >= len(g.arcBlock) {
-		g.arcBlock = make([]Arc, arcsPerBlock)
-		g.nextArc = 0
+		g.addArcBlock()
 	}
 	a := &g.arcBlock[g.nextArc]
 	g.nextArc++
@@ -133,8 +141,7 @@ func (g *Graph) NewArc(u, v *Vertex, length int64) {
 // a0.Partner = a1 and a1.Partner = a0.
 func (g *Graph) NewEdge(u, v *Vertex, length int64) {
 	if g.nextArc+1 >= len(g.arcBlock) {
-		g.arcBlock = make([]Arc, arcsPerBlock)
-		g.nextArc = 0
+		g.addArcBlock()
 	}
 	a0 := &g.arcBlock[g.nextArc]
 	a1 := &g.arcBlock[g.nextArc+1]
@@ -151,6 +158,32 @@ func (g *Graph) NewEdge(u, v *Vertex, length int64) {
 	u.Arcs = a0
 	v.Arcs = a1
 	g.M += 2
+}
+
+// ArcRecords returns a pointer to every Arc record in g's storage blocks, in
+// allocation order, including records that were allocated but never used.  This
+// mirrors the raw arc blocks that the original GraphBase save_graph serializes,
+// so the count and ordering match a .gb file produced by the C library.
+func (g *Graph) ArcRecords() []*Arc {
+	out := make([]*Arc, 0, len(g.arcBlocks)*arcsPerBlock)
+	for bi := range g.arcBlocks {
+		blk := g.arcBlocks[bi]
+		for i := range blk {
+			out = append(out, &blk[i])
+		}
+	}
+	return out
+}
+
+// ResetArcStore discards g's arc blocks and installs a single block of n Arc
+// records, returning it.  RestoreGraph uses this so that a restored graph owns
+// its arcs through the same machinery, letting SaveGraph reproduce them.
+func (g *Graph) ResetArcStore(n int64) []Arc {
+	blk := make([]Arc, n)
+	g.arcBlocks = [][]Arc{blk}
+	g.arcBlock = blk
+	g.nextArc = int(n) // block is fully populated by the caller
+	return blk
 }
 
 // --- Vertex index helpers ---

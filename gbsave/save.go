@@ -38,24 +38,24 @@ func SaveGraph(g *gbgraph.Graph, filename string) (int64, error) {
 	}
 	defer f.Close()
 
-	// Map vertices 0..N-1 to their indices.
-	vidx := make(map[*gbgraph.Vertex]int64, g.N)
-	for i := int64(0); i < g.N; i++ {
+	// The original save_graph serializes the raw memory blocks: the whole
+	// vertex array (g.N real vertices plus ExtraN shadow vertices) and every
+	// allocated arc record (including unused slots), numbering arcs by their
+	// position in the blocks.  We reproduce that layout here.
+	n := g.N + gbgraph.ExtraN
+
+	// Map every vertex slot to its index.
+	vidx := make(map[*gbgraph.Vertex]int64, n)
+	for i := int64(0); i < n && i < int64(len(g.Vertices)); i++ {
 		vidx[&g.Vertices[i]] = i
 	}
 
-	// Enumerate all arcs by traversing vertex arc lists.
-	var arcList []*gbgraph.Arc
-	aidx := make(map[*gbgraph.Arc]int64)
-	for i := int64(0); i < g.N; i++ {
-		for a := range g.Vertices[i].AllArcs() {
-			if _, seen := aidx[a]; !seen {
-				aidx[a] = int64(len(arcList))
-				arcList = append(arcList, a)
-			}
-		}
+	// Enumerate all arc records in allocation order.
+	arcList := g.ArcRecords()
+	aidx := make(map[*gbgraph.Arc]int64, len(arcList))
+	for i, a := range arcList {
+		aidx[a] = int64(i)
 	}
-	n := g.N
 	m := int64(len(arcList))
 
 	// Sanitize util_types to 14 valid characters.
@@ -197,11 +197,13 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 	}
 	r.GbNewline() // advance to graph record line (checksums it)
 
-	// Allocate graph with fileN vertices and fileM arc slots.
+	// Allocate graph with fileN vertices and fileM arc slots.  ResetArcStore
+	// installs the arc block as g's own storage so the graph round-trips back
+	// through SaveGraph with the same layout.
 	g := gbgraph.NewGraph(fileN)
 	g.UtilTypes = utStr
 	vertices := g.Vertices[:fileN]
-	arcs := make([]gbgraph.Arc, fileM)
+	arcs := g.ResetArcStore(fileM)
 
 	// Graph record: "id",n,m[,util fields 8-13]
 	g.ID = readQuotedStr(r)
