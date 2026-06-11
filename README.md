@@ -278,6 +278,30 @@ The product of 100 and 7 is 700.
 The quotient is 14, and the remainder is 2.
 ```
 
+### `queen`
+
+Builds the graph of queen moves on a 3×4 board — the union of rook moves
+(`board` with `-1`) and bishop moves (`board` with `-2`) via `gunion` — then
+prints every vertex and arc and saves the result with `gbsave`. This is the
+Go port of the example program in the Stanford GraphBase introduction
+(`queen.w` and `queen_wrap.w` in `sources/`). With `-w` the second coordinate
+wraps around, giving queen moves on a cylinder, and the graph is saved as
+`queen_wrap.gb` instead of `queen.gb`.
+
+```text
+$ go run ./demos/queen/
+Queen Moves on a 3x4 Board
+
+  The graph whose official name is
+gunion(board(3,4,0,0,-1,0,0),board(3,4,0,0,-2,0,0),0,0)
+  has 12 vertices and 92 arcs:
+
+0.0
+ -> 1.1, length 1
+ -> 2.2, length 2
+ ⋮
+```
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
