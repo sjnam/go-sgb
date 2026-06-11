@@ -1001,7 +1001,12 @@ func (b *builder) buildProd(m, n, mPlusN, f int64) {
 			b.g.NewArc(dv, dd, DELAY)
 			var dArg *gbgraph.Vertex
 			if fl > 0 {
-				dArg = cT[(k-i)+(fl-2)*mPlusN+1]
+				// d_{k-i}^{j-i} is the gate immediately following the
+				// stored C gate; the original uses Vertex-pointer
+				// arithmetic c[...]+1, since the C and D gates are
+				// allocated consecutively.
+				cGate := cT[(k-i)+(fl-2)*mPlusN]
+				dArg = b.vAt(gbgraph.VertexIndex(b.g, cGate) + 1)
 			} else {
 				dArg = b.vAt(uu + k - i - 1)
 			}
