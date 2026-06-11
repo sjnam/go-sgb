@@ -127,7 +127,7 @@ func analyze(g *gbgraph.Graph, useIndex bool) {
 	min := make([]int, nn)     // index of min-rank reachable vertex
 	arcFrom := make([]int, nn) // inter-component arc deduplication
 
-	for i := 0; i < nn; i++ {
+	for i := range nn {
 		untagged[i] = g.Vertices[i].Arcs
 		link[i] = -1
 		parent[i] = -1
@@ -179,7 +179,7 @@ func analyze(g *gbgraph.Graph, useIndex bool) {
 	}
 
 	// Tarjan's algorithm: iterative DFS over all unseen vertices.
-	for vi := 0; vi < nn; vi++ {
+	for vi := range nn {
 		if rank[vi] != 0 {
 			continue
 		}

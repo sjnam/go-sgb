@@ -94,7 +94,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) (int64, error) {
 	var rec strings.Builder
 	appendQuotedStr(&rec, g.ID, &anomalies)
 	fmt.Fprintf(&rec, ",%d,%d", g.N, g.M)
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		typ := ut[8+i]
 		if typ == 'Z' {
 			checkIgnored(graphUtil(g, i), &anomalies)
@@ -107,13 +107,13 @@ func SaveGraph(g *gbgraph.Graph, filename string) (int64, error) {
 
 	// Vertex records.
 	writeComment("* Vertices")
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		v := &g.Vertices[i]
 		var vr strings.Builder
 		appendQuotedStr(&vr, v.Name, &anomalies)
 		vr.WriteByte(',')
 		appendArcPtr(&vr, v.Arcs, aidx, &anomalies)
-		for j := 0; j < 6; j++ {
+		for j := range 6 {
 			typ := ut[j]
 			if typ == 'Z' {
 				checkIgnored(vertexUtil(v, j), &anomalies)
@@ -133,7 +133,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) (int64, error) {
 		ar.WriteByte(',')
 		appendArcPtr(&ar, a.Next, aidx, &anomalies)
 		fmt.Fprintf(&ar, ",%d", a.Len)
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			typ := ut[6+i]
 			if typ == 'Z' {
 				checkIgnored(arcUtil(a, i), &anomalies)
@@ -220,7 +220,7 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 		r.RawClose()
 		return nil, gbgraph.ErrSyntaxError
 	}
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		if utStr[8+i] == 'Z' {
 			continue
 		}
@@ -256,7 +256,7 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 			return nil, gbgraph.ErrSyntaxError
 		}
 		v.Arcs = aptr
-		for j := 0; j < 6; j++ {
+		for j := range 6 {
 			if utStr[j] == 'Z' {
 				continue
 			}
@@ -300,7 +300,7 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 			return nil, gbgraph.ErrSyntaxError
 		}
 		a.Len = alen
-		for j := 0; j < 2; j++ {
+		for j := range 2 {
 			if utStr[6+j] == 'Z' {
 				continue
 			}

@@ -62,7 +62,7 @@ func LinksSort[T any](l *Node[T], rng *gbflip.RNG) [256]*Node[T] {
 
 	// Pass 4: alt → sorted  by key byte 1, traverse 0→255
 	sorted = [256]*Node[T]{}
-	for i := 0; i < 256; i++ {
+	for i := range 256 {
 		for p := alt[i]; p != nil; {
 			q := p.Link
 			k := (p.Key >> 8) & 0xff
@@ -86,7 +86,7 @@ func LinksSort[T any](l *Node[T], rng *gbflip.RNG) [256]*Node[T] {
 
 	// Pass 6: alt → sorted  by key byte 3 (MSB, 0-127), traverse 0→255
 	sorted = [256]*Node[T]{}
-	for i := 0; i < 256; i++ {
+	for i := range 256 {
 		for p := alt[i]; p != nil; {
 			q := p.Link
 			k := (p.Key >> 24) & 0xff

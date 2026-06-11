@@ -204,8 +204,8 @@ func lisa(p lisaParams) ([]int64, error) {
 	}
 
 	// Skip the first m0 rows (each row = 5 lines).
-	for i := int64(0); i < m0; i++ {
-		for j := 0; j < 5; j++ {
+	for range m0 {
+		for range 5 {
 			r.GbNewline()
 		}
 	}
@@ -216,9 +216,9 @@ func lisa(p lisaParams) ([]int64, error) {
 	kappa := int64(0) // bottom boundary in giant for the current input row
 	kap := int64(0)   // first giant row not yet used
 
-	for k := int64(0); k < m; k++ {
+	for range m {
 		// Clear output row.
-		for l := int64(0); l < n; l++ {
+		for l := range n {
 			matx[outRow+l] = 0
 		}
 		nextKap := kap + capM
@@ -262,7 +262,7 @@ func lisa(p lisaParams) ([]int64, error) {
 		}
 
 		// Scale each output pixel.
-		for l := int64(0); l < n; l++ {
+		for l := range n {
 			v := matx[outRow+l]
 			if v <= d0 {
 				matx[outRow+l] = 0
@@ -277,7 +277,7 @@ func lisa(p lisaParams) ([]int64, error) {
 
 	// Skip remaining rows up to the end.
 	for i := m1; i < MaxM; i++ {
-		for j := 0; j < 5; j++ {
+		for range 5 {
 			r.GbNewline()
 		}
 	}

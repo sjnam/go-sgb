@@ -105,7 +105,7 @@ func TestRiscLatches(t *testing.T) {
 		t.Fatalf("Risc(16) returned nil")
 	}
 	// P0..P9 at 17..26
-	for k := int64(0); k < 10; k++ {
+	for k := range int64(10) {
 		v := &g.Vertices[17+k]
 		want := fmt.Sprintf("P%d", k)
 		if v.Name != want {

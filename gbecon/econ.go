@@ -125,7 +125,7 @@ func (s *econState) readEconDat() (*gbio.Reader, error) {
 	// Part 1: read 2*NormN-1 = 157 tree nodes in preorder.
 	var stk [NormN + NormN]*econNode
 	stkPtr := 0
-	for i := 0; i < 2*NormN-1; i++ {
+	for i := range 2*NormN - 1 {
 		p := s.nAt(i)
 		p.title = r.GbString(':')
 		if len(p.title) > 43 {
@@ -282,7 +282,7 @@ func (s *econState) growRandomSubtree(l int64, rng *gbflip.RNG) {
 	}
 
 	// Top-down: distribute tags.
-	for i := 0; i < adjIdx; i++ {
+	for i := range adjIdx {
 		p := s.nAt(i)
 		if p.tag > 1 {
 			li := p.tag

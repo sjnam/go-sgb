@@ -96,7 +96,7 @@ func TestWordsEdgesLoc(t *testing.T) {
 			u, w := v.Name, a.Tip.Name
 			diffs := 0
 			diffPos := int64(-1)
-			for p := 0; p < 5; p++ {
+			for p := range 5 {
 				if u[p] != w[p] {
 					diffs++
 					diffPos = int64(p)
@@ -196,7 +196,7 @@ func TestFindWordNeighbors(t *testing.T) {
 	}
 	for _, nb := range neighbors {
 		diffs := 0
-		for p := 0; p < 5; p++ {
+		for p := range 5 {
 			if nb[p] != query[p] {
 				diffs++
 			}

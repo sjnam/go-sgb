@@ -24,7 +24,7 @@ func init() {
 	for k := range icode {
 		icode[k] = UnexpectedChar
 	}
-	for k := 0; k < len(imap); k++ {
+	for k := range len(imap) {
 		icode[imap[k]] = byte(k)
 	}
 }

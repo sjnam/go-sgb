@@ -69,7 +69,7 @@ func TestBucketBoundaries(t *testing.T) {
 	sorted := LinksSort(buildList(keys), rng)
 
 	wantBucket := func(key int64) int { return int(key >> 24) }
-	for j := 0; j < 256; j++ {
+	for j := range 256 {
 		for p := sorted[j]; p != nil; p = p.Link {
 			if want := wantBucket(p.Key); want != j {
 				t.Errorf("key %d is in bucket %d, want bucket %d", p.Key, j, want)

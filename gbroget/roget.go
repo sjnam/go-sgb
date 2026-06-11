@@ -46,7 +46,7 @@ func Roget(n, minDistance, prob, seed int64) (*gbgraph.Graph, error) {
 	g.UtilTypes = "IZZZZZZZZZZZZZ"
 
 	// Select n categories at random and map them to vertices.
-	for k := int64(0); k < MaxN; k++ {
+	for k := range int64(MaxN) {
 		cats[k] = k + 1
 		mapping[k+1] = nil
 	}

@@ -203,7 +203,7 @@ func pruneEdges(dm *DistanceMatrix, nodeBlock []cityNode, maxDist, maxDeg, origM
 		localMaxDist = 30000
 	}
 
-	for k := int64(0); k < MaxN; k++ {
+	for k := range int64(MaxN) {
 		p := &nodeBlock[k]
 		if p.Val.pop == 0 {
 			continue // city not selected
@@ -212,7 +212,7 @@ func pruneEdges(dm *DistanceMatrix, nodeBlock []cityNode, maxDist, maxDeg, origM
 
 		// Build a list of nearby cities; negate distances that exceed localMaxDist.
 		var s *cityNode
-		for qi := int64(0); qi < MaxN; qi++ {
+		for qi := range int64(MaxN) {
 			q := &nodeBlock[qi]
 			if q.Val.pop == 0 || q == p {
 				continue
@@ -232,7 +232,7 @@ func pruneEdges(dm *DistanceMatrix, nodeBlock []cityNode, maxDist, maxDeg, origM
 			nearby := gbsort.LinksSort(s, rng)
 			// Iterate through sorted list; negate distances beyond localMaxDeg.
 			count := int64(0)
-			for qi := 0; qi < 256; qi++ {
+			for qi := range 256 {
 				for q := nearby[qi]; q != nil; q = q.Link {
 					count++
 					if count > localMaxDeg {

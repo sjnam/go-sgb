@@ -396,8 +396,8 @@ func TestRestoreSGBQueenFile(t *testing.T) {
 	}
 
 	// Vertices are the cells of a 3x4 board, named "row.col".
-	for r := int64(0); r < 3; r++ {
-		for c := int64(0); c < 4; c++ {
+	for r := range int64(3) {
+		for c := range int64(4) {
 			i := r*4 + c
 			want := fmt.Sprintf("%d.%d", r, c)
 			if g.Vertices[i].Name != want {

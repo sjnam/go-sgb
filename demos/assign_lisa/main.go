@@ -260,8 +260,8 @@ func (s *solver) transpose() {
 	}
 	m, n := s.m, s.n
 	tmtx := make([]int64, m*n)
-	for k := int64(0); k < m; k++ {
-		for l := int64(0); l < n; l++ {
+	for k := range m {
+		for l := range n {
 			tmtx[l*m+k] = s.mtx[k*n+l]
 		}
 	}

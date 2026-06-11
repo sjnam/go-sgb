@@ -303,7 +303,7 @@ func TestRandomBigraphCrossPartition(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RandomBigraph returned error: %v", err)
 	}
-	for i := int64(0); i < n1; i++ {
+	for i := range n1 {
 		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
 			j := int64(0)
 			for k := int64(0); k < g.N; k++ {
@@ -516,7 +516,7 @@ func TestRandomLengthsNonuniform(t *testing.T) {
 // makeUniformDist returns a distribution of length n summing to 2^30.
 func makeUniformDist(n int64) []int64 {
 	dist := make([]int64, n)
-	for k := int64(0); k < n; k++ {
+	for k := range n {
 		dist[k] = (0x40000000 + k) / n
 	}
 	return dist

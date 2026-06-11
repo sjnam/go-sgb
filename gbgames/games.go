@@ -141,7 +141,7 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, s
 	}
 
 	// Read the 120 team records.
-	for k := int64(0); k < MaxN; k++ {
+	for k := range int64(MaxN) {
 		p := &nodeBlock[k]
 		if k > 0 {
 			p.Link = &nodeBlock[k-1]

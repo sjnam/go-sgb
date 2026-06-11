@@ -195,7 +195,7 @@ func wordHash(word [5]byte) int64 {
 // matchExcept reports whether name agrees with word in every letter position
 // other than t.
 func matchExcept(name string, word [5]byte, t int) bool {
-	for j := 0; j < 5; j++ {
+	for j := range 5 {
 		if j != t && name[j] != word[j] {
 			return false
 		}
@@ -212,7 +212,7 @@ func (ix *Index) insertWord(g *gbgraph.Graph, curVertex *gbgraph.Vertex, word [5
 	curVertex.U = weight
 
 	rawHash := wordHash(word)
-	for t := 0; t < 5; t++ {
+	for t := range 5 {
 		h := int((rawHash - int64(word[t])<<(20-5*t)) % hashPrime)
 		for ix.htab[t][h] != nil {
 			if matchExcept(ix.htab[t][h].Name, word, t) {
@@ -259,7 +259,7 @@ func (ix *Index) FindWord(q string, f func(*gbgraph.Vertex)) *gbgraph.Vertex {
 	}
 
 	// Table t: match all positions except t → words differing at position t.
-	for t := 0; t < 5; t++ {
+	for t := range 5 {
 		for h := int((rawHash - int64(word[t])<<(20-5*t)) % hashPrime); ix.htab[t][h] != nil; {
 			if matchExcept(ix.htab[t][h].Name, word, t) {
 				f(ix.htab[t][h])

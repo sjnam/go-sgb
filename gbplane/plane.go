@@ -561,7 +561,7 @@ func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Gra
 	g.ID = fmt.Sprintf("plane(%d,%d,%d,%d,%d,%d)", n, xRange, yRange, boolInt(extend), prob, seed)
 	g.UtilTypes = "ZZZIIIZZZZZZZZ"
 
-	for k := int64(0); k < n; k++ {
+	for k := range n {
 		v := &g.Vertices[k]
 		v.X = rng.Unif(xRange)
 		v.Y = rng.Unif(yRange)

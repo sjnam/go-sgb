@@ -184,7 +184,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 	rng := gbflip.New(seed)
 
 	g := gbgraph.NewGraph(n)
-	for k := int64(0); k < n; k++ {
+	for k := range n {
 		g.Vertices[k].Name = fmt.Sprintf("%d", k)
 	}
 
@@ -290,14 +290,14 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64, minLen, maxLen,
 	if dist1 != nil {
 		copy(distFrom[:n1], dist1)
 	} else {
-		for k := int64(0); k < n1; k++ {
+		for k := range n1 {
 			distFrom[k] = (0x40000000 + k) / n1
 		}
 	}
 	if dist2 != nil {
 		copy(distTo[n1:], dist2)
 	} else {
-		for k := int64(0); k < n2; k++ {
+		for k := range n2 {
 			distTo[n1+k] = (0x40000000 + k) / n2
 		}
 	}

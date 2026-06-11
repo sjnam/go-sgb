@@ -136,7 +136,7 @@ func main() {
 
 	// Print all components that are neither isolated nor the giant component.
 	fmt.Println("\nThe following non-isolated words didn't join the giant component:")
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if master[i] == i && size[i] > 1 && size[i]*2 < g.N {
 			c := 1
 			fmt.Print(g.Vertices[i].Name)

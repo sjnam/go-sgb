@@ -500,7 +500,7 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*gbgraph.Graph, error)
 			g.HashIn(v)
 
 			// arcs from previous vertices
-			for j := int64(0); j < d; j++ {
+			for j := range d {
 				if st.xx[j] == 0 {
 					continue
 				}
@@ -1105,7 +1105,7 @@ func Binary(n, maxHeight int64, directed bool) (*gbgraph.Graph, error) {
 			g.HashIn(v)
 
 			// arcs via associativity rotations
-			for j := int64(0); j < d; j++ {
+			for j := range d {
 				if xtab[j] == 1 && xtab[j+1] == 1 {
 					// apply rotation: shift one position
 					// sv update uses the pre-increment i (matches C's for-post)
@@ -1189,13 +1189,13 @@ func Complement(g *gbgraph.Graph, copy, self, directed bool) (*gbgraph.Graph, er
 	if newG == nil {
 		return nil, gbgraph.ErrNoRoom
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		newG.Vertices[i].Name = g.Vertices[i].Name
 	}
 	gbgraph.MakeCompoundID(newG, "complement(", g,
 		fmt.Sprintf(",%d,%d,%d)", boolInt(copy), boolInt(self), boolInt(directed)))
 
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &g.Vertices[vi]
 		u := vMap(v, g, newG)
 		// stamp tmp of every neighbour of v in old graph
@@ -1203,7 +1203,7 @@ func Complement(g *gbgraph.Graph, copy, self, directed bool) (*gbgraph.Graph, er
 			setTmp(vMap(a.Tip, g, newG), u)
 		}
 		if directed {
-			for vvi := int64(0); vvi < n; vvi++ {
+			for vvi := range n {
 				vv := &newG.Vertices[vvi]
 				if (getTmp(vv) == u && copy) || (getTmp(vv) != u && !copy) {
 					if vv != u || self {
@@ -1226,7 +1226,7 @@ func Complement(g *gbgraph.Graph, copy, self, directed bool) (*gbgraph.Graph, er
 			}
 		}
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		setTmp(&newG.Vertices[i], nil)
 	}
 	return newG, nil
@@ -1246,13 +1246,13 @@ func Gunion(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, error) 
 	if newG == nil {
 		return nil, gbgraph.ErrNoRoom
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		newG.Vertices[i].Name = g.Vertices[i].Name
 	}
 	gbgraph.MakeDoubleCompoundID(newG, "gunion(", g, ",", gg,
 		fmt.Sprintf(",%d,%d)", boolInt(multi), boolInt(directed)))
 
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &g.Vertices[vi]
 		vv := vMap(v, g, newG)
 		// corresponding vertex in gg (if within gg.N)
@@ -1319,7 +1319,7 @@ func Gunion(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, error) 
 			}
 		}
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		setTmp(&newG.Vertices[i], nil)
 		setTlen(&newG.Vertices[i], nil)
 	}
@@ -1340,13 +1340,13 @@ func Intersection(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, e
 	if newG == nil {
 		return nil, gbgraph.ErrNoRoom
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		newG.Vertices[i].Name = g.Vertices[i].Name
 	}
 	gbgraph.MakeDoubleCompoundID(newG, "intersection(", g, ",", gg,
 		fmt.Sprintf(",%d,%d)", boolInt(multi), boolInt(directed)))
 
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &g.Vertices[vi]
 		vv := vMap(v, g, newG)
 		if vi >= gg.N {
@@ -1421,7 +1421,7 @@ func Intersection(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, e
 		}
 	}
 	// clear temp fields
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		setTmp(&newG.Vertices[i], nil)
 		setTlen(&newG.Vertices[i], nil)
 		setMult(&newG.Vertices[i], 0)
@@ -1837,7 +1837,7 @@ func Induced(g *gbgraph.Graph, description string, self, multi, directed bool) (
 					u2.Name = v.Name + "'"
 					ui++
 				default:
-					for j := int64(0); j < k; j++ {
+					for j := range k {
 						newG.Vertices[ui].Name = fmt.Sprintf("%s:%d", v.Name, j)
 						ui++
 					}

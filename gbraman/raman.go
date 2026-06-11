@@ -132,7 +132,7 @@ func Raman(p, q, typeVal int64, reduce bool) (*gbgraph.Graph, error) {
 		ut := []byte(newGraph.UtilTypes)
 		ut[4] = 'Z'
 		newGraph.UtilTypes = string(ut)
-		for a := int64(0); a < q; a++ {
+		for a := range q {
 			v := &newGraph.Vertices[a]
 			v.Name = fmt.Sprintf("%d", a)
 			v.X = a
@@ -141,7 +141,7 @@ func Raman(p, q, typeVal int64, reduce bool) (*gbgraph.Graph, error) {
 		newGraph.Vertices[q].X = q
 	case 2:
 		vi := int64(0)
-		for a := int64(0); a < q; a++ {
+		for a := range q {
 			for aa := a + 1; aa <= q; aa++ {
 				v := &newGraph.Vertices[vi]
 				if aa == q {
@@ -161,7 +161,7 @@ func Raman(p, q, typeVal int64, reduce bool) (*gbgraph.Graph, error) {
 		newGraph.UtilTypes = string(ut)
 		vi := int64(0)
 		for c := int64(0); c <= q; c++ {
-			for bv := int64(0); bv < q; bv++ {
+			for bv := range q {
 				for ai := int64(1); ai <= nFactor; ai++ {
 					v := &newGraph.Vertices[vi]
 					v.Z = c

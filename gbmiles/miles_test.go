@@ -79,11 +79,11 @@ func TestMilesTriangleInequality(t *testing.T) {
 		t.Fatalf("Miles failed: %v", err)
 	}
 	n := g.N
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		u := &g.Vertices[i]
-		for j := int64(0); j < n; j++ {
+		for j := range n {
 			v := &g.Vertices[j]
-			for k := int64(0); k < n; k++ {
+			for k := range n {
 				w := &g.Vertices[k]
 				duv := dm.Distance(u, v)
 				dvw := dm.Distance(v, w)

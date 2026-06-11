@@ -1083,7 +1083,7 @@ func (s *solver) cherTarKar() int64 {
 	// Each fragment owns a binomial-queue header; the original borrows an Arc
 	// record per vertex for this (newarc).
 	headers := make([]gbgraph.Arc, n)
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		s.info[i].pq = &headers[i]
 	}
 
@@ -1272,7 +1272,7 @@ func (c *ctk) stage2() int64 {
 		k++
 	}
 	n := s.g.N
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &s.g.Vertices[vi]
 		s.mems++ // o,v->comp
 		if s.vi(v).comp != nil {

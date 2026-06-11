@@ -94,7 +94,7 @@ func (b *builder) numericPrefix(ch byte, k int64) {
 // firstOf creates n vertices of type t and returns the index of the first.
 func (b *builder) firstOf(n int64, t byte) int64 {
 	idx := b.nextVI
-	for k := int64(0); k < n; k++ {
+	for range n {
 		b.newVert(t)
 	}
 	return idx
@@ -309,7 +309,7 @@ func (b *builder) buildRisc(regs int64) {
 
 	b.startPrefix("M")
 	var mem [16]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		mem[k] = b.newVert(INP)
 	}
 
@@ -328,7 +328,7 @@ func (b *builder) buildRisc(regs int64) {
 	extra := b.newVert(LAT)
 
 	regIdx := make([]int64, regs)
-	for r := int64(0); r < regs; r++ {
+	for r := range regs {
 		b.numericPrefix('R', r)
 		regIdx[r] = b.firstOf(16, LAT)
 	}
@@ -345,7 +345,7 @@ func (b *builder) buildRisc(regs int64) {
 
 	var mod [4]*gbgraph.Vertex
 	var dest [4]*gbgraph.Vertex
-	for k := int64(0); k < 4; k++ {
+	for k := range int64(4) {
 		mod[k] = b.make2(OR, b.make2(AND, extra, b.vAt(progIdx+2+k)), b.make2(AND, b.comp(extra), mem[8+k]))
 		dest[k] = b.make2(OR, b.make2(AND, extra, b.vAt(progIdx+6+k)), b.make2(AND, b.comp(extra), mem[12+k]))
 	}
@@ -355,33 +355,33 @@ func (b *builder) buildRisc(regs int64) {
 
 	// old_dest: present value of destination register
 	var destMatch [16]*gbgraph.Vertex
-	for r := int64(0); r < regs; r++ {
+	for r := range regs {
 		destMatch[r] = b.make4(AND,
 			b.evenComp(r, dest[0]), b.evenComp(r>>1, dest[1]),
 			b.evenComp(r>>2, dest[2]), b.evenComp(r>>3, dest[3]))
 	}
 	var oldDest [16]*gbgraph.Vertex
 	var tmp [16]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
-		for r := int64(0); r < regs; r++ {
+	for k := range int64(16) {
+		for r := range regs {
 			tmp[r] = b.make2(AND, destMatch[r], b.vAt(regIdx[r]+k))
 		}
 		oldDest[k] = b.newVert(OR)
-		for r := int64(0); r < regs; r++ {
+		for r := range regs {
 			b.g.NewArc(oldDest[k], tmp[r], DELAY)
 		}
 	}
 
 	// old_src: present value of source register
 	var oldSrc [16]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
-		for r := int64(0); r < regs; r++ {
+	for k := range int64(16) {
+		for r := range regs {
 			tmp[r] = b.make5(AND, b.vAt(regIdx[r]+k),
 				b.evenComp(r, mem[0]), b.evenComp(r>>1, mem[1]),
 				b.evenComp(r>>2, mem[2]), b.evenComp(r>>3, mem[3]))
 		}
 		oldSrc[k] = b.newVert(OR)
-		for r := int64(0); r < regs; r++ {
+		for r := range regs {
 			b.g.NewArc(oldSrc[k], tmp[r], DELAY)
 		}
 	}
@@ -408,7 +408,7 @@ func (b *builder) buildRisc(regs int64) {
 
 	// source[k]
 	var source [16]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		immK := mem[k]
 		if k >= 4 {
 			immK = mem[3]
@@ -423,7 +423,7 @@ func (b *builder) buildRisc(regs int64) {
 	// ---- General logic operation ----
 	b.startPrefix("L")
 	var logOp [16]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		logOp[k] = b.make4(OR,
 			b.make3(AND, mod[0], b.comp(oldDest[k]), b.comp(source[k])),
 			b.make3(AND, mod[1], b.comp(oldDest[k]), source[k]),
@@ -450,7 +450,7 @@ func (b *builder) buildRisc(regs int64) {
 
 	// Shift operations
 	var shift [18]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		var s0, s1, s2, s3 *gbgraph.Vertex
 		if k == 0 {
 			s0 = b.make4(AND, source[15], mod[0], b.comp(mod[1]), b.comp(mod[2]))
@@ -519,7 +519,7 @@ func (b *builder) buildRisc(regs int64) {
 	// result bits
 	jump := b.make5(AND, op, mod[0], mod[1], mod[2], mod[3])
 	var result [18]*gbgraph.Vertex
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		result[k] = b.make5(OR,
 			b.make2(AND, b.comp(op), logOp[k]),
 			b.make2(AND, jump, nextLoc[k]),
@@ -538,7 +538,7 @@ func (b *builder) buildRisc(regs int64) {
 	}
 
 	// Program register and extra bit
-	for k := int64(0); k < 10; k++ {
+	for k := range int64(10) {
 		b.latchit(mem[k+6], b.vAt(progIdx+k), runBit)
 	}
 	nextra := b.make2(OR, b.make2(AND, ind, b.comp(cond)), b.make2(AND, ind, change))
@@ -550,7 +550,7 @@ func (b *builder) buildRisc(regs int64) {
 	t5chg := b.make2(AND, change, b.comp(ind))
 	for r := int64(1); r < regs; r++ {
 		t4 := b.make2(AND, t5chg, destMatch[r])
-		for k := int64(0); k < 16; k++ {
+		for k := range int64(16) {
 			t3 := b.make2(OR, b.make2(AND, t4, result[k]), b.make2(AND, b.comp(t4), b.vAt(regIdx[r]+k)))
 			b.latchit(t3, b.vAt(regIdx[r]+k), runBit)
 		}
@@ -603,7 +603,7 @@ func (b *builder) buildRisc(regs int64) {
 		b.make3(AND, b.comp(skip), b.comp(hop), nzd))
 	special := b.make3(AND, b.comp(skip), ind, nzs)
 
-	for k := int64(0); k < 16; k++ {
+	for k := range int64(16) {
 		t5 = b.make4(OR,
 			b.make2(AND, normal, nextLoc[k]),
 			b.make4(AND, skip, ind, b.comp(nzs), nextNextLoc[k]),
@@ -677,7 +677,7 @@ func RunRisc(w io.Writer, g *gbgraph.Graph, rom []uint64, size, traceRegs int64)
 		return state, -2
 	}
 	if traceRegs > 0 {
-		for r := int64(0); r < traceRegs; r++ {
+		for r := range traceRegs {
 			fmt.Fprintf(w, " r%-2d ", r)
 		}
 		fmt.Fprintln(w, " P XSNKV MEM")
@@ -731,7 +731,7 @@ func riscRegVal(g *gbgraph.Graph, r int64) uint64 {
 }
 
 func printRiscState(w io.Writer, g *gbgraph.Graph, traceRegs int64, l uint64, rom []uint64, size int64) {
-	for r := int64(0); r < traceRegs; r++ {
+	for r := range traceRegs {
 		fmt.Fprintf(w, "%04x ", riscRegVal(g, r))
 	}
 	// prog register P0..P9, MSB (P9) first
@@ -769,7 +769,7 @@ func printRiscState(w io.Writer, g *gbgraph.Graph, traceRegs int64, l uint64, ro
 }
 
 func dumpRiscState(g *gbgraph.Graph) (state [18]uint64) {
-	for r := int64(0); r < 16; r++ {
+	for r := range int64(16) {
 		state[r] = riscRegVal(g, r)
 	}
 	var m uint64
@@ -846,13 +846,13 @@ func (b *builder) buildProd(m, n, mPlusN, f int64) {
 	yIdx := b.firstOf(n, INP)
 
 	// Define A_j for 0 <= j < m
-	for j := int64(0); j < m; j++ {
+	for j := range m {
 		b.numericPrefix('A', j)
 		for k := int64(0); k < j; k++ {
 			v := b.newVert(CON)
 			setBit(v, 0)
 		}
-		for k := int64(0); k < n; k++ {
+		for k := range n {
 			b.make2(AND, b.vAt(xIdx+j), b.vAt(yIdx+k))
 		}
 		for k := j + n; k < mPlusN; k++ {
@@ -866,21 +866,21 @@ func (b *builder) buildProd(m, n, mPlusN, f int64) {
 		alpha := aPos(3*j, m) * mPlusN
 		beta := aPos(3*j+1, m) * mPlusN
 		b.numericPrefix('P', j)
-		for k := int64(0); k < mPlusN; k++ {
+		for k := range mPlusN {
 			b.make2(XOR, b.vAt(alpha+k), b.vAt(beta+k))
 		}
 		b.numericPrefix('Q', j)
-		for k := int64(0); k < mPlusN; k++ {
+		for k := range mPlusN {
 			b.make2(AND, b.vAt(alpha+k), b.vAt(beta+k))
 		}
 		alpha2 := b.nextVI - 2*mPlusN
 		beta2 := aPos(3*j+2, m) * mPlusN
 		b.numericPrefix('A', m+2*j)
-		for k := int64(0); k < mPlusN; k++ {
+		for k := range mPlusN {
 			b.make2(XOR, b.vAt(alpha2+k), b.vAt(beta2+k))
 		}
 		b.numericPrefix('R', j)
-		for k := int64(0); k < mPlusN; k++ {
+		for k := range mPlusN {
 			b.make2(AND, b.vAt(alpha2+k), b.vAt(beta2+k))
 		}
 		alpha3 := b.nextVI - 3*mPlusN
@@ -897,11 +897,11 @@ func (b *builder) buildProd(m, n, mPlusN, f int64) {
 	alpha := aPos(3*m-6, m) * mPlusN
 	beta := aPos(3*m-5, m) * mPlusN
 	b.startPrefix("U")
-	for k := int64(0); k < mPlusN; k++ {
+	for k := range mPlusN {
 		b.make2(XOR, b.vAt(alpha+k), b.vAt(beta+k))
 	}
 	b.startPrefix("V")
-	for k := int64(0); k < mPlusN; k++ {
+	for k := range mPlusN {
 		b.make2(AND, b.vAt(alpha+k), b.vAt(beta+k))
 	}
 
@@ -1022,7 +1022,7 @@ func (b *builder) buildProd(m, n, mPlusN, f int64) {
 
 	// Compute Z = U XOR W, record outputs
 	b.startPrefix("Z")
-	for k := int64(0); k < mPlusN; k++ {
+	for k := range mPlusN {
 		zv := b.make2(XOR, b.vAt(uu+k), w[k])
 		a := &gbgraph.Arc{}
 		a.Tip = zv
@@ -1047,7 +1047,7 @@ func reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 	// Iterate until no more constant latches are produced.
 	for {
 		latchPtr := []*gbgraph.Vertex(nil) // list of latches linked via V
-		for i := int64(0); i < sentinel; i++ {
+		for i := range sentinel {
 			v := &g.Vertices[i]
 			b.reduceGate(v, &latchPtr)
 		}
@@ -1069,7 +1069,7 @@ func reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 
 	// Mark reachable gates
 	n := int64(0)
-	for i := int64(0); i < sentinel; i++ {
+	for i := range sentinel {
 		g.Vertices[i].V = nil // clear lnk
 	}
 	for a := Outs(g); a != nil; a = a.Next {
@@ -1102,7 +1102,7 @@ func reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 	newVI := int64(0)
 	var latchList []*gbgraph.Vertex // old latch vertices to fix up
 
-	for i := int64(0); i < sentinel; i++ {
+	for i := range sentinel {
 		v := &g.Vertices[i]
 		if v.V == nil {
 			continue // not marked
