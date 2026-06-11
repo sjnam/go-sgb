@@ -219,7 +219,7 @@ func analyze(g *gbgraph.Graph, useIndex bool) {
 	for v := settledStack; v >= 0; v = link[v] {
 		u := parent[v] // component representative of v
 		arcFrom[u] = u
-		for a := g.Vertices[v].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[v].AllArcs() {
 			w := parent[idx[a.Tip]] // component representative of arc target
 			if arcFrom[w] != u {
 				arcFrom[w] = u

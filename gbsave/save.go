@@ -48,7 +48,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) (int64, error) {
 	var arcList []*gbgraph.Arc
 	aidx := make(map[*gbgraph.Arc]int64)
 	for i := int64(0); i < g.N; i++ {
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[i].AllArcs() {
 			if _, seen := aidx[a]; !seen {
 				aidx[a] = int64(len(arcList))
 				arcList = append(arcList, a)

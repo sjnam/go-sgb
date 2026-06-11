@@ -230,7 +230,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 		}
 		if multi <= 0 {
 			found := false
-			for a := u.Arcs; a != nil; a = a.Next {
+			for a := range u.AllArcs() {
 				if a.Tip == v {
 					found = true
 					if multi == 0 {

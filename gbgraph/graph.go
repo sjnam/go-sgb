@@ -6,6 +6,7 @@ package gbgraph
 import (
 	"errors"
 	"fmt"
+	"iter"
 )
 
 // Sentinel errors returned by graph generators.
@@ -34,6 +35,19 @@ type Vertex struct {
 	U, V, W, X, Y, Z Util   // multipurpose fields (see Graph.UtilTypes)
 
 	idx int64 // position within the owning Graph's Vertices (set by NewGraph)
+}
+
+// AllArcs returns an iterator over the outgoing arcs of v, walking the
+// Arcs linked list. It lets callers write a plain range loop instead of
+// the manual `for a := v.Arcs; a != nil; a = a.Next` traversal.
+func (v *Vertex) AllArcs() iter.Seq[*Arc] {
+	return func(yield func(*Arc) bool) {
+		for a := v.Arcs; a != nil; a = a.Next {
+			if !yield(a) {
+				return
+			}
+		}
+	}
 }
 
 // Arc is a directed arc with three standard fields, two utility fields, and

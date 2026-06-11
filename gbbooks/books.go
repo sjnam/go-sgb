@@ -350,7 +350,7 @@ func bgraph(bipartite bool, title string, n, x, firstChap, lastChap, inWeight, o
 						for ri := qi + 1; ri < pp; ri++ {
 							u, v := clique[qi], clique[ri]
 							found := false
-							for a := u.Arcs; a != nil; a = a.Next {
+							for a := range u.AllArcs() {
 								if a.Tip == v {
 									found = true
 									break

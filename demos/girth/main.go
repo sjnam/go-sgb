@@ -219,7 +219,7 @@ func computeGirthDiameter(g *gbgraph.Graph) {
 		k++
 		for vIdx != sentinel {
 			v := &g.Vertices[vIdx]
-			for a := v.Arcs; a != nil; a = a.Next {
+			for a := range v.AllArcs() {
 				wIdx := int(gbgraph.VertexIndex(g, a.Tip))
 				if link[wIdx] == unseen {
 					link[wIdx] = uHead

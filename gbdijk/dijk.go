@@ -207,7 +207,7 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph, hh func(*gbgraph.Vertex
 	for t != vv {
 		// Relax all arcs from t.
 		d := Dist(t) - HhVal(t)
-		for a := t.Arcs; a != nil; a = a.Next {
+		for a := range t.AllArcs() {
 			v := a.Tip
 			dd := d + a.Len + hh(v)
 			if Backlink(v) != nil {

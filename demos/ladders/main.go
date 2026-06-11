@@ -123,14 +123,14 @@ func main() {
 		for i := int64(0); i < g.N; i++ {
 			u := &g.Vertices[i]
 			p := u.Name
-			for a := u.Arcs; a != nil; a = a.Next {
+			for a := range u.AllArcs() {
 				a.Len = alphDist(p, a.Tip.Name)
 			}
 		}
 	} else if freq {
 		for i := int64(0); i < g.N; i++ {
 			u := &g.Vertices[i]
-			for a := u.Arcs; a != nil; a = a.Next {
+			for a := range u.AllArcs() {
 				a.Len = freqCost(a.Tip)
 			}
 		}
@@ -247,7 +247,7 @@ func findLadder(g *gbgraph.Graph, wordIx *gbwords.Index, start, goal string, q g
 	// back-arcs are removed in LIFO order (matching the prepend order).
 	for i := gg.N - 1; i >= savedN; i-- {
 		u := &gg.Vertices[i]
-		for a := u.Arcs; a != nil; a = a.Next {
+		for a := range u.AllArcs() {
 			v := a.Tip
 			v.Arcs = v.Arcs.Next // strip the front arc pointing back to u
 		}

@@ -238,7 +238,7 @@ func depth(g *gbgraph.Graph) int64 {
 			dp[vi] = 0
 		default:
 			d := int64(0)
-			for a := v.Arcs; a != nil; a = a.Next {
+			for a := range v.AllArcs() {
 				if td := dp[gbgraph.VertexIndex(g, a.Tip)]; td > d {
 					d = td
 				}

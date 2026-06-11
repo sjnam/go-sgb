@@ -190,17 +190,17 @@ func GateEval(g *gbgraph.Graph, inVec string, outVec []byte) int64 {
 			t = Val(Alt(v))
 		case AND:
 			t = 1
-			for a := v.Arcs; a != nil; a = a.Next {
+			for a := range v.AllArcs() {
 				t &= Val(a.Tip)
 			}
 		case OR:
 			t = 0
-			for a := v.Arcs; a != nil; a = a.Next {
+			for a := range v.AllArcs() {
 				t |= Val(a.Tip)
 			}
 		case XOR:
 			t = 0
-			for a := v.Arcs; a != nil; a = a.Next {
+			for a := range v.AllArcs() {
 				t ^= Val(a.Tip)
 			}
 		case NOT:
@@ -266,7 +266,7 @@ func prGate(w io.Writer, v *gbgraph.Vertex) {
 		fmt.Fprintf(w, "copy of %s", Alt(v).Name)
 	}
 	first := true
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		if !first {
 			fmt.Fprintf(w, " %c ", Typ(v))
 		}
@@ -1121,7 +1121,7 @@ func reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 
 		// Reverse and copy arcs
 		var reversed []*gbgraph.Arc
-		for a := v.Arcs; a != nil; a = a.Next {
+		for a := range v.AllArcs() {
 			reversed = append(reversed, a)
 		}
 		for j := len(reversed) - 1; j >= 0; j-- {

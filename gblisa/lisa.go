@@ -384,7 +384,7 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64) (*gbgraph.Graph, error) {
 
 // adjac adds an undirected edge of length 1 between u and v, unless it already exists.
 func adjac(g *gbgraph.Graph, u, v *gbgraph.Vertex) {
-	for a := u.Arcs; a != nil; a = a.Next {
+	for a := range u.AllArcs() {
 		if a.Tip == v {
 			return
 		}

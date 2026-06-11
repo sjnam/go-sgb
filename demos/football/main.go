@@ -92,11 +92,11 @@ func computeDel(g *gbgraph.Graph) map[*gbgraph.Arc]int64 {
 	del := make(map[*gbgraph.Arc]int64)
 	for i := int64(0); i < g.N; i++ {
 		u := &g.Vertices[i]
-		for a := u.Arcs; a != nil; a = a.Next {
+		for a := range u.AllArcs() {
 			j := gbgraph.VertexIndex(g, a.Tip)
 			if j > i {
 				date := gbgames.Date(a)
-				for b := a.Tip.Arcs; b != nil; b = b.Next {
+				for b := range a.Tip.AllArcs() {
 					if b.Tip == u && gbgames.Date(b) == date {
 						del[a] = a.Len - b.Len
 						del[b] = b.Len - a.Len
@@ -178,7 +178,7 @@ func greedyChain(g *gbgraph.Graph, del map[*gbgraph.Arc]int64, start, goal *gbgr
 		for len(stack) > 0 {
 			u := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
-			for a := u.Arcs; a != nil; a = a.Next {
+			for a := range u.AllArcs() {
 				ti := idx[a.Tip]
 				if !blocked[ti] && valid[ti] != cookie {
 					valid[ti] = cookie
@@ -190,7 +190,7 @@ func greedyChain(g *gbgraph.Graph, del map[*gbgraph.Arc]int64, start, goal *gbgr
 		const sentinel = int64(-10000)
 		d := sentinel
 		var bestArc, lastArc *gbgraph.Arc
-		for a := cur.Arcs; a != nil; a = a.Next {
+		for a := range cur.AllArcs() {
 			if valid[idx[a.Tip]] != cookie {
 				continue
 			}
@@ -413,7 +413,7 @@ func stratifiedChain(g *gbgraph.Graph, del map[*gbgraph.Arc]int64, start, goal *
 			prevTot = curNode.totLen
 		}
 
-		for a := curV.Arcs; a != nil; a = a.Next {
+		for a := range curV.AllArcs() {
 			ui := idx[a.Tip]
 			if !visited[ui] {
 				continue
