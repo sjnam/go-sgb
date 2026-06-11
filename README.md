@@ -242,6 +242,24 @@ Flags: `-s` (16×32 smile), `-e` (20×50 eyes), `-c` (complement/minimize),
 `-h` (square-matrix heuristic), `-v`/`-V` (verbose), `-p` (print matrix and
 solution), `-P` (write `lisa.eps`), `-DDIR` (data directory).
 
+### `multiply`
+
+Multiplies numbers the slow way — by simulating, one gate at a time, the
+multiplication circuit that `gbgates` builds with `prod`. Given `multiply m n`
+it prompts for two numbers and multiplies them; given a third `seed` argument it
+specializes the circuit to multiply any m-bit number by one fixed random n-bit
+constant. An empty line ends the session.
+
+```text
+$ go run ./demos/multiply/ 16 16
+Here I am, ready to multiply 16-bit numbers by 16-bit numbers.
+(I'm simulating a logic circuit with 1781 gates, depth 25.)
+
+Number, please? 65535
+Another? 65535
+65535x65535=4294836225.
+```
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
