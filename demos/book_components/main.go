@@ -259,7 +259,7 @@ func biconnect(g *gbgraph.Graph) {
 		articPt = u
 	}
 
-	for vi := 0; vi < n; vi++ {
+	for vi := range n {
 		if rank[vi] != 0 {
 			continue
 		}

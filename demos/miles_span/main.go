@@ -232,12 +232,12 @@ func (s *solver) krusk() int64 {
 	// Put all the edges into bucket[0..63] with a two-pass radix sort on the
 	// low and high 6 bits of each length (lengths are < 2^12).
 	s.mems++ // o,n=g->n
-	for l := 0; l < 64; l++ {
+	for l := range 64 {
 		aucket[l], bucket[l] = nil, nil
 		s.mems += 2
 	}
 	s.mems++ // o, v=g->vertices (first fetch)
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &s.g.Vertices[vi]
 		a := v.Arcs
 		s.mems++ // o,a=v->arcs
@@ -278,7 +278,7 @@ func (s *solver) krusk() int64 {
 	}
 
 	// Put all the vertices into components by themselves.
-	for vi := int64(0); vi < n; vi++ {
+	for vi := range n {
 		v := &s.g.Vertices[vi]
 		iv := s.vi(v)
 		iv.clink, iv.comp = v, v
@@ -289,7 +289,7 @@ func (s *solver) krusk() int64 {
 	components := n
 
 	var totLen int64
-	for l := 0; l < 64; l++ {
+	for l := range 64 {
 		a := bucket[l]
 		s.mems++ // o,a=bucket[l]
 		for a != nil {
@@ -1229,16 +1229,17 @@ func (c *ctk) moveU(u, v *gbgraph.Vertex, oldSize, newSize int64) {
 		s.mems++ // o,u->lsib=t
 		c.tail = u
 	default: // u has just become large
-		if u == c.tail {
+		switch u {
+		case c.tail:
 			if u == c.small {
 				return // keep it small, we're done anyway
 			}
 			c.tail = s.vi(u).lsib
 			s.mems++ // o,t=u->lsib
-		} else if u == c.small {
+		case c.small:
 			c.small = s.vi(u).rsib
 			s.mems++ // o,s=u->rsib
-		} else {
+		default:
 			s.vi(s.vi(u).rsib).lsib = s.vi(u).lsib
 			s.mems += 3 // ooo,u->rsib->lsib=u->lsib
 			s.vi(s.vi(u).lsib).rsib = s.vi(u).rsib

@@ -576,8 +576,8 @@ func (s *solver) doublecheck() {
 // --- Printing and PostScript output ---
 
 func displayInput(mtx []int64, m, n, d int64, compl bool) {
-	for k := int64(0); k < m; k++ {
-		for l := int64(0); l < n; l++ {
+	for k := range m {
+		for l := range n {
 			v := mtx[k*n+l]
 			if compl {
 				v = d - v
@@ -614,8 +614,8 @@ func openInputEPS(mtx []int64, m, n, d int64, compl bool) *os.File {
 	fmt.Fprintf(f, "{currentfile buffer readhexstring pop} bind\n")
 	fmt.Fprintf(f, "gsave %d %d scale image\n", n, m)
 	conv := 255.0 / float64(d)
-	for k := int64(0); k < m; k++ {
-		for l := int64(0); l < n; l++ {
+	for k := range m {
+		for l := range n {
 			v := mtx[k*n+l]
 			if compl {
 				v = d - v

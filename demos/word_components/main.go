@@ -57,7 +57,7 @@ func main() {
 	var isol, comp, m int64
 	fmt.Printf("Component analysis of %s\n", g.ID)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		v := &g.Vertices[i]
 
 		// Initialize i as a singleton component.

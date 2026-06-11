@@ -307,7 +307,7 @@ func freqCost(v *gbgraph.Vertex) int64 {
 // alphDist returns the total alphabetic distance between two five-letter words.
 func alphDist(p, q string) int64 {
 	var d int64
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		diff := int64(p[i]) - int64(q[i])
 		if diff < 0 {
 			diff = -diff
@@ -320,7 +320,7 @@ func alphDist(p, q string) int64 {
 // hammDist returns the Hamming distance between two five-letter words.
 func hammDist(p, q string) int64 {
 	var d int64
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		if p[i] != q[i] {
 			d++
 		}
