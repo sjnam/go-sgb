@@ -142,11 +142,13 @@ func (b *builder) comp(v *gbgraph.Vertex) *gbgraph.Vertex {
 }
 
 // evenComp returns comp(v) if s is odd, v if s is even.
+// evenComp returns v when s is odd and comp(v) when s is even, matching the
+// original macro even_comp(s,v) == ((s)&1 ? v : comp(v)).
 func (b *builder) evenComp(s int64, v *gbgraph.Vertex) *gbgraph.Vertex {
 	if s&1 != 0 {
-		return b.comp(v)
+		return v
 	}
-	return v
+	return b.comp(v)
 }
 
 // makeXor constructs XOR(u,v) = OR(AND(u,comp(v)), AND(comp(u),v)).
@@ -646,8 +648,8 @@ func (b *builder) makeAdder(n int64, x, y, z []*gbgraph.Vertex, carry *gbgraph.V
 			b.make3(AND, b.comp(x[k]), b.comp(y[k]), carry),
 			b.make3(AND, x[k], y[k], carry))
 		carry = b.make3(OR,
-			b.make2(AND, b.evenComp(boolInt(!add), x[k]), y[k]),
-			b.make2(AND, b.evenComp(boolInt(!add), x[k]), carry),
+			b.make2(AND, b.evenComp(boolInt(add), x[k]), y[k]),
+			b.make2(AND, b.evenComp(boolInt(add), x[k]), carry),
 			b.make2(AND, y[k], carry))
 	}
 	z[n] = carry

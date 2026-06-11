@@ -2,6 +2,7 @@ package gbgates
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
@@ -291,5 +292,85 @@ func TestGateEvalRiscReset(t *testing.T) {
 	ret := GateEval(g, zeros, nil)
 	if ret != 0 {
 		t.Errorf("GateEval returned %d, want 0", ret)
+	}
+}
+
+// riscProgram is the multiply/divide program from the TAKE_RISC demo: it runs
+// the ternary subroutine x*floor(y/z) with x in r1, y in r2, z in r3.
+var riscProgram = []uint64{
+	0x2ff0, 0x1111, 0x1a30, 0x3333, 0x7f70, 0x5555, 0x0f8f,
+	0x3a21, 0x1a01, 0x0a12, 0x3a01, 0x4000, 0x5000, 0x6000, 0x2a63, 0x0f95,
+	0x3063, 0x1061, 0x6ac1, 0x5fd1, 0x2a63, 0x039b, 0x0843, 0x3463, 0x1561,
+	0x2863, 0x0c94, 0x4861, 0x6ac1, 0x2a63, 0x5a41, 0x0398, 0x6666, 0x0fa7,
+}
+
+// TestRunRiscMultiplyDivide drives the simulated RISC machine end to end and
+// checks that it actually computes products, quotients, and remainders.  This
+// exercises register loads, the source mux, and the adder — paths that an
+// inverted even_comp once left dead while the machine still appeared to "run".
+func TestRunRiscMultiplyDivide(t *testing.T) {
+	g, err := Risc(8)
+	if err != nil {
+		t.Fatalf("Risc(8) error: %v", err)
+	}
+	cases := []struct{ m, n, prod, quot, rem int64 }{
+		{100, 7, 700, 14, 2},
+		{1000, 3, 3000, 333, 1},
+		{255, 255, 65025 & 0xffff, 1, 0},
+		{12, 4, 48, 3, 0},
+	}
+	for _, c := range cases {
+		rom := append([]uint64(nil), riscProgram...)
+		rom[1], rom[3] = uint64(c.m), uint64(c.n)
+
+		rom[5] = 10 // mult
+		st, _ := RunRisc(io.Discard, g, rom, int64(len(rom)), 0)
+		if got := int64(st[4]); got != c.prod {
+			t.Errorf("%d * %d: r4=%d, want %d", c.m, c.n, got, c.prod)
+		}
+
+		rom[5] = 7 // div
+		st, _ = RunRisc(io.Discard, g, rom, int64(len(rom)), 0)
+		if got := int64(st[4]); got != c.quot {
+			t.Errorf("%d / %d: quotient=%d, want %d", c.m, c.n, got, c.quot)
+		}
+		if got := (int64(st[2]) + c.n) & 0x7fff; got != c.rem {
+			t.Errorf("%d %% %d: remainder=%d, want %d", c.m, c.n, got, c.rem)
+		}
+	}
+}
+
+// TestProdMultiplies builds prod(m,n) circuits and checks that simulating them
+// yields correct products, including sizes (e.g. 6x6) whose reduce step once
+// crashed on a nil arc tip.
+func TestProdMultiplies(t *testing.T) {
+	cases := []struct{ m, n, a, b int64 }{
+		{4, 4, 13, 11}, {6, 6, 50, 47}, {8, 8, 200, 201}, {5, 7, 31, 100},
+	}
+	for _, c := range cases {
+		g, err := Prod(c.m, c.n)
+		if err != nil {
+			t.Errorf("Prod(%d,%d) error: %v", c.m, c.n, err)
+			continue
+		}
+		in := make([]byte, c.m+c.n)
+		for i := int64(0); i < c.m; i++ {
+			in[i] = byte('0' + (c.a>>uint(i))&1)
+		}
+		for i := int64(0); i < c.n; i++ {
+			in[c.m+i] = byte('0' + (c.b>>uint(i))&1)
+		}
+		out := make([]byte, c.m+c.n+1)
+		if GateEval(g, string(in), out) < 0 {
+			t.Errorf("Prod(%d,%d) GateEval failed", c.m, c.n)
+			continue
+		}
+		var got int64
+		for i := int64(0); i < c.m+c.n; i++ { // big-endian
+			got = got<<1 + int64(out[i]-'0')
+		}
+		if got != c.a*c.b {
+			t.Errorf("prod(%d,%d): %d*%d=%d, want %d", c.m, c.n, c.a, c.b, got, c.a*c.b)
+		}
 	}
 }
