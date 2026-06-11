@@ -10,20 +10,24 @@ import (
 func main() {
 	g, err := gbbasic.Board(3, 4, 0, 0, -1, 0, false)
 	if err != nil {
-		panic(err)
-	}
-	gg, err := gbbasic.Board(3, 4, 0, 0, -2, 0, false)
-	if err != nil {
-		panic(err)
-	}
-	ggg, err := gbbasic.Gunion(g, gg, false, false)
-	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
+		os.Exit(1)
 	}
 
+	gg, err := gbbasic.Board(3, 4, 0, 0, -2, 0, false)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
+		os.Exit(1)
+	}
+
+	ggg, err := gbbasic.Gunion(g, gg, false, false)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
+		os.Exit(1)
+	}
 	if ggg == nil {
-		fmt.Fprintf(os.Stderr, "Something went wrong %s", err)
-		return
+		fmt.Fprintf(os.Stderr, "Something went wrong %v", err)
+		os.Exit(1)
 	}
 
 	fmt.Print("Queen Moves on a 3x4 Board\n\n")
