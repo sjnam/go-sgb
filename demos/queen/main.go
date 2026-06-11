@@ -18,6 +18,7 @@ func main() {
 	gbName, cylind := "queen.gb", ""
 
 	if *pWrap {
+		// we set wrap=2 because only the second coordinate wraps
 		wrap = int64(2)
 		gbName = "queen_wrap.gb"
 		cylind = "Cylindrical "
