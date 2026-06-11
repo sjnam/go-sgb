@@ -260,6 +260,24 @@ Another? 65535
 65535x65535=4294836225.
 ```
 
+### `take_risc`
+
+Multiplies and divides small numbers by simulating the simple RISC machine that
+`gbgates` builds with `risc` — loading a tiny 34-instruction program into its
+read-only memory and running the gate network cycle by cycle. It prompts for two
+positive numbers (each at most 0x7fff) and reports their product, quotient, and
+remainder. Any command-line argument turns on a per-cycle register trace.
+
+```text
+$ go run ./demos/take_risc/
+Welcome to the world of microRISC.
+
+Gimme a number: 100
+OK, now gimme another: 7
+The product of 100 and 7 is 700.
+The quotient is 14, and the remainder is 2.
+```
+
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
