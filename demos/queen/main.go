@@ -1,3 +1,15 @@
+// This is a short demonstration of how to generate and traverse graphs
+// with the Stanford GraphBase. It creates a graph with 12 vertices,
+// representing the cells of a 3x4 rectangular board; two
+// cells are considered adjacent if you can get from one to another
+// by a queen move. Then it prints a description of the vertices and
+// their neighbors, on the standard output file.
+
+// An ASCII file called queen.gb is also produced. Other programs
+// can obtain a copy of the queen graph by calling gbsave.SaveGraph(g,"queen.gb").
+// You might find it interesting to compare the output of QUEEN with
+// the contents of queen.gb; the former is intended to be readable
+// by human beings, the latter by computers.
 package main
 
 import (
@@ -24,24 +36,28 @@ func main() {
 		cylind = "Cylindrical "
 	}
 
+	// a graph with rook moves and wrapping if wrap=2
 	g, err := gbbasic.Board(3, 4, 0, 0, -1, wrap, false)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't build a board g (%v)!\n", err)
 		os.Exit(1)
 	}
+	// a graph with bishop moves and wrapping if wrap=2
 	gg, err := gbbasic.Board(3, 4, 0, 0, -2, wrap, false)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't build a board gg (%v)!\n", err)
 		os.Exit(1)
 	}
+	// a graph with queen moves
 	ggg, err := gbbasic.Gunion(g, gg, false, false)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't build a gunion (%v)!\n", err)
 		os.Exit(1)
 	}
+	// generate an ASCII file for ggg
 	if _, err = gbsave.SaveGraph(ggg, gbName); err != nil {
 		fmt.Fprintf(os.Stderr,
 			"Sorry, I couldn't save a graph (%v)!\n", err)
