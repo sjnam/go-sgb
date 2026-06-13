@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sjnam/go-sgb/gbgates"
+	"github.com/sjnam/go-sgb/gb-gates"
 )
 
 // Locations within the program below, and its length.

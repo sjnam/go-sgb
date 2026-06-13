@@ -58,9 +58,9 @@ import (
     "fmt"
     "os"
 
-    "github.com/sjnam/go-sgb/gbdijk"
-    "github.com/sjnam/go-sgb/gbio"
-    "github.com/sjnam/go-sgb/gbwords"
+    "github.com/sjnam/go-sgb/gb-dijk"
+    "github.com/sjnam/go-sgb/gb-io"
+    "github.com/sjnam/go-sgb/gb-words"
 )
 
 func main() {

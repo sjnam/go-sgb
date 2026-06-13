@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbraman"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbraman "github.com/sjnam/go-sgb/gb-raman"
 )
 
 func main() {

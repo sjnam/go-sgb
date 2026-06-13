@@ -29,8 +29,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gblisa"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gblisa "github.com/sjnam/go-sgb/gb-lisa"
 )
 
 // inf is "infinity (or darn near)" — the initial slack in every column.

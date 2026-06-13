@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbroget"
-	"github.com/sjnam/go-sgb/gbsave"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gbroget "github.com/sjnam/go-sgb/gb-roget"
+	gbsave "github.com/sjnam/go-sgb/gb-save"
 )
 
 func main() {

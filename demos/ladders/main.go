@@ -24,10 +24,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/sjnam/go-sgb/gbdijk"
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbwords"
+	gbdijk "github.com/sjnam/go-sgb/gb-dijk"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gbwords "github.com/sjnam/go-sgb/gb-words"
 )
 
 var (

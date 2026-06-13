@@ -19,9 +19,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbgames"
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
+	gbgames "github.com/sjnam/go-sgb/gb-games"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	"github.com/sjnam/go-sgb/gb-io"
 )
 
 // node represents one step in a chain from start to goal.

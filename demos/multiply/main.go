@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbgates"
-	"github.com/sjnam/go-sgb/gbgraph"
+	gbgates "github.com/sjnam/go-sgb/gb-gates"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
 )
 
 func main() {

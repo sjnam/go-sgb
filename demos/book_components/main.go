@@ -26,10 +26,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbbooks"
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbsave"
+	gbbooks "github.com/sjnam/go-sgb/gb-books"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gbsave "github.com/sjnam/go-sgb/gb-save"
 )
 
 var (

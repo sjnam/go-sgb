@@ -13,9 +13,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbwords"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gbwords "github.com/sjnam/go-sgb/gb-words"
 )
 
 func main() {

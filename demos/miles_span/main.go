@@ -37,10 +37,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbmiles"
-	"github.com/sjnam/go-sgb/gbsave"
+	gbgraph "github.com/sjnam/go-sgb/gb-graph"
+	gbio "github.com/sjnam/go-sgb/gb-io"
+	gbmiles "github.com/sjnam/go-sgb/gb-miles"
+	gbsave "github.com/sjnam/go-sgb/gb-save"
 )
 
 // infinity is returned by an algorithm when the graph has no spanning tree.

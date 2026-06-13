@@ -18,8 +18,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/sjnam/go-sgb/gbbasic"
-	"github.com/sjnam/go-sgb/gbsave"
+	gbbasic "github.com/sjnam/go-sgb/gb-basic"
+	gbsave "github.com/sjnam/go-sgb/gb-save"
 )
 
 func main() {
