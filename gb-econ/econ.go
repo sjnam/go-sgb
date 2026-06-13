@@ -17,8 +17,8 @@ package gbecon
 import (
 	"fmt"
 
-	gbgraph "github.com/sjnam/go-sgb/gb-graph"
 	"github.com/sjnam/go-sgb/gb-flip"
+	"github.com/sjnam/go-sgb/gb-graph"
 	"github.com/sjnam/go-sgb/gb-io"
 )
 
