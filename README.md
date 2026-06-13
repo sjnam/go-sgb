@@ -17,23 +17,21 @@ parameters and seeds — same vertices, same edges, same ID strings.
 
 ## Packages
 
-### Core
+### Kernel
 
 | Package | SGB Module | Description |
 | ------- | ---------- | ----------- |
+| `gbflip` | GB_FLIP | Subtractive RNG (period $2^{85}−2^{30}$) |
 | `gbgraph` | GB_GRAPH | Core data structures: `Vertex`, `Arc`, `Graph` |
-| `gbbasic` | GB_BASIC | Graph generators and transformers |
-| `gbflip` | GB_FLIP | Subtractive RNG (period 2⁸⁵ − 2³⁰) |
-| `gbrand` | GB_RAND | Random graph generator |
 | `gbgbio` | GB_IO | File I/O with checksum validation for `.dat` files |
-| `gbsave` | GB_SAVE | Serialize/deserialize graphs to/from `.gb` files |
-| `gbdijk` | GB_DIJK | Dijkstra shortest-path with pluggable priority queue |
 | `gbsort` | GB_SORT | Radix sort utility for linked lists |
 
 ### Graph Generators
 
 | Package | SGB Module | Description |
 | ------- | ---------- | ----------- |
+| `gbbasic` | GB_BASIC | Graph generators and transformers |
+| `gbdijk` | GB_DIJK | Dijkstra shortest-path with pluggable priority queue |
 | `gbwords` | GB_WORDS | Five-letter word graph (one-letter-difference edges) |
 | `gbroget` | GB_ROGET | Directed graph from Roget's 1879 Thesaurus |
 | `gbbooks` | GB_BOOKS | Character-encounter graphs from classic literature |
@@ -44,6 +42,8 @@ parameters and seeds — same vertices, same edges, same ID strings.
 | `gblisa` | GB_LISA | Pixel-intensity graph from the Mona Lisa image |
 | `gbplane` | GB_PLANE | Planar graphs via Delaunay triangulation |
 | `gbraman` | GB_RAMAN | Ramanujan expander graphs |
+| `gbrand` | GB_RAND | Random graph generator |
+| `gbsave` | GB_SAVE | Serialize/deserialize graphs to/from `.gb` files |
 
 ## Quick Start
 
@@ -101,27 +101,61 @@ words(5757,0,0,0): 5757 vertices, 14135 edges
 
 The `demos/` directory contains Go ports of Knuth's demo programs.
 
-### `ladders`
+### `assign_lisa`
 
-Finds shortest word ladders between five-letter English words using
-Dijkstra's algorithm.
+Solves the assignment problem on a matrix of Mona Lisa pixel brightnesses from
+`gblisa`: it picks at most one entry per row and column to maximize their sum,
+using the Hungarian algorithm, and reports the mem count. With `-P` it writes an
+encapsulated PostScript file `lisa.eps` visualizing the chosen pixels.
 
 ```text
-$ go run ./demos/ladders/
-Starting word: chaos
-    Goal word: order
-         0 chaos
-         1 choos
-         2 chops
-         ⋮
-        11 odder
-        12 order
+$ go run ./demos/assign_lisa/ -s -p
+Assignment problem for lisa(16,32,255,94,110,97,129,0,100000)
+ 171 172 169 177 186 191 169  99  78  ...
+ ⋮
+The following entries produce an optimum assignment:
+ [0,26]
+ ⋮
+Solved in 13529 mems.
 ```
 
-Options: `-v` (trace the search), `-a` (alphabetic distance), `-f`
-(frequency-based distance), `-h` (A\*-style lower-bound heuristic),
-`-e` (echo input), `-nN` (N most common words), `-rN` (N random words),
-`-sN` (random seed), `-dDIR` (data directory).
+Parameters are `name=value` (`m`, `n`, `d`, `m0`, `m1`, `n0`, `n1`, `d0`, `d1`).
+Flags: `-s` (16×32 smile), `-e` (20×50 eyes), `-c` (complement/minimize),
+`-h` (square-matrix heuristic), `-v`/`-V` (verbose), `-p` (print matrix and
+solution), `-P` (write `lisa.eps`), `-DDIR` (data directory).
+
+### `book_components`
+
+Computes biconnected components of character-encounter graphs from classic
+literature using the Hopcroft–Tarjan algorithm.
+
+```text
+go run ./demos/book_components/ [-tTITLE] [-nN] [-xN] [-fN] [-lN] [-iN] [-oN] [-sN] [-v] [-gFILE] [-dDIR]
+```
+
+`TITLE` is one of `anna` (default), `david`, `jean`, `huck`, or `homer`.
+
+### `econ_order`
+
+Permutes the sectors of the `gbecon` input/output matrix into a near-triangular
+order (primary-material producers first, final-product industries last) by
+minimizing the below-diagonal "feed-forward" sum with local search. The default
+is Gleason's cautious descent; `-g` uses greedy steepest descent. Both reproduce
+Knuth's published figures exactly.
+
+```text
+$ go run ./demos/econ_order/ -g
+Ordering the sectors of econ(79,2,0,0), using seed 0:
+ (Steepest descent method)
+(The amount of feed-forward must be at least 321656.)
+Local minimum feed-forward is 457408, found after 93 steps.
+The corresponding economic order is:
+ ⋮
+```
+
+Options: `-nN` (sectors, default 79), `-rN` (N random restarts), `-sN` (econ
+seed), `-tN` (permutation seed), `-g` (greedy), `-v`/`-V` (verbose), `-DDIR`
+(data directory).
 
 ### `football`
 
@@ -140,60 +174,6 @@ Starting team: Stanford
  ⋮
  Nov 17: Yale Bulldogs 34, Harvard Crimson 19 (+781)
 ```
-
-### `word_components`
-
-Computes connected components of the five-letter word graph, printing
-statistics as each vertex is added (union-find algorithm).
-
-```text
-go run ./demos/word_components/ [-dDIR]
-```
-
-### `book_components`
-
-Computes biconnected components of character-encounter graphs from classic
-literature using the Hopcroft–Tarjan algorithm.
-
-```text
-go run ./demos/book_components/ [-tTITLE] [-nN] [-xN] [-fN] [-lN] [-iN] [-oN] [-sN] [-v] [-gFILE] [-dDIR]
-```
-
-`TITLE` is one of `anna` (default), `david`, `jean`, `huck`, or `homer`.
-
-### `roget_components`
-
-Computes strongly connected components of the Roget thesaurus graph using
-Tarjan's iterative depth-first-search algorithm. Components are printed in
-reverse topological order.
-
-```text
-go run ./demos/roget_components/ [-nN] [-dN] [-pN] [-sN] [-gFILE] [-DDIR]
-```
-
-### `miles_span`
-
-Finds the minimum spanning tree of a highway-mileage graph with four classic
-algorithms and reports how many "mems" (memory references) each one consumes —
-a machine-independent measure of efficiency. The four are Kruskal's algorithm
-(radix sort + union/find), Jarník–Prim with a binary heap, Jarník–Prim with a
-Fibonacci heap, and Cheriton–Tarjan–Karp with binomial queues. The mem counts
-reproduce Knuth's published figures exactly.
-
-```text
-$ go run ./demos/miles_span/
-The graph miles(100,0,0,0,0,10,0) has 405 edges,
-  and its minimum spanning tree has length 14467.
- The Kruskal/radix-sort algorithm takes 8379 mems;
- the Jarnik/Prim/binary-heap algorithm takes 7972 mems;
- the Jarnik/Prim/Fibonacci-heap algorithm takes 11736 mems;
- the Cheriton/Tarjan/Karp algorithm takes 17770 mems.
-```
-
-Options: `-nN` (N cities, max 128), `-NN`/`-WN`/`-PN` (north/west/population
-weights), `-dN` (max degree), `-rN` (investigate N graphs with consecutive
-seeds), `-sN` (random seed), `-v` (report each tree edge), `-gFILE` (restore an
-external graph), `-DDIR` (data directory).
 
 ### `girth`
 
@@ -219,28 +199,51 @@ So the diameter is 22, and the girth is 20.
 
 Enter `p = 2` only with `q = 17` or `43`; an empty line or EOF exits.
 
-### `assign_lisa`
+### `ladders`
 
-Solves the assignment problem on a matrix of Mona Lisa pixel brightnesses from
-`gblisa`: it picks at most one entry per row and column to maximize their sum,
-using the Hungarian algorithm, and reports the mem count. With `-P` it writes an
-encapsulated PostScript file `lisa.eps` visualizing the chosen pixels.
+Finds shortest word ladders between five-letter English words using
+Dijkstra's algorithm.
 
 ```text
-$ go run ./demos/assign_lisa/ -s -p
-Assignment problem for lisa(16,32,255,94,110,97,129,0,100000)
- 171 172 169 177 186 191 169  99  78  ...
- ⋮
-The following entries produce an optimum assignment:
- [0,26]
- ⋮
-Solved in 13529 mems.
+$ go run ./demos/ladders/
+Starting word: chaos
+    Goal word: order
+         0 chaos
+         1 choos
+         2 chops
+         ⋮
+        11 odder
+        12 order
 ```
 
-Parameters are `name=value` (`m`, `n`, `d`, `m0`, `m1`, `n0`, `n1`, `d0`, `d1`).
-Flags: `-s` (16×32 smile), `-e` (20×50 eyes), `-c` (complement/minimize),
-`-h` (square-matrix heuristic), `-v`/`-V` (verbose), `-p` (print matrix and
-solution), `-P` (write `lisa.eps`), `-DDIR` (data directory).
+Options: `-v` (trace the search), `-a` (alphabetic distance), `-f`
+(frequency-based distance), `-h` (A\*-style lower-bound heuristic),
+`-e` (echo input), `-nN` (N most common words), `-rN` (N random words),
+`-sN` (random seed), `-dDIR` (data directory).
+
+### `miles_span`
+
+Finds the minimum spanning tree of a highway-mileage graph with four classic
+algorithms and reports how many "mems" (memory references) each one consumes —
+a machine-independent measure of efficiency. The four are Kruskal's algorithm
+(radix sort + union/find), Jarník–Prim with a binary heap, Jarník–Prim with a
+Fibonacci heap, and Cheriton–Tarjan–Karp with binomial queues. The mem counts
+reproduce Knuth's published figures exactly.
+
+```text
+$ go run ./demos/miles_span/
+The graph miles(100,0,0,0,0,10,0) has 405 edges,
+  and its minimum spanning tree has length 14467.
+ The Kruskal/radix-sort algorithm takes 8379 mems;
+ the Jarnik/Prim/binary-heap algorithm takes 7972 mems;
+ the Jarnik/Prim/Fibonacci-heap algorithm takes 11736 mems;
+ the Cheriton/Tarjan/Karp algorithm takes 17770 mems.
+```
+
+Options: `-nN` (N cities, max 128), `-NN`/`-WN`/`-PN` (north/west/population
+weights), `-dN` (max degree), `-rN` (investigate N graphs with consecutive
+seeds), `-sN` (random seed), `-v` (report each tree edge), `-gFILE` (restore an
+external graph), `-DDIR` (data directory).
 
 ### `multiply`
 
@@ -258,24 +261,6 @@ Here I am, ready to multiply 16-bit numbers by 16-bit numbers.
 Number, please? 65535
 Another? 65535
 65535x65535=4294836225.
-```
-
-### `take_risc`
-
-Multiplies and divides small numbers by simulating the simple RISC machine that
-`gbgates` builds with `risc` — loading a tiny 34-instruction program into its
-read-only memory and running the gate network cycle by cycle. It prompts for two
-positive numbers (each at most 0x7fff) and reports their product, quotient, and
-remainder. Any command-line argument turns on a per-cycle register trace.
-
-```text
-$ go run ./demos/take_risc/
-Welcome to the world of microRISC.
-
-Gimme a number: 100
-OK, now gimme another: 7
-The product of 100 and 7 is 700.
-The quotient is 14, and the remainder is 2.
 ```
 
 ### `queen`
@@ -300,6 +285,43 @@ gunion(board(3,4,0,0,-1,0,0),board(3,4,0,0,-2,0,0),0,0)
  -> 1.1, length 1
  -> 2.2, length 2
  ⋮
+```
+
+### `roget_components`
+
+Computes strongly connected components of the Roget thesaurus graph using
+Tarjan's iterative depth-first-search algorithm. Components are printed in
+reverse topological order.
+
+```text
+go run ./demos/roget_components/ [-nN] [-dN] [-pN] [-sN] [-gFILE] [-DDIR]
+```
+
+### `take_risc`
+
+Multiplies and divides small numbers by simulating the simple RISC machine that
+`gbgates` builds with `risc` — loading a tiny 34-instruction program into its
+read-only memory and running the gate network cycle by cycle. It prompts for two
+positive numbers (each at most 0x7fff) and reports their product, quotient, and
+remainder. Any command-line argument turns on a per-cycle register trace.
+
+```text
+$ go run ./demos/take_risc/
+Welcome to the world of microRISC.
+
+Gimme a number: 100
+OK, now gimme another: 7
+The product of 100 and 7 is 700.
+The quotient is 14, and the remainder is 2.
+```
+
+### `word_components`
+
+Computes connected components of the five-letter word graph, printing
+statistics as each vertex is added (union-find algorithm).
+
+```text
+go run ./demos/word_components/ [-dDIR]
 ```
 
 ## Data Files
