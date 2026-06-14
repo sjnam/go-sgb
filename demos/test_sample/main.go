@@ -11,8 +11,9 @@
 //   - the original adds a stray vertex to a graph's data area with a pointer
 //     hack before saving test.gb; that has no idiomatic Go equivalent, so it is
 //     omitted and test.gb holds only the complement graph;
-//   - one genuine library divergence this test still surfaces: gb-gates
-//     partial_gates reduces to a slightly different gate count.
+//   - in partial_gates a couple of reduced gates print with different names
+//     (e.g. Z898 vs Z913): the gate count matches, but one latch's resolved
+//     input is a different, functionally equivalent gate.
 //
 // Failures still print SGB's numeric panic codes (panicCode maps the standard
 // error sentinels), and everything else matches, since the generators are

@@ -1142,20 +1142,20 @@ func reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			continue
 		}
 		newAlt, _ := oldAlt.V.(*gbgraph.Vertex)
-		if newAlt != nil {
-			setAlt(u, newAlt)
-		} else {
-			// latched gate is an input that precedes the latch: create an OR copy
+		if newAlt != nil && vertIdx(g, oldAlt) < vertIdx(g, v) {
+			// The latched gate precedes the latch, so reading it directly would
+			// yield the current cycle's value; insert an OR "copy gate" after the
+			// latch that captures it (the original reduce does the same, and an OR
+			// must have two inputs, hence the doubled arc).
 			orV := &newG.Vertices[newVI]
 			newVI++
 			orV.Name = fmt.Sprintf("%s>%s", oldAlt.Name, u.Name)
 			setTyp(orV, OR)
-			newAltMapped, _ := oldAlt.V.(*gbgraph.Vertex)
-			if newAltMapped != nil {
-				newG.NewArc(orV, newAltMapped, DELAY)
-				newG.NewArc(orV, newAltMapped, DELAY)
-			}
+			newG.NewArc(orV, newAlt, DELAY)
+			newG.NewArc(orV, newAlt, DELAY)
 			setAlt(u, orV)
+		} else {
+			setAlt(u, newAlt)
 		}
 	}
 
@@ -1470,11 +1470,14 @@ func markGates(g *gbgraph.Graph, v *gbgraph.Vertex, n *int64) {
 			if altV != nil && altV.V == nil {
 				altV.V = altV
 				*n++
-				if altIdx := vertIdx(g, altV); altIdx < vertIdx(g, top.v) {
-					*n++ // extra gate for copy
-				}
 				stack = append(stack, frame{altV, altV.Arcs})
 				continue
+			}
+			// About to pop this latch: if its latched gate precedes it, the copy
+			// phase inserts an OR "copy gate" for it, so count that gate now —
+			// unconditionally, matching the original's `if (u<v) n++`.
+			if altV != nil && vertIdx(g, altV) < vertIdx(g, top.v) {
+				*n++
 			}
 		}
 		stack = stack[:len(stack)-1]
