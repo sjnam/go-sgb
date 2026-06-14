@@ -37,6 +37,10 @@ type basicState struct {
 	sig [maxD + 3]int64
 	xx  [maxD + 2]int64
 	yy  [maxD + 2]int64
+
+	// normParams holds n0..n4 after normalization (clamped to n; zeroed once a
+	// parameter <= 0 terminates the spec), as the original prints them in IDs.
+	normParams [5]int64
 }
 
 const shortImap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_^~&@,;.:?!%#$+-*/|<=>()[]{}`'"
@@ -332,10 +336,12 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*gbgraph.Graph, er
 // n is the coordinate sum. Returns (d, periodic, k) where k is used for
 // periodic expansion if periodic==true.
 func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64, ok bool) {
+	st.normParams = [5]int64{} // params after the terminating one stay 0
 	if n0 == 0 {
 		n0 = -2
 	}
 	if n0 < 0 {
+		st.normParams[0] = n0
 		k, d = 2, -n0
 		st.nn[0] = n
 		st.nn[k-1] = st.nn[0] // seed for periodic expansion: st.nn[1] = st.nn[0]
@@ -344,8 +350,10 @@ func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64,
 	if n0 > n {
 		n0 = n
 	}
+	st.normParams[0] = n0
 	st.nn[0] = n0
 	if n1 <= 0 {
+		st.normParams[1] = n1
 		k, d = 2, -n1
 		if d == 0 {
 			d = k - 2
@@ -357,8 +365,10 @@ func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64,
 	if n1 > n {
 		n1 = n
 	}
+	st.normParams[1] = n1
 	st.nn[1] = n1
 	if n2 <= 0 {
+		st.normParams[2] = n2
 		k, d = 3, -n2
 		if d == 0 {
 			d = k - 2
@@ -370,8 +380,10 @@ func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64,
 	if n2 > n {
 		n2 = n
 	}
+	st.normParams[2] = n2
 	st.nn[2] = n2
 	if n3 <= 0 {
+		st.normParams[3] = n3
 		k, d = 4, -n3
 		if d == 0 {
 			d = k - 2
@@ -383,8 +395,10 @@ func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64,
 	if n3 > n {
 		n3 = n
 	}
+	st.normParams[3] = n3
 	st.nn[3] = n3
 	if n4 <= 0 {
+		st.normParams[4] = n4
 		k, d = 5, -n4
 		if d == 0 {
 			d = k - 2
@@ -396,6 +410,7 @@ func (st *basicState) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (d, k int64,
 	if n4 > n {
 		n4 = n
 	}
+	st.normParams[4] = n4
 	st.nn[4] = n4
 	d = 4
 	return d, k, false
@@ -576,7 +591,8 @@ func Subsets(n, n0, n1, n2, n3, n4, sizeBits int64, directed bool) (*gbgraph.Gra
 	if g == nil {
 		return nil, gbgraph.ErrNoRoom
 	}
-	g.ID = fmt.Sprintf("subsets(%d,%d,%d,%d,%d,%d,0x%x,%d)", n, n0, n1, n2, n3, n4, sizeBits, boolInt(directed))
+	p := st.normParams
+	g.ID = fmt.Sprintf("subsets(%d,%d,%d,%d,%d,%d,0x%x,%d)", n, p[0], p[1], p[2], p[3], p[4], sizeBits, boolInt(directed))
 	g.UtilTypes = "ZZZIIIZZZZZZZZ"
 
 	st.yy[d+1] = 0

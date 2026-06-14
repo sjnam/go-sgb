@@ -318,6 +318,16 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 		r.GbNewline()
 	}
 
+	// Reconstruct Partner pointers.  The two arcs of an undirected edge are
+	// saved in adjacent slots (NewEdge allocates them as a pair, and the
+	// original relies on this "edge_trick" adjacency surviving save/restore),
+	// so a restored arc's companion is its neighbor.  The .gb format does not
+	// store Partner explicitly, yet routines like RandomLengths need it.
+	for i := int64(0); i+1 < fileM; i += 2 {
+		arcs[i].Partner = &arcs[i+1]
+		arcs[i+1].Partner = &arcs[i]
+	}
+
 	// Checksum line.
 	csLine := r.GbString('\n')
 	var savedChecksum int64
