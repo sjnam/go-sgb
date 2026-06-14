@@ -315,7 +315,16 @@ The product of 100 and 7 is 700.
 The quotient is 14, and the remainder is 2.
 ```
 
-### `test_sample`
+### `word_components`
+
+Computes connected components of the five-letter word graph, printing
+statistics as each vertex is added (union-find algorithm).
+
+```text
+go run ./demos/word_components/ [-dDIR]
+```
+
+## Test Sample
 
 Knuth's installation/portability check: it runs most of the generators and
 prints salient characteristics of each graph (and writes a saved graph to
@@ -330,14 +339,6 @@ Its output matches `sources/sample.correct` except for a few documented spots
 (raman's bool reduce parameter, the omitted stray-vertex pointer hack, and one
 library divergence it still surfaces in `partial_gates`).
 
-### `word_components`
-
-Computes connected components of the five-letter word graph, printing
-statistics as each vertex is added (union-find algorithm).
-
-```text
-go run ./demos/word_components/ [-dDIR]
-```
 
 ## Data Files
 
