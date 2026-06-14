@@ -339,7 +339,6 @@ Its output matches `sources/sample.correct` except for a few documented spots
 (raman's bool reduce parameter, the omitted stray-vertex pointer hack, and one
 library divergence it still surfaces in `partial_gates`).
 
-
 ## Data Files
 
 The `data/` directory contains the `.dat` files required by the graph
