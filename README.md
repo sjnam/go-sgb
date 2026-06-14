@@ -327,8 +327,8 @@ go run ./demos/test_sample/
 ```
 
 Its output matches `sources/sample.correct` except for a few documented spots
-(raman's bool reduce parameter, the omitted stray-vertex pointer hack, and two
-library divergences it surfaces in `partial_gates` and `plane_miles`).
+(raman's bool reduce parameter, the omitted stray-vertex pointer hack, and one
+library divergence it still surfaces in `partial_gates`).
 
 ### `word_components`
 

@@ -69,10 +69,16 @@ func (d *DistanceMatrix) Distance(u, v *gbgraph.Vertex) int64 {
 // The returned DistanceMatrix records the mileage data for the new graph,
 // including distances suppressed by maxDistance or maxDegree.
 func Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64) (*gbgraph.Graph, *DistanceMatrix, error) {
+	return MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed, gbflip.New(seed))
+}
+
+// MilesRNG is Miles using a caller-supplied random generator, so the caller can
+// continue the same gb_flip stream afterward — as plane_miles does for its edge
+// rejection, where the original relies on miles and the Delaunay pass sharing
+// one stream.  seed is used only for the graph ID.
+func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64, rng *gbflip.RNG) (*gbgraph.Graph, *DistanceMatrix, error) {
 	var nodeBlock [MaxN]cityNode
 	dm := &DistanceMatrix{}
-
-	rng := gbflip.New(seed)
 
 	if n == 0 || n > MaxN {
 		n = MaxN

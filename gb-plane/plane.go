@@ -610,14 +610,17 @@ func PlaneMiles(n, northWeight, westWeight, popWeight int64, extend bool, prob, 
 	if n == 0 || n > gbmiles.MaxN {
 		n = gbmiles.MaxN
 	}
-	g, dm, err := gbmiles.Miles(n, northWeight, westWeight, popWeight, 1, 0, seed)
+	// Share one gb_flip stream: miles consumes some draws, then the Delaunay
+	// edge rejection below continues the very same stream (as the original does).
+	rng := gbflip.New(seed)
+	g, dm, err := gbmiles.MilesRNG(n, northWeight, westWeight, popWeight, 1, 0, seed, rng)
 	if err != nil {
 		return nil, err
 	}
-	rng := gbflip.New(seed)
 	g.ID = fmt.Sprintf("plane_miles(%d,%d,%d,%d,%d,%d,%d)",
 		n, northWeight, westWeight, popWeight, boolInt(extend), prob, seed)
-	g.UtilTypes = "ZZZIIIZZZZZZZZ"
+	// Keep the util_types miles set ("ZZIIII…": W=population, X/Y=coords,
+	// Z=index); the original plane_miles reuses the graph miles returns.
 
 	var infVertex *gbgraph.Vertex
 	if extend {

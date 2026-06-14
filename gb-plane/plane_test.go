@@ -265,7 +265,9 @@ func TestPlaneMilesUtilTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("PlaneMiles failed: %v", err)
 	}
-	if g.UtilTypes != "ZZZIIIZZZZZZZZ" {
+	// plane_miles reuses the graph from miles, keeping its util_types
+	// (W=population, X/Y=coords, Z=index).
+	if g.UtilTypes != "ZZIIIIZZZZZZZZ" {
 		t.Errorf("UtilTypes=%q", g.UtilTypes)
 	}
 }
