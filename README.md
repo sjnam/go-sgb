@@ -17,7 +17,23 @@ parameters and seeds — same vertices, same edges, same ID strings.
 
 ## Packages
 
-### Kernel
+### Data files
+
+| Name | Description |
+| ------- | ---------- |
+| `anna.dat` | Anna Karenina (used by gb_books) |
+| `david.dat` | David Copperfield (used by gb_books) |
+| `econ.dat` | US economic input and output (used by gb_econ) |
+| `games.dat` | College football scores, 1990 (used by gb_games) |
+| `homer.dat` | The Iliad (used by gb_books) |
+| `huck.dat` | Huckleberry Finn (used by gb_books) |
+| `jean.dat` | Les Miserables (used by gb_books) |
+| `lisa.dat` | Mona Lisa pixels (used by gb_lisa) |
+| `miles.dat` | Mileage between North American cities (used by gb_miles) |
+| `roget.dat` | Cross references in Roget's Thesaurus (used by gb_roget) |
+| `words.dat` | Five-letter words of English (used by gb_words) |
+
+### Kernel routines
 
 | Package | SGB Module | Description |
 | ------- | ---------- | ----------- |
@@ -26,24 +42,30 @@ parameters and seeds — same vertices, same edges, same ID strings.
 | `gbgbio` | GB_IO | File I/O with checksum validation for `.dat` files |
 | `gbsort` | GB_SORT | Radix sort utility for linked lists |
 
-### Graph Generators
+### Graph Generating routines
 
 | Package | SGB Module | Description |
 | ------- | ---------- | ----------- |
 | `gbbasic` | GB_BASIC | Graph generators and transformers |
-| `gbdijk` | GB_DIJK | Dijkstra shortest-path with pluggable priority queue |
-| `gbwords` | GB_WORDS | Five-letter word graph (one-letter-difference edges) |
-| `gbroget` | GB_ROGET | Directed graph from Roget's 1879 Thesaurus |
 | `gbbooks` | GB_BOOKS | Character-encounter graphs from classic literature |
-| `gbgames` | GB_GAMES | 1990 college football season game graph |
-| `gbmiles` | GB_MILES | Highway mileage graph between 128 North American cities |
 | `gbecon` | GB_ECON | U.S. input/output economic flow graph (1985 data) |
+| `gbgames` | GB_GAMES | 1990 college football season game graph |
 | `gbgates` | GB_GATES | Boolean circuit graphs |
 | `gblisa` | GB_LISA | Pixel-intensity graph from the Mona Lisa image |
+| `gbmiles` | GB_MILES | Highway mileage graph between 128 North American cities |
 | `gbplane` | GB_PLANE | Planar graphs via Delaunay triangulation |
 | `gbraman` | GB_RAMAN | Ramanujan expander graphs |
 | `gbrand` | GB_RAND | Random graph generator |
+| `gbroget` | GB_ROGET | Directed graph from Roget's 1879 Thesaurus |
+| `gbwords` | GB_WORDS | Five-letter word graph (one-letter-difference edges) |
+
+### Miscellaneous routines
+
+| Package | SGB Module | Description |
+| ------- | ---------- | ----------- |
+| `gbdijk` | GB_DIJK | Dijkstra shortest-path with pluggable priority queue |
 | `gbsave` | GB_SAVE | Serialize/deserialize graphs to/from `.gb` files |
+| `test_sample` | | Test routine for GraphBase installation |
 
 ## Quick Start
 
