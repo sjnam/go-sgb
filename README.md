@@ -315,6 +315,21 @@ The product of 100 and 7 is 700.
 The quotient is 14, and the remainder is 2.
 ```
 
+### `test_sample`
+
+Knuth's installation/portability check: it runs most of the generators and
+prints salient characteristics of each graph (and writes a saved graph to
+`test.gb`), to be diffed against a golden file. Run it from the repository root
+so the generators find their `.dat` files.
+
+```text
+go run ./demos/test_sample/
+```
+
+Its output matches `sources/sample.correct` except for a few documented spots
+(raman's bool reduce parameter, the omitted stray-vertex pointer hack, and two
+library divergences it surfaces in `partial_gates` and `plane_miles`).
+
 ### `word_components`
 
 Computes connected components of the five-letter word graph, printing
