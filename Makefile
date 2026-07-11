@@ -1,8 +1,8 @@
 # go-sgb 빌드용 Makefile.
 #
 #   make            # tangle + go vet + go test
-#   make tangle     # 각 패키지의 .w -> .go (+ _test.go)
-#   make doc        # 각 패키지의 .pdf 조판 (한글이라 luatex)
+#   make tangle     # 각 .w -> .go (+ _test.go)
+#   make doc        # 각 .w의 .pdf 조판 (한글이라 luatex)
 #   make test       # go vet + go test
 #   make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
 #
@@ -12,24 +12,28 @@ GTANGLE ?= gtangle
 GWEAVE  ?= gweave
 
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
-PKGS := gbflip gbio gbgraph gbsort
+PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk
+DEMOS := demos/word_components demos/ladders
 
-.PHONY: all tangle doc test clean $(PKGS)
+.PHONY: all tangle doc test clean $(PKGS) $(DEMOS)
 .DEFAULT_GOAL := all
 
 all: tangle test
 
-tangle: $(PKGS)
+tangle: $(PKGS) $(DEMOS)
 
-$(PKGS):
-	cd $@ && $(GTANGLE) $@.w
+$(PKGS) $(DEMOS):
+	cd $@ && $(GTANGLE) $(notdir $@).w
 
 test:
 	go vet ./...
 	go test ./...
 
 doc:
-	for p in $(PKGS); do (cd $$p && $(GWEAVE) $$p.w && luatex $$p.tex </dev/null); done
+	for p in $(PKGS) $(DEMOS); do \
+	  (cd $$p && $(GWEAVE) $$(basename $$p).w && luatex $$(basename $$p).tex </dev/null); \
+	done
 
 clean:
 	rm -f */*.go */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf
+	rm -f demos/*/*.go demos/*/*.tex demos/*/*.idx demos/*/*.scn demos/*/*.toc demos/*/*.log demos/*/*.pdf
