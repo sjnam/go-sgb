@@ -76,16 +76,15 @@ $$\vbox{\halign{\indent#\hfil&\quad#\hfil\cr
 |hh_val|&|v.X.I| --- 셈해 둔 |hh(v)|\cr
 |llink|, |rlink|&|v.V.V|, |v.W.V| --- 큐의 두 이음\cr}}$$
 
-@ 이제 |Dijkstra|다. |hh|가 |nil|이면 늘 0을 주는 더미로 바꾸되, 사용자가
-어림 함수를 주었는지는 |hasHH|에 미리 적어 둔다(발자취에서 |hh| 값을 괄호로
-보일지 정하는 데 쓴다). |pq|가 |nil|이면 기본 큐를 쓴다.
-
+@ 이제 |Dijkstra|다. |Dijkstra|는 |gg|에서 |uu|부터 |vv|까지 최단 경로의
+길이를 돌려준다. 경로가 없으면 $-1$이다. |hh|가 |nil|이면 늘 0을 주는 더미로
+바꾸되, 사용자가 어림 함수를 주었는지는 |hasHH|에 미리 적어 둔다(발자취에서 |hh|
+값을 괄호로 보일지 정하는 데 쓴다). |pq|가 |nil|이면 기본 큐를 쓴다. |trace|가
+|nil|이 아니면 발자취를 남긴다.
 @<|Dijkstra| 절차@>=
-// |Dijkstra|는 |gg|에서 |uu|부터 |vv|까지 최단 경로의 길이를 돌려준다.
-// 경로가 없으면 $-1$이다. |hh|가 |nil|이 아니면 어림 함수로 탐색을 좁힌다.
-// |pq|가 |nil|이면 기본 큐를, |trace|가 |nil|이 아니면 발자취를 남긴다.
 func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
-	hh func(*gbgraph.Vertex) int64, pq PriorityQueue, trace io.Writer) int64 {
+	hh func(*gbgraph.Vertex) int64,
+	pq PriorityQueue, trace io.Writer) int64 {
 	hasHH := hh != nil
 	if hh == nil {
 		hh = func(*gbgraph.Vertex) int64 { return 0 }
@@ -116,10 +115,10 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 
 @<|uu|만을 본 정점으로 만들고, 아는 정점으로도 삼는다@>=
 for i := int64(0); i < gg.N; i++ {
-	gg.Vertices[i].Y.V = nil // backlink를 지운다
+	gg.Vertices[i].Y.V = nil // |backlink|를 지운다
 }
-uu.Y.V = uu   // backlink
-uu.Z.I = 0    // dist
+uu.Y.V = uu   // |backlink|
+uu.Z.I = 0    // |dist|
 uu.X.I = hh(uu) // |hh| 값
 pq.Init(0)    // 큐를 비운다
 
@@ -127,7 +126,7 @@ pq.Init(0)    // 큐를 비운다
 넣고(|Requeue|), 처음 본 이웃은 |hh| 값을 셈해 큐에 넣는다(|Enqueue|).
 
 @<|t|에 이웃한 아직 못 본 정점을 큐에 넣고, 나머지의 거리를 고친다@>=
-d := t.Z.I - t.X.I // dist에서 |hh| 값을 뺀 값
+d := t.Z.I - t.X.I // |dist|에서 |hh| 값을 뺀 값
 for a := t.Arcs; a != nil; a = a.Next {
 	v := a.Tip
 	if v.Y.V != nil { // |v|를 이미 보았다
@@ -166,10 +165,7 @@ fmt.Fprintf(trace, " via %s\n", t.Y.V.Name)
 이음들을 뒤집는다. 그리고 사용자가 |backlink|가 망가지길 바라지 않았을지도
 모르니, 다시 되뒤집어 원래대로 돌려놓는다. 리스트 뒤집기는 한 스택에서 꺼내
 다른 스택에 쌓는 일로 여기면 편하다.
-
 @<결과를 찍는 |PrintResult|@>=
-// |PrintResult|는 |Dijkstra|가 찾은 |vv|까지의 최단 경로를 앞쪽 방향으로
-// 찍는다. |vv|에 닿을 수 없으면 그렇다고 알린다.
 func PrintResult(vv *gbgraph.Vertex, out io.Writer) {
 	if vv.Y.V == nil {
 		fmt.Fprintf(out, "Sorry, %s is unreachable.\n", vv.Name)
