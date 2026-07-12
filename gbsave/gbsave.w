@@ -3,7 +3,6 @@
 @i ../types.w
 
 \input kotexgweb
-\raggedbottom % 코드가 빽빽한 문서라 페이지 하단을 억지로 늘리지 않는다
 \def\title{GB\_\,SAVE}
 
 @s reader int
@@ -93,6 +92,7 @@ func vertUtil(v *gbgraph.Vertex, pos int) *gbgraph.Util {
 	}
 }
 
+@ @<유틸리티 필드 도우미@>=
 func arcUtil(a *gbgraph.Arc, pos int) *gbgraph.Util {
 	if pos == 6 {
 		return &a.A

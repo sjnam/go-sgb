@@ -3,7 +3,6 @@
 @i ../../types.w
 
 \input kotexgweb
-\raggedbottom % 코드가 빽빽한 문서라 페이지 하단을 억지로 늘리지 않는다
 \def\title{MILES\_\,SPAN}
 
 @* 최소 신장 트리. 그래프의 최소 길이 신장 트리를 찾는 알고리즘의 역사를 다룬
@@ -130,6 +129,11 @@ num := func(s string) int64 {
 	}
 	return v
 }
+
+@ 각 인자의 접두어를 떼어 해당 매개변수에 넣는다. \.{-g}$\langle$파일$\rangle$은
+뒤에서 다른 옵션을 제치고 외부 그래프를 복원하는 데 쓰인다.
+
+@<명령줄 옵션을 읽는다@>=
 for _, arg := range os.Args[1:] {
 	switch {
 	case arg == "-v":
@@ -639,10 +643,8 @@ func (h *fibHeap) enqueue(v *gbgraph.Vertex, d int64) {
 
 @<피보나치 힙@>=
 func (h *fibHeap) requeue(v *gbgraph.Vertex, d int64) {
-	h.s.mems++ // |o,v->dist=d|
-	v.Z.I = d
-	h.s.mems++ // |o,p=v->parent|
-	p := v.U.V
+	h.s.mems++; v.Z.I = d // |o,v->dist=d|
+	h.s.mems++; p := v.U.V // |o,p=v->parent|
 	if p == nil {
 		if h.fHeap.Z.I > d {
 			h.fHeap = v
@@ -654,26 +656,21 @@ func (h *fibHeap) requeue(v *gbgraph.Vertex, d int64) {
 		return
 	}
 	for {
-		h.s.mems++ // |o,r=p->rank_tag|
-		r := p.X.I
+		h.s.mems++; r := p.X.I // |o,r=p->rank_tag|
 		if r >= 4 { // |v|는 외자식이 아니다
 			@<|v|를 가족에서 뗀다@>@;
 		}
 		@<|v|를 숲에 넣는다@>@;
-		h.s.mems++ // |o,pp=p->parent|
-		pp := p.U.V
+		h.s.mems++; pp := p.U.V // |o,pp=p->parent|
 		if pp == nil { // |v|의 부모가 뿌리다
-			h.s.mems++ // |o,p->rank_tag=r-2|
-			p.X.I = r - 2
+			h.s.mems++; p.X.I = r - 2 // |o,p->rank_tag=r-2|
 			break
 		}
 		if r&1 == 0 { // 부모에 표식이 없다
-			h.s.mems++ // |o,p->rank_tag=r-1|
-			p.X.I = r - 1
+			h.s.mems++; p.X.I = r - 1 // |o,p->rank_tag=r-1|
 			break // 이제 표식이 붙었다
 		}
-		h.s.mems++ // |o,p->rank_tag=r-2| (표식 있던 부모는 뿌리가 된다)
-		p.X.I = r - 2
+		h.s.mems++; p.X.I = r - 2 // |o,p->rank_tag=r-2| (표식 있던 부모는 뿌리가 된다)
 		v = p
 		p = pp
 	}
@@ -779,19 +776,16 @@ for {
 		break
 	}
 	u := h.newRoots[r]
-	h.s.mems++ // |o,new_roots[r]=NULL|
-	h.newRoots[r] = nil
+	h.s.mems++; h.newRoots[r] = nil// |o,new_roots[r]=NULL|
 	h.s.mems += 2 // |oo,u->dist<v->dist|
 	if u.Z.I < v.Z.I {
-		h.s.mems++ // |o,v->rank_tag=r<<1|
-		v.X.I = r << 1
+		h.s.mems++; v.X.I = r << 1 // |o,v->rank_tag=r<<1|
 		u, v = v, u
 	}
 	@<|u|를 |v|의 자식으로 만든다@>@;
 	r++
 }
-h.s.mems++ // |o,v->rank_tag=r<<1|
-v.X.I = r << 1
+h.s.mems++; v.X.I = r << 1 // |o,v->rank_tag=r<<1|
 
 @ 이때 |u|와 |v| 모두 계수 |r|이고 |u->dist>=v->dist|이며 |u|엔 표식이 없다.
 
@@ -919,13 +913,11 @@ var c, r, rr *gbgraph.Arc
 var key int64
 m -= k
 if m != 0 {
-	s.mems++ // |o,r=q->qsib|
-	r = q.B.A
+	s.mems++; r = q.B.A // |o,r=q->qsib|
 }
 mm -= k
 if mm != 0 {
-	s.mems++ // |o,rr=qq->qsib|
-	rr = qq.B.A
+	s.mems++; rr = qq.B.A // |o,rr=qq->qsib|
 }
 @<|c|를 |q|와 |qq|의 합으로 놓는다@>@;
 k <<= 1
@@ -937,20 +929,17 @@ for (m|mm)&k != 0 {
 	} else {
 		@<|q|를 |c|에 합치고 |q|를 나아가게 한다@>@;
 		if mm&k != 0 {
-			s.mems++ // |o,p->qsib=qq|
-			p.B.A = qq
+			s.mems++; p.B.A = qq // |o,p->qsib=qq|
 			p = qq
 			mm -= k
 			if mm != 0 {
-				s.mems++ // |o,qq=qq->qsib|
-				qq = qq.B.A
+				s.mems++; qq = qq.B.A // |o,qq=qq->qsib|
 			}
 		}
 	}
 	k <<= 1
 }
-s.mems++ // |o,p->qsib=c|
-p.B.A = c
+s.mems++; p.B.A = c // |o,p->qsib=c|
 p = c
 _ = key
 
@@ -1254,8 +1243,7 @@ for {
 	if a == nil {
 		return infinity // 그래프가 이어져 있지 않다
 	}
-	s.mems++ // |o,u=a->tip|
-	u = a.Tip
+	s.mems++; u = a.Tip // |o,u=a->tip|
 	for {
 		s.mems++ // |o,u->comp|
 		if u.Y.V == nil {
@@ -1270,17 +1258,12 @@ for {
 if s.verbose {
 	s.report(a.Partner.Tip, a.Tip, a.Len)
 }
-s.mems++ // |o,tot_len+=a->len|
-totLen += a.Len
-s.mems++ // |o,v->comp=u|
-v.Y.V = u
+s.mems++; totLen += a.Len // |o,tot_len+=a->len|
+s.mems++; v.Y.V = u // |o,v->comp=u|
 s.qmerge(u.U.A, v.U.A)
-s.mems++ // |o,old_size=u->csize|
-oldSize := u.X.I
-s.mems++ // |o,new_size=old_size+v->csize|
-newSize := oldSize + v.X.I
-s.mems++ // |o,u->csize=new_size|
-u.X.I = newSize
+s.mems++; oldSize := u.X.I // |o,old_size=u->csize|
+s.mems++; newSize := oldSize + v.X.I // |o,new_size=old_size+v->csize|
+s.mems++; u.X.I = newSize // |o,u->csize=new_size|
 sm, tl, largeList = s.moveU(u, v, sm, tl, largeList, oldSize, newSize, hiSqrt)
 
 @ 작은 조각 |v|를 |u|에 합친 뒤 |u|의 자리를 옮긴다. 여러 특별한 경우를 mem을
@@ -1297,46 +1280,47 @@ func (s *solver) moveU(u, v, first, last, largeList *gbgraph.Vertex,
 		return
 	}
 	if newSize < hiSqrt { // |u|는 여전히 작다
-		if u == last {
-			return // 이미 우리가 바라는 자리다
-		}
-		if u == first {
-			s.mems++ // |o,s=u->rsib|
-			nf = u.W.V
-		} else {
-			s.mems += 3 // |ooo,u->rsib->lsib=u->lsib|
-			u.W.V.V.V = u.V.V
-			s.mems++ // |o,u->lsib->rsib=u->rsib|
-			u.V.V.W.V = u.W.V
-		}
-		s.mems++ // |o,t->rsib=u|
-		last.W.V = u
-		s.mems++ // |o,u->lsib=t|
-		u.V.V = last
-		nl = u
+		@<|u|를 작은 리스트의 끝으로 옮긴다@>@;
+	}
+	@<|u|를 작은 리스트에서 떼어 큰 리스트에 붙인다@>@;
+}
+
+@ |u|가 여전히 작으면 작은 리스트의 맨 끝으로 옮긴다.
+
+@<|u|를 작은 리스트의 끝으로 옮긴다@>=
+if u == last {
+	return // 이미 우리가 바라는 자리다
+}
+if u == first {
+	s.mems++; nf = u.W.V // |o,s=u->rsib|
+} else {
+	s.mems += 3; u.W.V.V.V = u.V.V // |ooo,u->rsib->lsib=u->lsib|
+	s.mems++; u.V.V.W.V = u.W.V // |o,u->lsib->rsib=u->rsib|
+}
+s.mems++; last.W.V = u // |o,t->rsib=u|
+s.mems++; u.V.V = last // |o,u->lsib=t|
+nl = u
+return
+
+@ |u|가 방금 커졌으면 작은 리스트에서 떼어 큰 리스트 앞에 붙인다.
+
+@<|u|를 작은 리스트에서 떼어 큰 리스트에 붙인다@>=
+if u == last {
+	if u == first {
 		return
 	}
-	// |u|가 방금 커졌다
-	if u == last {
-		if u == first {
-			return
-		}
-		s.mems++ // |o,t=u->lsib|
-		nl = u.V.V
-	} else if u == first {
-		s.mems++ // |o,s=u->rsib|
-		nf = u.W.V
-	} else {
-		s.mems += 3 // |ooo|
-		u.W.V.V.V = u.V.V
-		s.mems++ // |o|
-		u.V.V.W.V = u.W.V
-	}
-	s.mems++ // |o,u->rsib=large_list|
-	u.W.V = largeList
-	nll = u
-	return
+	s.mems++; nl = u.V.V // |o,t=u->lsib|
+} else if u == first {
+	s.mems++; nf = u.W.V // |o,s=u->rsib|
+} else {
+	s.mems += 3 // |ooo|
+	u.W.V.V.V = u.V.V
+	s.mems++ // |o|
+	u.V.V.W.V = u.W.V
 }
+s.mems++; u.W.V = largeList // |o,u->rsib=large_list|
+nll = u
+return
 
 @ 단계 2다. 정점들을 0부터 $\lsqrtn-1$까지의 번호로 옮기고(|findex|, |csize|를
 되씀), 남은 간선으로 축소 행렬을 세운 뒤, Prim의 알고리즘으로 마무리한다.
@@ -1370,6 +1354,12 @@ for v := sm; v != nil; k++ {
 	s.mems++ // 반복마다 |o,v=v->rsib|
 	v = v.W.V
 }
+
+@ 이제 나머지 정점들에도 자기 조각의 번호를 퍼뜨린다. \CEE/의
+|for(t=v;o,u=t->comp;t=u)|는 대표에 이르면 몸통 실행 전에 빠져나가므로,
+|nxt==nil| 검사를 |comp=NULL|·|findex| 대입보다 앞에 둔다.
+
+@<정점들을 번호로 옮긴다@>=
 for i := int64(0); i < s.g.N; i++ {
 	v := &s.g.Vertices[i]
 	s.mems++ // |o,v->comp|
@@ -1501,6 +1491,11 @@ func TestSpanMems(t *testing.T) {
 		{10, 8379, 7972, 11736, 17770},
 		{99, 63795, 50594, 59050, 175519},
 	}
+
+@ 각 경우마다 네 알고리즘을 차례로 돌려, mem 수를 발표값과 대조하고 결과 길이가
+모두 같은지 확인한다.
+
+@(miles_span_test.go@>=
 	for _, c := range cases {
 		g, err := gbmiles.Miles(100, 0, 0, 0, 0, c.degree, 0, "../../data")
 		if err != nil {
