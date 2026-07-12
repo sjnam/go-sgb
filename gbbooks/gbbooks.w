@@ -154,7 +154,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	return b.g, nil
 }
 
-@ |n=0|은 최대치로, |firstChapter=0|은 1로, |lastChapter=0|은 최대치로 바꾼다.
+@ |n==0|은 최대치로, |firstChapter==0|은 1로, |lastChapter==0|은 최대치로 바꾼다.
 파일 이름은 제목의 앞 여섯 글자에 \.{.dat}을 붙인 것이다.
 
 @<매개변수가 올바른지 확인한다@>=
