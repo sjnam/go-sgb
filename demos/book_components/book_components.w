@@ -29,20 +29,7 @@
 @c
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"io"
-	"log"
-	"os"
-	"strconv"
-	"strings"
-
-	"github.com/sjnam/go-sgb/gbbooks"
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbio"
-	"github.com/sjnam/go-sgb/gbsave"
-)
+@<내포하는 패키지들@>
 
 @<자료 구조@>@;
 @<이름 짓기와 인물 소개@>@;
@@ -60,6 +47,22 @@ func main() {
 	}
 	s.hopcroftTarjan()
 }
+
+@ @<내포하는...@>=
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/sjnam/go-sgb/gbbooks"
+	"github.com/sjnam/go-sgb/gbgraph"
+	"github.com/sjnam/go-sgb/gbio"
+	"github.com/sjnam/go-sgb/gbsave"
+)
 
 @ 알고리즘 상태를 |solver|에 담는다. \CEE/ 원본은 전역 |nn|·|active_stack|·
 |dummy|·|artic_pt|에 기댔지만, 우리는 이들을 구조체에 모아 패키지 수준 가변
