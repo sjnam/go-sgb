@@ -103,7 +103,7 @@ var defaultWtVector = []int64{100, 10, 4, 2, 2, 1, 1, 1, 1} // |wtVector|가 |ni
 @ 프로그램의 뼈대는 다음과 같다. 커널 네 패키지를 모두 끌어와, 상수와 자료
 구조를 두고, 보조 함수들을 정의한 뒤, 바깥에 내놓을 두 서브루틴 |Words|와
 |FindWord|를 짓는다.
-
+@d DataInputDirectory
 @c
 package gbwords
 
@@ -117,6 +117,8 @@ import (
 	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/gbsort"
 )
+
+const DataInputDirectory = "/usr/local/sgb/data"
 
 @<상수, 표, 자료 구조@>@;
 @<보조 함수@>@;
@@ -138,6 +140,9 @@ import (
 // |Words|는 |dir| 디렉터리의 \.{words.dat}에 담긴 다섯 글자 낱말들로
 // 그래프를 짓는다. |wtVector|가 |nil|이면 기본 무게를 쓴다.
 func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*gbgraph.Graph, error) {
+	if dir == "" {
+		dir = DataInputDirectory
+	}
 	rng := gbflip.New(seed)
 	usedDefault := wtVector == nil
 	@<가중치 벡터가 올바른지 검증한다@>@;

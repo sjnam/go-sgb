@@ -42,7 +42,7 @@ San Antonio(786,023), San Francisco(678,974), Washington D.C.(638,432)가
 씨앗으로 스트림을 하나 열어 쓴다. 다만 {\sc GB\_PLANE}의 |plane_miles|처럼
 스트림을 이어 쓰려는 호출자를 위해, 난수 생성기를 직접 받는 |MilesRNG| 변형도
 함께 내놓는다. |Miles|는 그저 |MilesRNG|를 |New(seed)|로 감싼 것이다.
-
+@d DataInputDirectory
 @c
 package gbmiles
 
@@ -55,6 +55,8 @@ import (
 	"github.com/sjnam/go-sgb/gbio"
 	"github.com/sjnam/go-sgb/gbsort"
 )
+
+const DataInputDirectory = "/usr/local/sgb/data"
 
 @<상수와 자료 구조@>@;
 @<도시 자료를 읽는 함수@>@;
@@ -118,6 +120,9 @@ func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, see
 표식 문자열은 이렇게 다듬은 뒤의 |n|과 |maxDegree|를 담는다.
 
 @<매개변수가 올바른지 확인한다@>=
+if dir == "" {
+	dir = DataInputDirectory
+}
 if n == 0 || n > maxN {
 	n = maxN
 }
