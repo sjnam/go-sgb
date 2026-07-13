@@ -30,7 +30,6 @@ import (
 )
 
 @<보조 함수@>@;
-@<성분을 분석해 찍는다@>@;
 
 func main() {
 	dir := flag.String("d", "data", "words.dat가 있는 디렉터리")
@@ -39,26 +38,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("사전을 짓지 못했습니다: %v", err)
 	}
-	analyze(g, os.Stdout)
+	@<성분을 분석해 찍는다@>@;
 }
 
-@ 함수 |analyze|는 정점을 무게순으로 훑으며 성분 구조를 키운다. 정점 |v|의
-|arcs| 리스트에서, |v|보다 나중에 온 낱말로 가는 호는 앞쪽에, 먼저 온 낱말로
-가는 호는 뒤쪽에 놓인다(낱말이 그래프에 들어오는 차례가 그렇게 만든다). 우리는
-과거에만 관심이 있고 미래에는 관심이 없으니, 앞쪽의 호들을 건너뛴다.
+@ 정점을 무게순으로 훑으며 성분 구조를 키운다. 정점 |v|의 |arcs| 리스트에서,
+|v|보다 나중에 온 낱말로 가는 호는 앞쪽에, 먼저 온 낱말로 가는 호는 뒤쪽에
+놓인다(낱말이 그래프에 들어오는 차례가 그렇게 만든다). 우리는 과거에만 관심이
+있고 미래에는 관심이 없으니, 앞쪽의 호들을 건너뛴다.
 
 @<성분을 분석해 찍는다@>=
-func analyze(g *gbgraph.Graph, out io.Writer) (comp, isol, m int64) {
-	fmt.Fprintf(out, "Component analysis of %s\n", g.ID)
-	for i := int64(0); i < g.N; i++ {
-		v := &g.Vertices[i]
-		fmt.Fprintf(out, "%4d: %5d %s", i+1, v.U.I, v.Name)
-		@<정점 |v|를 성분 구조에 더하며, 합쳐지는 성분을 찍는다@>@;
-		fmt.Fprintf(out, "; c=%d,i=%d,m=%d\n", comp, isol, m)
-	}
-	@<뜻밖의 성분들을 모두 보여 준다@>@;
-	return
+out := os.Stdout
+var comp, isol, m int64
+fmt.Fprintf(out, "Component analysis of %s\n", g.ID)
+for i := int64(0); i < g.N; i++ {
+	v := &g.Vertices[i]
+	fmt.Fprintf(out, "%4d: %5d %s", i+1, v.U.I, v.Name)
+	@<정점 |v|를 성분 구조에 더하며, 합쳐지는 성분을 찍는다@>@;
+	fmt.Fprintf(out, "; c=%d,i=%d,m=%d\n", comp, isol, m)
 }
+@<뜻밖의 성분들을 모두 보여 준다@>@;
 
 @ 연결 성분은 순환 리스트로 좇는다. 이 방법은
 참으로 무작위인 그래프에서 평균 $O(n)$ 시간이 걸린다고 알려져 있다[Knuth와
@@ -191,63 +189,5 @@ for i := int64(0); i < g.N; i++ {
 		fmt.Fprint(out, "\n")
 	}
 }
-
-@* 시험. 성분 분석을 조용히(|io.Discard|로) 돌려, 얻은 값들이 서로 아귀가
-맞는지 본다. 간선 수 |m|은 반드시 |g.M/2|와 같아야 하고(|M|은 방향 있는 호를
-세므로), 거대 성분·외딴 낱말·작은 성분의 크기 합은 정점 총수와 같아야 한다.
-Knuth의 낱말 그래프는 5757개 낱말 가운데 4493개가 하나의 거대 성분을 이룬다.
-
-@(word_components_test.go@>=
-package main
-
-import (
-	"io"
-	"testing"
-
-	"github.com/sjnam/go-sgb/gbwords"
-)
-
-func TestWordComponents(t *testing.T) {
-	g, err := gbwords.Words(0, nil, 0, 0, "../../data")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if g.N != 5757 {
-		t.Fatalf("정점 수 = %d, 원함 5757", g.N)
-	}
-	comp, isol, m := analyze(g, io.Discard)
-	@<성분 값들이 아귀가 맞는지 확인한다@>@;
-}
-
-@ 거대 성분의 크기는 으뜸 정점들의 |X.I| 가운데 가장 큰 값이다. 성분 크기의
-총합은 정점 총수와 같아야 하고, 외딴 낱말은 크기 1인 성분의 수와 같아야 한다.
-
-@<성분 값들이 아귀가 맞는지 확인한다@>=
-if m != g.M/2 {
-	t.Errorf("간선 수 = %d, 원함 %d(=M/2)", m, g.M/2)
-}
-var giant, sizeSum, singles int64
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
-	if v.Y.V == v { // 으뜸 정점
-		sizeSum += v.X.I
-		if v.X.I == 1 {
-			singles++
-		}
-		if v.X.I > giant {
-			giant = v.X.I
-		}
-	}
-}
-if sizeSum != g.N {
-	t.Errorf("성분 크기 합 = %d, 원함 %d", sizeSum, g.N)
-}
-if singles != isol {
-	t.Errorf("외딴 낱말 = %d, 크기 1 성분 = %d", isol, singles)
-}
-if giant != 4493 {
-	t.Errorf("거대 성분 크기 = %d, 원함 4493", giant)
-}
-_ = comp
 
 @* 찾아보기.

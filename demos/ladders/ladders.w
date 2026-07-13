@@ -238,21 +238,19 @@ type ladders struct {
 	out     io.Writer
 }
 
-@ |find|는 |start|에서 |goal|까지 최단 사다리를 찾아 찍는다. 증폭 그래프
-|gg|를 짓고, |Dijkstra|에게 궂은일을 맡기고, 답을 찍고, |gg|의 흔적을 지워
-|g|를 원래대로 돌려놓는다.
+@ |start|에서 |goal|까지 최단 사다리를 찾아 찍는다. 증폭 그래프 |gg|를 짓고,
+|Dijkstra|에게 궂은일을 맡기고, 답을 찍고, |gg|의 흔적을 지워 |g|를 원래대로
+돌려놓는다.
 
-@<사다리 찾개 |ladders|@>=
-func (l *ladders) find(start, goal string) {
-	gg := gbgraph.NewGraph(0)
-	gg.Vertices = l.g.Vertices // |g|의 정점을 빌린다
-	gg.N = l.g.N
-	@<새 간선을 심는 |plant|을 마련한다@>@;
-	@<|start|와 |goal|을 |gg|에 끼워 넣는다@>@;
-	@<둘 다 새 낱말이고 서로 이웃이면 잇는다@>@;
-	@<|Dijkstra|에게 궂은일을 맡기고 답을 찍는다@>@;
-	@<|gg|의 흔적을 모두 지운다@>@;
-}
+@<|start|에서 |goal|까지 최단 사다리를 찾아 찍는다@>=
+gg := gbgraph.NewGraph(0)
+gg.Vertices = l.g.Vertices // |g|의 정점을 빌린다
+gg.N = l.g.N
+@<새 간선을 심는 |plant|을 마련한다@>@;
+@<|start|와 |goal|을 |gg|에 끼워 넣는다@>@;
+@<둘 다 새 낱말이고 서로 이웃이면 잇는다@>@;
+@<|Dijkstra|에게 궂은일을 맡기고 답을 찍는다@>@;
+@<|gg|의 흔적을 모두 지운다@>@;
 
 @ |FindWord|는 |g|에 없는 낱말이면 |nil|을 돌려주는데, 그 전에 두 번째 인자를
 이웃한 낱말마다 부른다. |plant|이 바로 그 인자로, 갓 끼운 정점에서 이웃으로
@@ -396,7 +394,7 @@ for {
 	if !ok {
 		continue // 목적 낱말이 없으면 시작부터 다시
 	}
-	l.find(start, goal)
+	@<|start|에서 |goal|까지 최단 사다리를 찾아 찍는다@>@;
 }
 
 @ |promptForFive|는 정확히 다섯 개의 소문자를 엔터와 함께 받을 때까지 조른다.
@@ -441,102 +439,6 @@ for {
 		valid = false
 	} else if len(buf) < 5 {
 		buf = append(buf, c)
-	}
-}
-
-@* 시험. 진짜 낱말 그래프(5757개)를 지어 몇 가지를 확인한다. 이웃한 두 낱말
-사이의 사다리는 두 줄이라야 하고, 사전에 없는 낱말을 임시로 끼워도 사다리를
-찾아야 하며, 사다리 찾기가 끝난 뒤 |g|는 원래대로 돌아와 있어야 한다(그래서
-같은 물음을 두 번 하면 같은 답이 나온다).
-
-@(ladders_test.go@>=
-package main
-
-import (
-	"fmt"
-	"strings"
-	"testing"
-
-	"github.com/sjnam/go-sgb/gbdijk"
-	"github.com/sjnam/go-sgb/gbgraph"
-	"github.com/sjnam/go-sgb/gbwords"
-)
-
-func loadGraph(t *testing.T) *gbgraph.Graph {
-	t.Helper()
-	g, err := gbwords.Words(0, nil, 0, 0, "../../data")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return g
-}
-
-@<이웃 사다리 시험@>@;
-@<사전에 없는 낱말 시험@>@;
-@<|g|가 원래대로 돌아오는지 시험@>@;
-
-@ 이웃이 있는 첫 정점과 그 이웃 하나 사이의 사다리는 두 줄 --- 시작 낱말과
-이웃 --- 이라야 하고, 거리는 0과 1이다. 이웃은 정점의 |Arcs| 리스트에서 바로
-얻는다(|FindWord|는 사전에 있는 낱말이면 곧바로 돌려주므로 이웃을 열거하지
-않는다).
-
-@<이웃 사다리 시험@>=
-func TestNeighborLadder(t *testing.T) {
-	g := loadGraph(t)
-	var start, goal string
-	for i := int64(0); i < g.N; i++ {
-		if g.Vertices[i].Arcs != nil {
-			start = g.Vertices[i].Name
-			goal = g.Vertices[i].Arcs.Tip.Name
-			break
-		}
-	}
-	if start == "" {
-		t.Fatal("이웃이 있는 정점을 찾지 못함")
-	}
-	var b strings.Builder
-	l := &ladders{g: g, pq: gbdijk.NewDList(), out: &b}
-	l.find(start, goal)
-	want := fmt.Sprintf("%10d %s\n%10d %s\n", 0, start, 1, goal)
-	if b.String() != want {
-		t.Errorf("사다리 =\n%q\n원함\n%q", b.String(), want)
-	}
-}
-
-@ 사전에 없는 낱말 |"zhere"|는 진짜 낱말 |"there"|와 한 자리만 다르다. 임시로
-끼워 넣어 사다리 |zhere|-|there|를 길이 1로 찾아야 한다.
-
-@<사전에 없는 낱말 시험@>=
-func TestNonDictionaryLadder(t *testing.T) {
-	g := loadGraph(t)
-	var b strings.Builder
-	l := &ladders{g: g, pq: gbdijk.NewDList(), out: &b}
-	l.find("zhere", "there")
-	want := fmt.Sprintf("%10d %s\n%10d %s\n", 0, "zhere", 1, "there")
-	if b.String() != want {
-		t.Errorf("사다리 =\n%q\n원함\n%q", b.String(), want)
-	}
-}
-
-@ 사다리를 찾은 뒤 |g|는 흔적 없이 원래대로라야 한다. 같은 물음을 두 번 해
-답이 같은지 보면, 흔적 지우기가 옳게 되었음을 알 수 있다. 정점 총수와 호
-총수도 그대로여야 한다.
-
-@<|g|가 원래대로 돌아오는지 시험@>=
-func TestGraphRestored(t *testing.T) {
-	g := loadGraph(t)
-	n, m := g.N, g.M
-	l := &ladders{g: g, pq: gbdijk.NewDList(), out: &strings.Builder{}}
-	var b1, b2 strings.Builder
-	l.out = &b1
-	l.find("zhere", "there")
-	l.out = &b2
-	l.find("zhere", "there")
-	if b1.String() != b2.String() {
-		t.Errorf("두 번째 답이 다름:\n%q\n%q", b1.String(), b2.String())
-	}
-	if g.N != n || g.M != m {
-		t.Errorf("그래프가 안 돌아옴: N %d→%d, M %d→%d", n, g.N, m, g.M)
 	}
 }
 

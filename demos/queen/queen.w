@@ -25,116 +25,50 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
 	"github.com/sjnam/go-sgb/gbbasic"
-	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbsave"
 )
 
-@<퀸 그래프를 짓는다@>@;
-@<정점과 간선을 찍는다@>@;
-
 func main() {
-	g, err := buildQueen()
-	if err != nil {
-		log.Fatalf("무언가 잘못됐습니다: %v", err)
-	}
+	@<퀸 그래프를 짓는다@>@;
 	if err := gbsave.SaveGraph(g, "queen.gb"); err != nil {
 		log.Fatalf("queen.gb를 저장하지 못했습니다: %v", err)
 	}
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
-	printQueen(out, g)
+	@<정점과 간선을 찍는다@>@;
 }
 
-@ 룩 판과 비숍 판의 합집합이 퀸 그래프다. 한 곳에서만 쓰이지만, 시험에서도
-직접 부르므로 함수 경계를 둔다.
+@ 룩 판과 비숍 판의 합집합이 퀸 그래프다.
 
 @<퀸 그래프를 짓는다@>=
-func buildQueen() (*gbgraph.Graph, error) {
-	rook, err := gbbasic.Board(3, 4, 0, 0, -1, 0, false) // 룩 행마
-	if err != nil {
-		return nil, err
-	}
-	bishop, err := gbbasic.Board(3, 4, 0, 0, -2, 0, false) // 비숍 행마
-	if err != nil {
-		return nil, err
-	}
-	return gbbasic.Gunion(rook, bishop, false, false) // 퀸 행마
+rook, err := gbbasic.Board(3, 4, 0, 0, -1, 0, false) // 룩 행마
+if err != nil {
+	log.Fatalf("무언가 잘못됐습니다: %v", err)
+}
+bishop, err := gbbasic.Board(3, 4, 0, 0, -2, 0, false) // 비숍 행마
+if err != nil {
+	log.Fatalf("무언가 잘못됐습니다: %v", err)
+}
+g, err := gbbasic.Gunion(rook, bishop, false, false) // 퀸 행마
+if err != nil {
+	log.Fatalf("무언가 잘못됐습니다: %v", err)
 }
 
 @ 각 정점의 이름과, 그 정점에서 나가는 호의 목적지 및 길이를 차례로 찍는다.
 
 @<정점과 간선을 찍는다@>=
-func printQueen(out io.Writer, g *gbgraph.Graph) {
-	fmt.Fprint(out, "Queen Moves on a 3x4 Board\n\n")
-	fmt.Fprintf(out, "  The graph whose official name is\n%s\n", g.ID)
-	fmt.Fprintf(out, "  has %d vertices and %d arcs:\n\n", g.N, g.M)
-	for i := range g.Vertices[:g.N] {
-		v := &g.Vertices[i]
-		fmt.Fprintf(out, "%s\n", v.Name)
-		for a := v.Arcs; a != nil; a = a.Next {
-			fmt.Fprintf(out, "  -> %s, length %d\n", a.Tip.Name, a.Len)
-		}
-	}
-}
-
-@* 시험. 퀸 그래프의 얼개를 확인한다: 정점 12개, 표식, 그리고 모서리 칸의
-퀸 차수(룩 5 + 비숍 2 = 7).
-
-@(queen_test.go@>=
-package main
-
-import (
-	"strings"
-	"testing"
-
-	"github.com/sjnam/go-sgb/gbgraph"
-)
-
-func degree(v *gbgraph.Vertex) (d int64) {
+fmt.Fprint(out, "Queen Moves on a 3x4 Board\n\n")
+fmt.Fprintf(out, "  The graph whose official name is\n%s\n", g.ID)
+fmt.Fprintf(out, "  has %d vertices and %d arcs:\n\n", g.N, g.M)
+for i := range g.Vertices[:g.N] {
+	v := &g.Vertices[i]
+	fmt.Fprintf(out, "%s\n", v.Name)
 	for a := v.Arcs; a != nil; a = a.Next {
-		d++
-	}
-	return
-}
-
-func TestBuildQueen(t *testing.T) {
-	g, err := buildQueen()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if g.N != 12 {
-		t.Fatalf("N = %d, 원함 12", g.N)
-	}
-	want := "gunion(board(3,4,0,0,-1,0,0),board(3,4,0,0,-2,0,0),0,0)"
-	if g.ID != want {
-		t.Errorf("ID = %q", g.ID)
-	}
-	if d := degree(&g.Vertices[0]); d != 7 {
-		t.Errorf("모서리 \"0.0\"의 퀸 차수 = %d, 원함 7", d)
-	}
-}
-
-@ 출력이 머리글과 정점 이름을 담는지 살핀다.
-
-@(queen_test.go@>=
-func TestPrintQueen(t *testing.T) {
-	g, err := buildQueen()
-	if err != nil {
-		t.Fatal(err)
-	}
-	var sb strings.Builder
-	printQueen(&sb, g)
-	s := sb.String()
-	if !strings.Contains(s, "Queen Moves on a 3x4 Board") {
-		t.Error("머리글이 없다")
-	}
-	if !strings.Contains(s, "has 12 vertices and 92 arcs:") {
-		t.Errorf("정점·호 수 줄이 잘못됐다:\n%s", s)
+		fmt.Fprintf(out, "  -> %s, length %d\n", a.Tip.Name, a.Len)
 	}
 }
 

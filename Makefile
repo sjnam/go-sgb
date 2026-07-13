@@ -1,7 +1,7 @@
 # go-sgb 빌드용 Makefile.
 #
 #   make            # tangle + go vet + go test
-#   make tangle     # 각 .w -> .go (+ _test.go)
+#   make tangle     # 각 .w -> .go (패키지는 + _test.go; demos/는 시험 없음)
 #   make doc        # 각 .w의 .pdf 조판 (한글이라 luatex)
 #   make test       # go vet + go test
 #   make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
@@ -12,8 +12,8 @@ GTANGLE ?= gtangle
 GWEAVE  ?= gweave
 
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
-PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks
-DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components
+PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks gbgames
+DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains
 
 .PHONY: all tangle doc test clean $(PKGS) $(DEMOS)
 .DEFAULT_GOAL := all

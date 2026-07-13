@@ -6,8 +6,6 @@
 \def\title{BOOK\_\,COMPONENTS}
 \def\<#1>{\hbox{$\langle$\rm#1$\rangle$}}
 
-@s solver int
-
 @* 이중 성분. 이 시연 프로그램은 세계 문학에서 뽑은 GraphBase 그래프의 이중연결
 성분(biconnected component, 줄여서 ``bicomponent'')을, Hopcroft와 Tarjan의
 알고리즘[R.~E. Tarjan, ``Depth-first search and linear graph algorithms,''
@@ -43,7 +41,7 @@ func main() {
 	s := &solver{g: g, book: fileName == "", out: out}
 	fmt.Fprintf(out, "Biconnectivity analysis of %s\n\n", g.ID)
 	if verbose > 0 {
-		s.printCast(verbose, inWeight, outWeight)
+		@<선택된 인물들의 명단을 찍는다@>@;
 	}
 	s.hopcroftTarjan()
 }
@@ -162,19 +160,17 @@ func (s *solver) name(v *gbgraph.Vertex) string {
 @ \.{-v}/\.{-V}일 때, 고른 인물들의 명단을 먼저 찍는다. \.{-V}는 설명과 가중
 등장 횟수까지 보인다.
 
-@<이름 짓기와 인물 소개@>=
-func (s *solver) printCast(verbose int, inWeight, outWeight int64) {
-	for i := int64(0); i < s.g.N; i++ {
-		v := &s.g.Vertices[i]
-		if verbose == 1 {
-			fmt.Fprintf(s.out, "%s=%s\n", s.name(v), v.Name)
-		} else {
-			fmt.Fprintf(s.out, "%s=%s, %s [weight %d]\n", s.name(v), v.Name,
-				v.Z.S, inWeight*v.Y.I+outWeight*v.X.I)
-		}
+@<선택된 인물들의 명단을 찍는다@>=
+for i := int64(0); i < s.g.N; i++ {
+	v := &s.g.Vertices[i]
+	if verbose == 1 {
+		fmt.Fprintf(s.out, "%s=%s\n", s.name(v), v.Name)
+	} else {
+		fmt.Fprintf(s.out, "%s=%s, %s [weight %d]\n", s.name(v), v.Name,
+			v.Z.S, inWeight*v.Y.I+outWeight*v.X.I)
 	}
-	fmt.Fprintln(s.out)
 }
+fmt.Fprintln(s.out)
 
 @*알고리즘. Hopcroft-Tarjan 알고리즘은 본디 재귀적이지만, 깊은 재귀에 약한
 시스템도 있어 우리는 연결 리스트로 재귀를 명시적으로 편다. 각 정점은 세 단계를
@@ -330,64 +326,6 @@ for t != v {
 	fmt.Fprintf(s.out, " %s (from %s; ..to %s)\n",
 		s.name(t), s.name(t.Y.V), s.name(t.V.V))
 	t = t.W.V // t.link
-}
-
-@* 시험. |Book("anna",...)|의 이중연결 분석을 돌려, 출력이 올바른 얼개를
-갖추는지 살핀다.
-
-@(book_components_test.go@>=
-package main
-
-import (
-	"strings"
-	"testing"
-
-	"github.com/sjnam/go-sgb/gbbooks"
-)
-
-@<anna 이중 성분 시험@>@;
-
-@ 전체 |anna| 그래프에 알고리즘을 돌리면, 한 연결 성분의 끝을 알리는 줄과
-이중 성분 줄들이 나와야 한다. 인물 이름 대신 2글자 코드가 쓰이는지도 본다.
-
-@<anna 이중 성분 시험@>=
-func TestAnnaBicomponents(t *testing.T) {
-	g, err := gbbooks.Book("anna", 0, 0, 0, 0, 1, 1, 0, "../../data")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var sb strings.Builder
-	s := &solver{g: g, book: true, out: &sb}
-	s.hopcroftTarjan()
-	out := sb.String()
-	if !strings.Contains(out, "Bicomponent") {
-		t.Errorf("이중 성분 줄이 없다:\n%s", out)
-	}
-	if !strings.Contains(out, "connected component of the graph") {
-		t.Errorf("연결 성분 끝 줄이 없다")
-	}
-}
-
-@ 모든 인물이 어떤 성분에든 배정돼, 알고리즘이 정점을 빠뜨리지 않는지 확인한다.
-활성 스택은 끝에 비어 있어야 한다.
-
-@<anna 이중 성분 시험@>=
-func TestAllSettled(t *testing.T) {
-	g, err := gbbooks.Book("anna", 30, 1, 0, 0, 1, 1, 0, "../../data")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var sb strings.Builder
-	s := &solver{g: g, book: true, out: &sb}
-	s.hopcroftTarjan()
-	for i := int64(0); i < g.N; i++ {
-		if g.Vertices[i].Z.I == 0 {
-			t.Fatalf("정점 %d가 안 본 채로 남았다", i)
-		}
-	}
-	if s.activeStack != nil {
-		t.Error("활성 스택이 비지 않았다")
-	}
 }
 
 @* 찾아보기.
