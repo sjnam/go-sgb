@@ -5,9 +5,6 @@
 \input kotexgweb
 \def\title{GB\_\,SAVE}
 
-@s reader int
-@s writer int
-
 @* 들어가며. 이 모듈은 두 유틸리티 |SaveGraph|와 |RestoreGraph|를 담는다.
 그래프를 {\sc GB\_GRAPH}이 설명한 내부 표현과, 사람과 기계가 함께 읽을 수 있는
 기호적 파일 형식 사이에서 오가게 한다. 연구자는 이 둘로 그래프를 기계와 무관하게

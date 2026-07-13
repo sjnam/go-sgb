@@ -6,9 +6,6 @@
 \def\title{GB\_\,BOOKS}
 \def\<#1>{\hbox{$\langle$\rm#1$\rangle$}}
 
-@s charInfo int
-@s bookBuilder int
-
 @* 들어가며. 이 모듈은 고전 문학 작품에 바탕한 무향 그래프 집안을 짓는 |Book|
 서브루틴과, 그와 짝을 이루는 이분 그래프를 짓는 |BiBook| 서브루틴을 담는다.
 쓰임새는 {\sc BOOK\_COMPONENTS} 데모에서 볼 수 있다.

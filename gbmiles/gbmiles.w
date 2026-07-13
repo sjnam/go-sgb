@@ -5,8 +5,6 @@
 \input kotexgweb
 \def\title{GB\_\,MILES}
 
-@s cityInfo int
-
 @* 들어가며. 이 모듈은 |Miles| 서브루틴을 담는다. 북아메리카 도시들 사이의
 고속도로 거리 자료를 바탕으로 무향 그래프의 한 갈래를 짓는다. 쓰임새는
 {\sc MILES\_SPAN}과 {\sc GB\_PLANE} 데모에서 볼 수 있다.

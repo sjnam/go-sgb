@@ -5,12 +5,6 @@
 \input kotexgweb
 \def\title{CHAINS}
 
-@s problem int
-@s state int
-@s shared int
-@s searcher int
-@s repairer int
-
 @* 들어가며. Knuth는 Stanford GraphBase의 도전 문제 하나를 이렇게 소개했다:
 1990년 미식축구 시즌의 경기 결과를 단순 사슬로 이어, 스탠퍼드가 하버드를 몇 점
 차까지 앞선다고 ``증명''할 수 있는가? Knuth 자신의 최고 기록은 2279였고, Buel

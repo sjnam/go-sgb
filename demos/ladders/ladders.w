@@ -5,8 +5,6 @@
 \input kotexgweb
 \def\title{LADDERS}
 
-@s ladders int
-
 @* 들어가며. 이 시연 프로그램은 {\sc GB\_WORDS} 모듈이 지은 그래프를 써서
 {\sc LADDERS}라는 대화형 프로그램을 만든다. 영어 다섯 글자 낱말 둘을 주면 그
 사이의 최단 경로를 찾아 준다. 이는 Lewis Carroll이 1877년 크리스마스에
