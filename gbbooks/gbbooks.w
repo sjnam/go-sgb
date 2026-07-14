@@ -37,7 +37,6 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 외부 변수 |chapters|를 두지만, 우리는 패키지 수준 가변 상태를 피해 이들을
 |bookBuilder| 구조체에 담는다. |Book|과 |BiBook|은 안쪽 |bgraph|를 부르는데,
 |bgraph|가 두 루틴의 일을 겸한다.
-@d DataInputDirectory
 @c
 package gbbooks
 
@@ -52,6 +51,8 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
+const	DataInputDirectory = "/usr/local/sgb/data"
+
 @<상수 정의@>@;
 @<자료 구조@>@;
 @<|Book|과 |BiBook|@>@;
@@ -61,7 +62,6 @@ import (
 
 @<상수 정의@>=
 const (
-	DataInputDirectory = "/usr/local/sgb/data"
 	maxChaps   = 360        // 어떤 책도 이만큼 장이 많지 않다
 	maxChars   = 600        // 인물도 이만큼 많지 않다
 	maxCode    = 1296       // $36\times36$, 36진법 두 자리 코드의 수

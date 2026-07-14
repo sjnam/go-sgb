@@ -103,7 +103,6 @@ var defaultWtVector = []int64{100, 10, 4, 2, 2, 1, 1, 1, 1} // |wtVector|가 |ni
 @ 프로그램의 뼈대는 다음과 같다. 커널 네 패키지를 모두 끌어와, 상수와 자료
 구조를 두고, 보조 함수들을 정의한 뒤, 바깥에 내놓을 두 서브루틴 |Words|와
 |FindWord|를 짓는다.
-@d DataInputDirectory
 @c
 package gbwords
 
