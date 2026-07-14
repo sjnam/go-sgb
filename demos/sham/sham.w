@@ -1,8 +1,7 @@
 @i ../../types.w
+\datethis
 
-\def\title{Symmetric Hamiltonian Cycles}
-
-@* Introduction.
+@* Symmetric Hamiltonian Cycles.
 A {\it Hamiltonian cycle\/} of a graph visits every vertex exactly once and
 returns to its start. This program counts the Hamiltonian cycles of a graph that
 are {\it symmetric\/}: the graph has the central automorphism that sends each
@@ -12,7 +11,7 @@ cycles that map to themselves under it.
 The graph here is the one whose vertices are the squares of an $8\times9$ board
 and whose edges are knight moves; it is built by |Board| from the Go port of
 Knuth's {\it Stanford GraphBase\/} (SGB). The program is itself a port to Go,
-and to GWEB, of Knuth's \.{SGB} demonstration program {\tt sham}; the commentary
+and to \.{GWEB}, of Knuth's \.{SGB} demonstration program {\tt sham}; the commentary
 here is newly written.
 
 The search exploits the symmetry directly. Identify every vertex with its mate,
@@ -55,6 +54,7 @@ func main() {
 	@<Check that the search can start@>
 	@<Search from every pair of edges leaving |x|@>
 	fmt.Printf("Altogether %d solutions and %d wannabees.\n", count, dcount)
+	@<Print the degree sequence@>
 }
 
 @* Folding the graph in half.
@@ -98,7 +98,7 @@ Self-loops would confuse the forcing rule below (a vertex of apparent degree~1
 that is really a dead end), and they are never part of a cycle, so we splice them
 out of every arc list first.
 @<Remove self-loops@>=
-for i := 0; i < n; i++ {
+for i := range n {
 	v := &g.Vertices[i]
 	var prev *Arc
 	for a := v.Arcs; a != nil; a = a.Next {
@@ -132,7 +132,7 @@ id := func(v *Vertex) int { return int(g.Index(v)) }
 
 dmin := n
 var x *Vertex
-for i := 0; i < n; i++ {
+for i := range n {
 	v := &g.Vertices[i]
 	taken[i] = false
 	d := 0
@@ -157,7 +157,7 @@ if deg[id(x)] < 2 {
 }
 
 @ @<Print the degree sequence@>=
-for i := 0; i < n; i++ {
+for i := range n {
 	fmt.Printf(" %d", deg[i])
 }
 fmt.Println()
@@ -307,25 +307,25 @@ others (an even number of crossings) still form a valid path but do not give a
 new symmetric cycle, so we count them separately as ``wannabees.''
 @<Record a solution@>=
 s := int64(0)
-for k := 0; k < tmax; k++ {
+for k := range tmax {
 	s ^= ark[k].Len & 1
 }
 if s != 0 {
 	*count++
 	if *count%100000 == 0 {
-		report(g, "", *count, x, ark, tmax)
+		report("", *count, x, ark, tmax)
 	}
 } else {
 	*dcount++
 	if *dcount%100000 == 0 {
-		report(g, ">", *dcount, x, ark, tmax)
+		report(">", *dcount, x, ark, tmax)
 	}
 }
 
 @ |report| echoes one tour: the start vertex, then each successive vertex,
 prefixed by \.{*} when the arc into it crosses to the mate side.
 @<Sub...@>=
-func report(g *Graph, prefix string, num int, x *Vertex, ark []*Arc, tmax int) {
+func report(prefix string, num int, x *Vertex, ark []*Arc, tmax int) {
 	fmt.Printf("%s%d: %s", prefix, num, x.Name)
 	for k := 0; k < tmax; k++ {
 		sep := " "
