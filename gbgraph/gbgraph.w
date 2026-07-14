@@ -183,6 +183,7 @@ type Graph struct {
 	ID       string   // GraphBase 표식
 	UtilTypes string  // 유틸리티 필드들의 쓰임새
 	UU, VV, WW, XX, YY, ZZ Util // 다목적 필드들
+	arcs []*Arc // 할당 순서의 호 레코드; SGB 호환 저장을 위해서만 쓴다
 }
 
 @ |UtilTypes|는 언제나 길이 14의 문자열이다. 처음 여섯 자는 |Vertex|의
@@ -288,10 +289,16 @@ func (g *Graph) MakeDoubleCompoundID(s1 string, gg *Graph, s2 string,
 안전망도 있었다. \GO/에서 이 루틴의 소임은 |new| 한 번으로 줄지만,
 생성기들이 직접 부르는 일이 있으므로 이름은 남겨 둔다.
 
+블록 관리는 쓰레기 수거기에게 넘겼지만, 딱 한 가지 흔적은 남긴다: {\sc
+GB\_\,SAVE}가 SGB와 byte 단위로 같은 \.{.gb} 파일을 뽑으려면 호를 만들어진
+순서대로 번호 매겨야 하므로, 새로 만든 호를 |g.arcs|에 차례로 적어 둔다.
+
 @<그래프 키우기@>=
-// |VirginArc|는 새 |Arc| 레코드 하나를 내준다. 호 수 |M|은 세지 않는다.
+// |VirginArc|는 새 |Arc| 레코드 하나를 내주고, 할당 순서에 적어 둔다.
 func (g *Graph) VirginArc() *Arc {
-	return new(Arc)
+	a := new(Arc)
+	g.arcs = append(g.arcs, a)
+	return a
 }
 
 @ |g.NewArc(u,v,len)|은 정점 |u|에서 |v|로 가는 길이 |len|의 호를
@@ -309,32 +316,32 @@ func (g *Graph) NewArc(u, v *Vertex, len int64) {
 }
 
 @ 무향 그래프에는 호 대신 ``간선(edge)''이 있다. 간선 하나는 양쪽으로
-가는 호 두 개로 표현한다. \CEE/에서는 |arcs_per_block|이 짝수라는 사실 덕에
-|gb_virgin_arc|를 한 번만 불러 이웃한 레코드 한 쌍을 얻었고, |u<v|냐
-아니냐에 따라 어느 쪽이 앞 레코드가 되는지를 공들여 정해 두었다 — 짝을
-포인터 산술로 찾기 위해서다. 우리는 |[2]Arc| 배열 하나를 할당해 두 호가
-이웃한다는 전통을 지키되, 서로를 |Partner| 필드로 정직하게 가리키게
-하므로 |u<v| 구분은 필요 없어진다.
+가는 호 두 개로 표현한다. 짝을 찾는 일은 |Partner| 필드가 맡으므로
+\CEE/의 |edge_trick| 포인터 산술은 필요 없다. 다만 두 호에 매기는 번호까지
+\CEE/와 똑같이 하려고, |gb_new_edge|의 순서 규약은 글자 그대로 옮긴다:
+잇달아 할당한 두 호 |a|, |b| 가운데 |a|가 앞 번호를 받는데, |u<v|이면 |a|가
+|u|에서 |v|로 가는 호(|u|의 리스트)이고, 아니면 |a|가 |v|에서 |u|로 가는
+호(|v|의 리스트)다. 이렇게 해야 {\sc GB\_\,SAVE}의 호 번호가 SGB와 맞는다.
 
-다만 자기 고리(|u==v|)일 때는 손이 조금 간다. 두 호가 같은 정점의
-리스트에 앞뒤로 이어져야 하는데, \CEE/가 만들던 모양 — 첫 호의 |Next|가
-곧 짝 — 을 그대로 재현한다.
+정점의 앞뒤는 포인터 순서, 곧 |Index| 순서로 가른다. 자기 고리(|u==v|)는
+|u>=v| 갈래로 들어가며, \CEE/가 만들던 모양 — 첫 호의 |Next|가 곧 짝 — 이
+그대로 나온다.
 
 @<그래프 키우기@>=
 // |NewEdge|는 |u|와 |v|를 잇는 간선, 곧 서로 짝이 되는 호 한 쌍을 |g|에 만든다.
 func (g *Graph) NewEdge(u, v *Vertex, len int64) {
-	pair := new([2]Arc) // 두 호는 \CEE/에서처럼 메모리에서도 이웃이다
-	a, b := &pair[0], &pair[1]
+	a, b := g.VirginArc(), g.VirginArc() // |a|가 앞 번호, |b|가 뒤 번호
 	a.Partner, b.Partner = b, a
-	a.Tip, b.Tip = v, u
 	a.Len, b.Len = len, len
-	if u == v {
-		b.Next = u.Arcs
-		a.Next = b
-		u.Arcs = a
-	} else {
-		a.Next, b.Next = u.Arcs, v.Arcs
+	if g.Index(u) < g.Index(v) {
+		a.Tip, a.Next = v, u.Arcs
+		b.Tip, b.Next = u, v.Arcs
 		u.Arcs, v.Arcs = a, b
+	} else { // |u>=v|; 자기 고리도 이 갈래다
+		b.Tip, b.Next = v, u.Arcs
+		u.Arcs = b // |u==v|일 때를 대비해 먼저 해 둔다
+		a.Tip, a.Next = u, v.Arcs
+		v.Arcs = a
 	}
 	g.M += 2
 }
@@ -356,6 +363,31 @@ func (g *Graph) Index(v *Vertex) int64 {
 	base := uintptr(unsafe.Pointer(&g.Vertices[0]))
 	off := uintptr(unsafe.Pointer(v)) - base
 	return int64(off / unsafe.Sizeof(Vertex{}))
+}
+
+@ {\sc GB\_\,SAVE}는 호를 할당 순서대로 번호 매겨 내보낸다. \CEE/는 호를
+|arcsPerBlock|(102)개들이 블록으로 떼어 주었고, 마지막 블록의 안 쓰인 자리는
+빈 레코드로 남아 파일에도 그대로 실렸다. |ArcRecords|는 그 모양을 재현한다:
+할당 순서의 호들에, 레코드 수가 102의 배수가 되도록 |nil| 자리를 덧붙여 준다.
+
+@<그래프 키우기@>=
+const arcsPerBlock = 102 // \CEE/ |gb_virgin_arc|의 블록 크기
+
+// |ArcRecords|는 할당 순서의 모든 호 레코드를 준다(빈 자리는 |nil|).
+func (g *Graph) ArcRecords() []*Arc {
+	total := len(g.arcs)
+	if r := total % arcsPerBlock; r != 0 {
+		total += arcsPerBlock - r
+	}
+	records := make([]*Arc, total)
+	copy(records, g.arcs)
+	return records
+}
+
+// |SetArcStore|는 되살린 그래프의 호 레코드를 파일 순서대로 등록해,
+// {\sc GB\_\,SAVE}가 그 그래프를 똑같이 다시 저장할 수 있게 한다.
+func (g *Graph) SetArcStore(arcs []*Arc) {
+	g.arcs = arcs
 }
 
 @ \GO/ 1.23이 들여온 범위 함수(range-over-func) 덕에, 앞서 손으로 풀어

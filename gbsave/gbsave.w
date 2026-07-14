@@ -394,14 +394,20 @@ func (r *reader) finishRecord() error {
 
 @ 마지막으로 짝 호를 잇는다. |save_graph|가 짝을 이웃하게 뽑아 두므로, 되살린
 호 배열에서 이웃한 둘($2k$, $2k+1$)이 서로의 짝이다(\CEE/의 |edge_trick|을
-흉내 낸다). 그래야 무향 그래프 연산이 |Partner|를 따라갈 수 있다. 그다음
-검사합을 확인한다.
+흉내 낸다). 그래야 무향 그래프 연산이 |Partner|를 따라갈 수 있다. 되살린 호를
+파일 순서 그대로 |g|의 저장고에 등록하면, 이 그래프를 다시 저장했을 때 원본과
+글자까지 같은 파일이 나온다. 그다음 검사합을 확인한다.
 
 @<짝 호를 잇고 검사합을 확인한다@>=
 for i := 0; i+1 < len(r.arcs); i += 2 {
 	r.arcs[i].Partner = &r.arcs[i+1]
 	r.arcs[i+1].Partner = &r.arcs[i]
 }
+store := make([]*gbgraph.Arc, len(r.arcs))
+for i := range r.arcs {
+	store[i] = &r.arcs[i]
+}
+r.g.SetArcStore(store)
 line := r.f.String('\n')
 magic := r.f.RawClose()
 var sum int64
@@ -488,21 +494,11 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	if g == nil || g.Vertices == nil {
 		return gbgraph.MissingOperand
 	}
-	arcIndex := map[*gbgraph.Arc]int64{}
-	var arcList []*gbgraph.Arc
-	for v := range g.AllVertices() {
-		for a := range v.AllArcs() {
-			if _, ok := arcIndex[a]; ok {
-				continue
-			}
-			arcIndex[a] = int64(len(arcList))
-			arcList = append(arcList, a)
-			if p := a.Partner; p != nil {
-				if _, ok := arcIndex[p]; !ok {
-					arcIndex[p] = int64(len(arcList))
-					arcList = append(arcList, p)
-				}
-			}
+	arcRecords := g.ArcRecords()
+	arcIndex := make(map[*gbgraph.Arc]int64, len(arcRecords))
+	for i, a := range arcRecords {
+		if a != nil {
+			arcIndex[a] = int64(i)
 		}
 	}
 	file, err := os.Create(filename)
@@ -515,8 +511,10 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	return w.out.Flush()
 }
 
-@ 첫 줄과 표시 줄은 곧장 쓰고, 레코드들은 |field|를 거쳐 검사합에 든다. 정점
-수와 호 수는 |g.N|과 |arcList|의 길이(곧 |g.M|)다.
+@ 첫 줄과 표시 줄은 곧장 쓰고, 레코드들은 |field|를 거쳐 검사합에 든다.
+머리글의 정점 수와 호 수는 SGB처럼 {\it 블록 전체\/}의 크기다 --- 정점은
+그림자까지 포함한 |len(g.Vertices)|, 호는 102의 배수로 채운 |arcRecords|의
+길이. (그래프 레코드 줄에 적히는 |g.N|·|g.M|과는 다르다.)
 
 @<그래프를 외부 형식으로 옮긴다@>=
 w.out.WriteString("* GraphBase graph (util_types ")
@@ -529,9 +527,9 @@ for i := 0; i < 14; i++ {
 	}
 }
 w.out.WriteString(",")
-w.out.WriteString(strconv.FormatInt(g.N, 10))
+w.out.WriteString(strconv.FormatInt(int64(len(g.Vertices)), 10))
 w.out.WriteString("V,")
-w.out.WriteString(strconv.FormatInt(int64(len(arcList)), 10))
+w.out.WriteString(strconv.FormatInt(int64(len(arcRecords)), 10))
 w.out.WriteString("A)\n")
 @<그래프 레코드를 옮긴다@>@;
 @<정점 레코드를 옮긴다@>@;
@@ -611,9 +609,13 @@ for pos := 8; pos <= 13; pos++ {
 }
 w.flushLine()
 
-@ @<정점 레코드를 옮긴다@>=
+@ 정점 레코드는 그림자 정점까지 블록 전체를 내보낸다. 안 쓰인 그림자 정점은
+이름이 빈 문자열, 호가 |nil|이라 저절로 `\.{"",0}'으로 나온다.
+
+@<정점 레코드를 옮긴다@>=
 w.out.WriteString("* Vertices\n")
-for v := range g.AllVertices() {
+for i := range g.Vertices {
+	v := &g.Vertices[i]
 	w.commaExpected = false
 	w.field(quote(v.Name), 'S')
 	if v.Arcs != nil {
@@ -627,10 +629,16 @@ for v := range g.AllVertices() {
 	w.flushLine()
 }
 
-@ @<호 레코드를 옮긴다@>=
+@ 호 레코드는 |arcRecords|(할당 순서, 102의 배수로 채운 것)를 그대로 훑는다.
+빈 자리(|nil|)는 필드가 모두 0인 호로 다루어 `\.{0,0,0}'으로 나온다.
+
+@<호 레코드를 옮긴다@>=
 w.out.WriteString("* Arcs\n")
-for _, a := range arcList {
+for _, a := range arcRecords {
 	w.commaExpected = false
+	if a == nil {
+		a = &gbgraph.Arc{} // 안 쓰인 슬롯: 모든 필드가 0
+	}
 	if a.Tip != nil {
 		w.field("V"+strconv.FormatInt(g.Index(a.Tip), 10), 'V')
 	} else {
