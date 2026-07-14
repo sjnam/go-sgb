@@ -1,0 +1,11 @@
+# tangle 생성물 — .w가 일차 산출물이므로 .go는 커밋하지 않는다
+*.go
+
+# weave/조판 생성물
+*.tex
+*.idx
+*.scn
+*.toc
+*.log
+*.pdf
+
