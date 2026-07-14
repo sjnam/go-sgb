@@ -41,7 +41,7 @@ package gbdijk
 import (
 	"fmt"
 	"io"
-
+	@#
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 

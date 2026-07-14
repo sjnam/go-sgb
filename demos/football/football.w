@@ -58,7 +58,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
+	@#
 	"github.com/sjnam/go-sgb/gbflip"
 	"github.com/sjnam/go-sgb/gbgames"
 	"github.com/sjnam/go-sgb/gbgraph"
@@ -68,9 +68,9 @@ import (
 디렉터리다. 음수 너비는 절댓값을 쓴다(하이픈을 쓴 사용자를 위해).
 
 @<명령줄 옵션을 읽는다@>=
+var dir string
 var width int64
 verbose := false
-dir := "data"
 for _, arg := range os.Args[1:] {
 	switch {
 	case arg == "-v":
@@ -127,7 +127,7 @@ type chainer struct {
 	mm   int64   // \.{-v}용 계수기
 }
 
-@* 그래프 마련. |games(0,...)|로 1990년 시즌 전체 그래프를 짓는다. |Games|가 준
+@* 그래프 마련. |Games(0,...)|로 1990년 시즌 전체 그래프를 짓는다. |Games|가 준
 호에는 |u|가 낸 점수가 |Len|으로 실려 있다. 우리는 그 호에 |del| 필드를 더
 얹는데, |del|은 |u|와 |v|의 점수 차다. 게임 그래프에서 |venue|였던 |A.I| 자리를
 이제 |del|로 다시 쓴다.

@@ -66,14 +66,14 @@ import (
 	"runtime"
 	"sync"
 	"time"
-
+	@#
 	"github.com/sjnam/go-sgb/gbgames"
 )
 
 @ @<명령줄 옵션을 읽는다@>=
 from := flag.String("from", "Stanford", "시작 팀")
 to := flag.String("to", "Harvard", "목표 팀")
-dir := flag.String("D", "data", "자료 디렉터리")
+dir := flag.String("D", "/usr/local/sgb/data", "자료 디렉터리")
 limit := flag.Duration("t", 30*time.Second, "탐색 시간")
 workers := flag.Int("w", runtime.NumCPU(), "병렬 탐색 수")
 seed := flag.Uint64("s", 1, "난수 씨앗")

@@ -45,7 +45,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-
+	@#
 	"github.com/sjnam/go-sgb/gbflip"
 	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbio"
