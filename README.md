@@ -1,7 +1,7 @@
 # go-sgb
 
 Donald Knuth의 [Stanford GraphBase](https://www-cs-faculty.stanford.edu/~knuth/sgb.html)
-(SGB)를 **한글 \.{GWEB} 문학적 프로그램**으로 옮겨 Go로 짜는 프로젝트다.
+(SGB)를 **한글 GWEB 문학적 프로그램**으로 옮겨 Go로 짜는 프로젝트다.
 `.w` 문서가 일차 산출물이고, 여기서 `gtangle`로 Go 소스를, `gweave`+`luatex`로
 한글 PDF 문서를 뽑아낸다.
 
