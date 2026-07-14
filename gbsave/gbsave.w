@@ -512,7 +512,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 }
 
 @ 첫 줄과 표시 줄은 곧장 쓰고, 레코드들은 |field|를 거쳐 검사합에 든다.
-머리글의 정점 수와 호 수는 SGB처럼 {\it 블록 전체\/}의 크기다 --- 정점은
+머리글의 정점 수와 호 수는 SGB처럼 {\it 블록 전체\/}의 크기다---정점은
 그림자까지 포함한 |len(g.Vertices)|, 호는 102의 배수로 채운 |arcRecords|의
 길이. (그래프 레코드 줄에 적히는 |g.N|·|g.M|과는 다르다.)
 
