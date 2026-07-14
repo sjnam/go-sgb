@@ -10,6 +10,7 @@
 
 @s Reader int
 @s Writer int
+@s iter.Seq int
 @s testing.T int
 @s testing.B int
 

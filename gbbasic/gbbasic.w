@@ -1372,7 +1372,7 @@ func Complement(g *gbgraph.Graph, cp, self, directed bool) (*gbgraph.Graph, erro
 for i := int64(0); i < n; i++ {
 	v := &g.Vertices[i]
 	u := &ng.Vertices[i]
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		ng.Vertices[g.Index(a.Tip)].U.V = u // |tmp|를 |u|로 찍는다
 	}
 	if directed {
@@ -1773,7 +1773,7 @@ for ui := int64(0); ui < m; ui++ {
 		ng.NewEdge(u, &ng.Vertices[li], 1)
 	}
 	v = u.V.V // 이어서 둘째 끝점에 닿는 앞선 선들
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		vv := a.Tip
 		if inArray(vv, ng.Vertices[:m]) && ptrLess(vv, u) {
 			ng.NewEdge(u, vv, 1)
@@ -2052,7 +2052,7 @@ for i := int64(0); i < g.N; i++ {
 }
 
 @ @<|u|에 닿는 기존 간선을 표시한다@>=
-for a := u.Arcs; a != nil; a = a.Next {
+for a := range u.AllArcs() {
 	tip := a.Tip
 	tip.U.V = u
 	if directed || ptrLess(u, tip) || a.Next == a.Partner {
@@ -2180,8 +2180,7 @@ if directed || ptrGeq(toV, fromV) {
 비운다.
 
 @<|g|를 원래 상태로 되돌린다@>=
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
+for v := range g.AllVertices() {
 	if v.Z.V != nil {
 		v.Z.I = v.Z.V.V.I // |ind|를 되살린다
 		v.Z.V = nil
@@ -2280,7 +2279,7 @@ func TestComplete(t *testing.T) {
 }
 
 func degree(v *gbgraph.Vertex) (d int64) {
-	for a := v.Arcs; a != nil; a = a.Next {
+	for range v.AllArcs() {
 		d++
 	}
 	return
@@ -2298,9 +2297,9 @@ func TestQueenBoard(t *testing.T) {
 		t.Fatalf("N = %d, 원함 12", g.N)
 	}
 	// 3x4 판에서 각 칸의 룩 이동은 (3-1)+(4-1)=5개다.
-	for i := range g.Vertices[:g.N] {
-		if d := degree(&g.Vertices[i]); d != 5 {
-			t.Errorf("정점 %s의 룩 차수 = %d, 원함 5", g.Vertices[i].Name, d)
+	for v := range g.AllVertices() {
+		if d := degree(v); d != 5 {
+			t.Errorf("정점 %s의 룩 차수 = %d, 원함 5", v.Name, d)
 		}
 	}
 }
@@ -2336,9 +2335,9 @@ func TestPetersen(t *testing.T) {
 	if g.M/2 != 15 {
 		t.Errorf("간선 수 = %d, 원함 15", g.M/2)
 	}
-	for i := range g.Vertices[:g.N] {
-		if d := degree(&g.Vertices[i]); d != 3 {
-			t.Errorf("정점 %s의 차수 = %d, 원함 3", g.Vertices[i].Name, d)
+	for v := range g.AllVertices() {
+		if d := degree(v); d != 3 {
+			t.Errorf("정점 %s의 차수 = %d, 원함 3", v.Name, d)
 		}
 	}
 }
@@ -2393,9 +2392,9 @@ func TestBinary(t *testing.T) {
 	if g.M/2 != 5 {
 		t.Errorf("간선 수 = %d, 원함 5", g.M/2)
 	}
-	for i := range g.Vertices[:g.N] {
-		if d := degree(&g.Vertices[i]); d != 2 {
-			t.Errorf("정점 %s의 차수 = %d, 원함 2", g.Vertices[i].Name, d)
+	for v := range g.AllVertices() {
+		if d := degree(v); d != 2 {
+			t.Errorf("정점 %s의 차수 = %d, 원함 2", v.Name, d)
 		}
 	}
 }
@@ -2491,9 +2490,9 @@ func TestProductC4(t *testing.T) {
 	if p.N != 4 || p.M/2 != 4 {
 		t.Errorf("K2□K2: N=%d, 간선=%d, 원함 4,4", p.N, p.M/2)
 	}
-	for i := range p.Vertices[:p.N] {
-		if d := degree(&p.Vertices[i]); d != 2 {
-			t.Errorf("정점 %s의 차수 = %d, 원함 2", p.Vertices[i].Name, d)
+	for v := range p.AllVertices() {
+		if d := degree(v); d != 2 {
+			t.Errorf("정점 %s의 차수 = %d, 원함 2", v.Name, d)
 		}
 	}
 }

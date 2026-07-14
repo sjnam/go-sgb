@@ -147,7 +147,7 @@ for i := 0; i < n; i++ {
 	if v.Name == to {
 		p.goal = i
 	}
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		j := int(g.Index(a.Tip))
 		if d := a.Len - a.Partner.Len; d > p.del[i][j] {
 			p.del[i][j] = d

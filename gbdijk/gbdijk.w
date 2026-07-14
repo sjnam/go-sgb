@@ -114,8 +114,8 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 여긴다. 처음엔 모든 |backlink|를 지우고, |uu|만 자기 자신을 가리키게 한다.
 
 @<|uu|만을 본 정점으로 만들고, 아는 정점으로도 삼는다@>=
-for i := int64(0); i < gg.N; i++ {
-	gg.Vertices[i].Y.V = nil // |backlink|를 지운다
+for v := range gg.AllVertices() {
+	v.Y.V = nil // |backlink|를 지운다
 }
 uu.Y.V = uu   // |backlink|
 uu.Z.I = 0    // |dist|
@@ -127,7 +127,7 @@ pq.Init(0)    // 큐를 비운다
 
 @<|t|에 이웃한 아직 못 본 정점을 큐에 넣고, 나머지의 거리를 고친다@>=
 d := t.Z.I - t.X.I // |dist|에서 |hh| 값을 뺀 값
-for a := t.Arcs; a != nil; a = a.Next {
+for a := range t.AllArcs() {
 	v := a.Tip
 	if v.Y.V != nil { // |v|를 이미 보았다
 		dd := d + a.Len + v.X.I

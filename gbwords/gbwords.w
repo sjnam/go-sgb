@@ -473,8 +473,8 @@ func FindWord(g *gbgraph.Graph, q string, f func(*gbgraph.Vertex)) *gbgraph.Vert
 		return nil
 	}
 	ht := makeWordHash()
-	for i := int64(0); i < g.N; i++ {
-		ht.insert(&g.Vertices[i], nil)
+	for v := range g.AllVertices() {
+		ht.insert(v, nil)
 	}
 	@<꼭 맞는 낱말이 있으면 돌려준다@>@;
 	@<|q|와 이웃한 낱말마다 |f|를 부른다@>@;
@@ -583,9 +583,8 @@ func TestWordStructure(t *testing.T) {
 }
 
 @ @<모든 호를 확인한다@>=
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
-	for a := v.Arcs; a != nil; a = a.Next {
+for v := range g.AllVertices() {
+	for a := range v.AllArcs() {
 		if a.Len != 1 {
 			t.Fatalf("호 길이 = %d, 원함 1", a.Len)
 		}

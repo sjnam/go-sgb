@@ -298,8 +298,7 @@ Computer Science\/ \bf 6\/} (1978), 281--315]. 각 성분의 정점들은 |clink
 
 @<모든 정점을 저마다의 성분에 넣는다@>=
 components := s.g.N
-for i := int64(0); i < s.g.N; i++ {
-	v := &s.g.Vertices[i]
+for v := range s.g.AllVertices() {
 	s.mems += 2 // |oo,v->clink=v->comp=v|
 	v.Z.V, v.Y.V = v, v
 	s.mems++ // |o,v->csize=1|

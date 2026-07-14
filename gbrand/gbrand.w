@@ -335,7 +335,7 @@ for {
   |break|한다@>=
 if multi <= 0 {
 	var dup *gbgraph.Arc
-	for a := u.Arcs; a != nil; a = a.Next {
+	for a := range u.AllArcs() {
 		if a.Tip == v {
 			dup = a
 			break
@@ -464,8 +464,7 @@ randLen := func() int64 {
 	}
 	return minLen + rng.Unif(maxLen-minLen+1)
 }
-for i := int64(0); i < g.N; i++ {
-	u := &g.Vertices[i]
+for u := range g.AllVertices() {
 	for a := u.Arcs; a != nil; a = a.Next {
 		v := a.Tip
 		if !directed && g.Index(u) > g.Index(v) {
@@ -526,7 +525,7 @@ func TestBasicUndirected(t *testing.T) {
 	}
 	seen := make(map[[2]int64]bool)
 	for i := int64(0); i < g.N; i++ {
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[i].AllArcs() {
 			if a.Tip == &g.Vertices[i] {
 				t.Fatalf("자기 고리가 있으면 안 된다: 정점 %d", i)
 			}
@@ -579,10 +578,10 @@ func TestDirectedSelfMulti(t *testing.T) {
 		t.Errorf("M = %d, 원함 500", g.M)
 	}
 	sawSelfLoop, sawDup := false, false
-	for i := int64(0); i < g.N; i++ {
+	for v := range g.AllVertices() {
 		seen := make(map[int64]int)
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
-			if a.Tip == &g.Vertices[i] {
+		for a := range v.AllArcs() {
+			if a.Tip == v {
 				sawSelfLoop = true
 			}
 			seen[g.Index(a.Tip)]++
@@ -609,7 +608,7 @@ func TestNoDuplicates(t *testing.T) {
 	}
 	for i := int64(0); i < g.N; i++ {
 		seen := make(map[int64]bool)
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[i].AllArcs() {
 			key := g.Index(a.Tip)
 			if seen[key] {
 				t.Fatalf("정점 %d에서 %d로 가는 호가 중복됐다", i, key)
@@ -645,12 +644,12 @@ func TestNonuniformDistribution(t *testing.T) {
 		t.Fatal(err)
 	}
 	forward, backward := 0, 0
-	for a := g.Vertices[0].Arcs; a != nil; a = a.Next {
+	for a := range g.Vertices[0].AllArcs() {
 		if g.Index(a.Tip) == n-1 {
 			forward++
 		}
 	}
-	for a := g.Vertices[n-1].Arcs; a != nil; a = a.Next {
+	for a := range g.Vertices[n-1].AllArcs() {
 		if g.Index(a.Tip) == 0 {
 			backward++
 		}
@@ -673,8 +672,8 @@ func TestWalkerTableRuns(t *testing.T) {
 	if g.N != 3 {
 		t.Fatalf("N = %d, 원함 3", g.N)
 	}
-	for i := int64(0); i < g.N; i++ {
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+	for v := range g.AllVertices() {
+		for a := range v.AllArcs() {
 			if a.Len < 1 || a.Len > 2 {
 				t.Errorf("길이 %d가 [1,2] 밖이다", a.Len)
 			}
@@ -703,7 +702,7 @@ func TestRandomBigraph(t *testing.T) {
 	n1 := g.N1()
 	for i := int64(0); i < g.N; i++ {
 		left := i < n1
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[i].AllArcs() {
 			if (g.Index(a.Tip) < n1) == left {
 				t.Fatalf("간선이 두 갈래를 잇지 않는다: %d -> %d", i, g.Index(a.Tip))
 			}
@@ -723,9 +722,8 @@ func TestRandomLengths(t *testing.T) {
 	if err := RandomLengths(g, false, 100, 200, nil, 5); err != nil {
 		t.Fatal(err)
 	}
-	for i := int64(0); i < g.N; i++ {
-		u := &g.Vertices[i]
-		for a := u.Arcs; a != nil; a = a.Next {
+	for u := range g.AllVertices() {
+		for a := range u.AllArcs() {
 			if a.Len < 100 || a.Len > 200 {
 				t.Errorf("길이 %d가 [100,200] 밖이다", a.Len)
 			}

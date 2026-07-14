@@ -490,8 +490,8 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	}
 	arcIndex := map[*gbgraph.Arc]int64{}
 	var arcList []*gbgraph.Arc
-	for i := int64(0); i < g.N; i++ {
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+	for v := range g.AllVertices() {
+		for a := range v.AllArcs() {
 			if _, ok := arcIndex[a]; ok {
 				continue
 			}
@@ -613,8 +613,7 @@ w.flushLine()
 
 @ @<정점 레코드를 옮긴다@>=
 w.out.WriteString("* Vertices\n")
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
+for v := range g.AllVertices() {
 	w.commaExpected = false
 	w.field(quote(v.Name), 'S')
 	if v.Arcs != nil {

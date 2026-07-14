@@ -13,7 +13,7 @@ GWEAVE  ?= gweave
 
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
 PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks gbgames gbrand
-DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains
+DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains demos/sham
 
 .PHONY: all tangle doc test clean $(PKGS) $(DEMOS)
 .DEFAULT_GOAL := all

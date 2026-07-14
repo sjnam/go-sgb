@@ -172,8 +172,7 @@ func printMerge(out io.Writer, c int64, name string, size int64) {
 
 @<뜻밖의 성분들을 모두 보여 준다@>=
 fmt.Fprint(out, "\nThe following non-isolated words didn't join the giant component:\n")
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
+for v := range g.AllVertices() {
 	if v.Y.V == v && v.X.I > 1 && v.X.I+v.X.I < g.N {
 		c := int64(1) // 이번 줄에 찍은 낱말 수
 		fmt.Fprint(out, v.Name)

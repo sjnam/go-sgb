@@ -524,7 +524,7 @@ func TestArcFields(t *testing.T) {
 		t.Fatal(err)
 	}
 	v := &g.Vertices[0]
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		if a.A.I < home || a.A.I > away {
 			t.Fatalf("venue = %d, 범위 밖", a.A.I)
 		}

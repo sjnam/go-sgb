@@ -391,8 +391,8 @@ func TestCompleteGraph(t *testing.T) {
 	if g.M != 2*8128 {
 		t.Errorf("호 수 = %d, 원함 %d", g.M, 2*8128)
 	}
-	for i := int64(0); i < g.N; i++ {
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+	for v := range g.AllVertices() {
+		for a := range v.AllArcs() {
 			if a.Len <= 0 {
 				t.Fatalf("간선 길이 = %d", a.Len)
 			}
@@ -408,9 +408,9 @@ func TestCompleteGraph(t *testing.T) {
 
 @<거리 시험@>=
 func vertexNamed(g *gbgraph.Graph, name string) *gbgraph.Vertex {
-	for i := int64(0); i < g.N; i++ {
-		if g.Vertices[i].Name == name {
-			return &g.Vertices[i]
+	for v := range g.AllVertices() {
+		if v.Name == name {
+			return v
 		}
 	}
 	return nil
@@ -426,7 +426,7 @@ func TestKnownDistance(t *testing.T) {
 	if w == nil || y == nil {
 		t.Fatal("Worcester나 Youngstown을 찾지 못함")
 	}
-	for a := w.Arcs; a != nil; a = a.Next {
+	for a := range w.AllArcs() {
 		if a.Tip == y {
 			if a.Len != 604 {
 				t.Errorf("Worcester-Youngstown = %d, 원함 604", a.Len)

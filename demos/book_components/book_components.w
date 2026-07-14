@@ -161,8 +161,7 @@ func (s *solver) name(v *gbgraph.Vertex) string {
 등장 횟수까지 보인다.
 
 @<선택된 인물들의 명단을 찍는다@>=
-for i := int64(0); i < s.g.N; i++ {
-	v := &s.g.Vertices[i]
+for v := range s.g.AllVertices() {
 	if verbose == 1 {
 		fmt.Fprintf(s.out, "%s=%s\n", s.name(v), v.Name)
 	} else {
@@ -187,8 +186,7 @@ fmt.Fprintln(s.out)
 func (s *solver) hopcroftTarjan() {
 	s.dummy = new(gbgraph.Vertex) // rank 0
 	@<모든 정점을 안 본 상태로, 모든 호를 태그 안 됨으로 둔다@>@;
-	for i := int64(0); i < s.g.N; i++ {
-		vv := &s.g.Vertices[i]
+	for vv := range s.g.AllVertices() {
 		if vv.Z.I == 0 { // 아직 안 봤다
 			s.dfs(vv)
 		}
@@ -196,8 +194,7 @@ func (s *solver) hopcroftTarjan() {
 }
 
 @ @<모든 정점을 안 본 상태로, 모든 호를 태그 안 됨으로 둔다@>=
-for i := int64(0); i < s.g.N; i++ {
-	v := &s.g.Vertices[i]
+for v := range s.g.AllVertices() {
 	v.Z.I = 0    // rank
 	v.X.A = v.Arcs // untagged
 }

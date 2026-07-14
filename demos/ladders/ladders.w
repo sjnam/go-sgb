@@ -170,16 +170,14 @@ if verbose {
 
 @<|alph|이나 |freq|이면 간선 길이를 고친다@>=
 if alph {
-	for i := int64(0); i < g.N; i++ {
-		u := &g.Vertices[i]
-		for a := u.Arcs; a != nil; a = a.Next {
+	for u := range g.AllVertices() {
+		for a := range u.AllArcs() {
 			a.Len = aDist(u.Name, a.Tip.Name, int(a.A.I))
 		}
 	}
 } else if freq {
-	for i := int64(0); i < g.N; i++ {
-		u := &g.Vertices[i]
-		for a := u.Arcs; a != nil; a = a.Next {
+	for u := range g.AllVertices() {
+		for a := range u.AllArcs() {
 			a.Len = freqCost(a.Tip)
 		}
 	}

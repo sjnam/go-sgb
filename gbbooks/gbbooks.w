@@ -437,7 +437,7 @@ for qi := 0; qi+1 < len(clique); qi++ {
 
 @<|bgraph|와 그 도우미@>=
 func (b *bookBuilder) makeAdjacent(u, v *gbgraph.Vertex, k int64) {
-	for a := u.Arcs; a != nil; a = a.Next {
+	for a := range u.AllArcs() {
 		if a.Tip == v {
 			return // 이미 이웃이다
 		}
@@ -619,7 +619,7 @@ func isBipartite(g *gbgraph.Graph) bool {
 	n1 := g.N1()
 	for i := int64(0); i < g.N; i++ {
 		left := i < n1
-		for a := g.Vertices[i].Arcs; a != nil; a = a.Next {
+		for a := range g.Vertices[i].AllArcs() {
 			if (g.Index(a.Tip) < n1) == left {
 				return false
 			}

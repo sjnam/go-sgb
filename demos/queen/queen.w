@@ -64,10 +64,9 @@ if err != nil {
 fmt.Fprint(out, "Queen Moves on a 3x4 Board\n\n")
 fmt.Fprintf(out, "  The graph whose official name is\n%s\n", g.ID)
 fmt.Fprintf(out, "  has %d vertices and %d arcs:\n\n", g.N, g.M)
-for i := range g.Vertices[:g.N] {
-	v := &g.Vertices[i]
+for v := range g.AllVertices() {
 	fmt.Fprintf(out, "%s\n", v.Name)
-	for a := v.Arcs; a != nil; a = a.Next {
+	for a := range v.AllArcs() {
 		fmt.Fprintf(out, "  -> %s, length %d\n", a.Tip.Name, a.Len)
 	}
 }

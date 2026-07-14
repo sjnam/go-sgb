@@ -137,9 +137,8 @@ g, err := gbgames.Games(0, 0, 0, 0, 0, 0, 0, 0, dir)
 if err != nil {
 	log.Fatalf("그래프를 만들 수 없습니다: %v", err)
 }
-for i := int64(0); i < g.N; i++ {
-	v := &g.Vertices[i]
-	for a := v.Arcs; a != nil; a = a.Next {
+for v := range g.AllVertices() {
+	for a := range v.AllArcs() {
 		if g.Index(a.Tip) > g.Index(v) { // 짝마다 한 번만
 			a.A.I = a.Len - a.Partner.Len // |del|
 			a.Partner.A.I = -a.A.I
@@ -158,8 +157,7 @@ for i := int64(0); i < g.N; i++ {
 
 @<탐욕 알고리즘@>=
 func (c *chainer) greedy(start, goal *gbgraph.Vertex) *node {
-	for i := int64(0); i < c.g.N; i++ {
-		v := &c.g.Vertices[i]
+	for v := range c.g.AllVertices() {
 		v.U.I = 0   // |blocked|
 		v.V.V = nil // |valid|
 	}
@@ -180,7 +178,7 @@ func (c *chainer) greedy(start, goal *gbgraph.Vertex) *node {
 @<|v|에서 갈 수 있는 최선의 호를 골라 |curNode.game|으로 삼는다@>=
 d := int64(-10000)
 var bestArc, lastArc *gbgraph.Arc
-for a := v.Arcs; a != nil; a = a.Next {
+for a := range v.AllArcs() {
 	if a.A.I > d && a.Tip.V.V == v {
 		if a.Tip == goal {
 			lastArc = a
@@ -363,8 +361,7 @@ func (c *chainer) placeChildren(curNode *node, start, goal *gbgraph.Vertex) {
 이끄는 걸음에 이미 쓴 정점과 |start|를 그렇게 빼 둔다.
 
 @<모든 정점을 안 봄으로, 모든 호를 태그 안 됨으로 둔다@>=
-for i := int64(0); i < c.g.N; i++ {
-	v := &c.g.Vertices[i]
+for v := range c.g.AllVertices() {
 	v.Z.I = 0      // |rank|
 	v.X.A = v.Arcs // |untagged|
 }
@@ -385,7 +382,7 @@ base := start
 if curNode != nil {
 	base = curNode.game.Tip
 }
-for a := base.Arcs; a != nil; a = a.Next {
+for a := range base.AllArcs() {
 	u := a.Tip
 	if u.X.A == nil { // |goal|에 닿는다
 		x := newNode(curNode, a.A.I) // |del|
@@ -613,9 +610,9 @@ func (c *chainer) promptForTeam(sc *bufio.Scanner, prompt string) *gbgraph.Verte
 			return nil
 		}
 		name := sc.Text()
-		for i := int64(0); i < c.g.N; i++ {
-			if c.g.Vertices[i].Name == name {
-				return &c.g.Vertices[i]
+		for v := range c.g.AllVertices() {
+			if v.Name == name {
+				return v
 			}
 		}
 		fmt.Fprintln(c.out, " (Sorry, I don't know any team by that name.)")

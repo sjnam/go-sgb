@@ -25,6 +25,7 @@ package gbgraph
 
 import (
 	"fmt"
+	"iter"
 	"unsafe"
 )
 
@@ -169,7 +170,9 @@ $$\vbox{\halign{#\hfil\cr
 \quad|}|\cr
 |}|\cr}}$$
 슬라이스를 |g.N|에서 자르는 데 주의 — |Vertices|의 실제 길이는 조금 더
-길다(다음다음 절 참조).
+길다(다음다음 절 참조). 이 두 겹 순회는 워낙 흔하므로, 뒤에서 정점의
+|AllArcs|와 그래프의 |AllVertices| 반복자로 감싸 |for v := range
+g.AllVertices()| 꼴로 짧게 쓸 수 있게 해 둔다.
 
 @<자료구조@>=
 // |Graph|는 그래프 하나의 전모다.
@@ -355,6 +358,37 @@ func (g *Graph) Index(v *Vertex) int64 {
 	return int64(off / unsafe.Sizeof(Vertex{}))
 }
 
+@ \GO/ 1.23이 들여온 범위 함수(range-over-func) 덕에, 앞서 손으로 풀어
+썼던 두 겹 순회의 각 겹을 반복자 하나로 감쌀 수 있다. 정점 하나의 호
+리스트를 훑는 |AllArcs|와, 그래프 하나의 정점들을 훑는 |AllVertices|다.
+둘 다 |yield|가 |false|를 돌려주면 그 자리에서 멈추므로, 순회하는 |for|
+안의 |break|가 제대로 먹는다. 이제 그래프의 모든 호는
+|for v := range g.AllVertices()|와 |for a := range v.AllArcs()|를 겹쳐
+방문하면 된다.
+
+@<그래프 키우기@>=
+// |AllArcs|는 정점 |v|에서 나가는 호들을 차례로 내주는 반복자다.
+func (v *Vertex) AllArcs() iter.Seq[*Arc] {
+	return func(yield func(*Arc) bool) {
+		for a := v.Arcs; a != nil; a = a.Next {
+			if !yield(a) {
+				return
+			}
+		}
+	}
+}
+
+// |AllVertices|는 그래프 |g|의 정점들을 차례로 내주는 반복자다.
+func (g *Graph) AllVertices() iter.Seq[*Vertex] {
+	return func(yield func(*Vertex) bool) {
+		for i := range g.Vertices[:g.N] {
+			if !yield(&g.Vertices[i]) {
+				return
+			}
+		}
+	}
+}
+
 @* 정점 찾기. 이름으로 정점을 찾고 싶을 때가 있고, 그것을 표준적인
 방식으로 하면 좋다. \CEE/에는 루틴이 넷 있었다: 현재 그래프에 이름을 넣는
 |hash_in|과 찾는 |hash_out|, 그리고 임의의 그래프에 대해 같은 일을 하는
@@ -530,6 +564,40 @@ func TestHashAndIndex(t *testing.T) {
 	}
 	if g.HashLookup("zzzzz") != nil {
 		t.Fatal("없는 이름이 찾아졌다")
+	}
+}
+
+@ 끝으로 두 반복자를 시험한다. |AllVertices|는 |g.N|개의 정점을 번호
+순서대로 내주어야 하고, |AllArcs|는 정점의 호를 빠짐없이 내주되 |break|로
+일찍 멈추면 그 자리에서 멎어야 한다.
+
+@(gbgraph_test.go@>=
+func TestIterators(t *testing.T) {
+	g := NewGraph(3)
+	u := &g.Vertices[0]
+	g.NewEdge(u, &g.Vertices[1], 1)
+	g.NewArc(u, &g.Vertices[2], 2)
+	var got []int64
+	for x := range g.AllVertices() {
+		got = append(got, g.Index(x))
+	}
+	if len(got) != 3 || got[0] != 0 || got[1] != 1 || got[2] != 2 {
+		t.Fatalf("AllVertices가 %v를 내줬다", got)
+	}
+	n := 0
+	for range u.AllArcs() {
+		n++
+	}
+	if n != 2 {
+		t.Fatalf("u의 호 수가 %d로 나왔다", n)
+	}
+	n = 0
+	for range u.AllArcs() {
+		n++
+		break
+	}
+	if n != 1 {
+		t.Fatal("AllArcs가 break를 존중하지 않았다")
 	}
 }
 
