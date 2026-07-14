@@ -57,7 +57,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 
 ## 빌드
 
-\.{GWEB} 문학적 프로그래밍 도구(`gtangle`, `gweave`)와 한글 조판용
+GWEB 문학적 프로그래밍 도구(`gtangle`, `gweave`)와 한글 조판용
 `luatex`(`kotexgweb`)가 설치되어 있어야 한다.
 
 ```sh
