@@ -43,13 +43,6 @@ const (
 	maxCoord = 16384      // 좌표의 상한, $2^{14}$
 )
 
-func boolInt(b bool) int64 {
-	if b {
-		return 1
-	}
-	return 0
-}
-
 @<산술 서브루틴@>
 @<행렬식 판정 서브루틴@>
 @<Delaunay 자료 구조@>
@@ -143,6 +136,15 @@ $m=\lfloor2^{2k-21}\rfloor$, $0<y=\lfloor2^{20-2k}x\rfloor-s^2+s\le q=2s$를
 지키며 도는 것이 요령이다.
 
 @* 산술.
+@<산술 서브루틴@>=
+func boolInt(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+@ @<산술 서브루틴@>=
 @<산술 서브루틴@>=
 func intSqrt(x int64) int64 {
 	if x <= 0 {
@@ -716,8 +718,8 @@ newMileEdge := func(u, v *gbgraph.Vertex) {
 }
 Delaunay(g, newMileEdge)
 
-@* 시험. |miles.dat|이 |../data|에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
-|sample.correct|와 대조한다. |PlaneMiles|는 |Delaunay|를 end-to-end로 거치므로
+@* 시험. \.{miles.dat}이 \.{../data}에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
+\.{sample.correct}와 대조한다. |PlaneMiles|는 |Delaunay|를 end-to-end로 거치므로
 가장 든든한 검사다.
 
 @(gbplane_test.go@>=
