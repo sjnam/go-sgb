@@ -50,7 +50,8 @@ const (
 @<Plane 서브루틴@>
 @<PlaneMiles 서브루틴@>
 
-@ @<Plane 서브루틴@>=
+@ 직사각형 안에 무작위로 놓인 정점들로 무향 평면 그래프를 짓는 서브루틴이다.
+@<Plane 서브루틴@>=
 func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Graph, error) {
 	rng := gbflip.New(seed)
 	if xRange > maxCoord || yRange > maxCoord {
@@ -119,7 +120,7 @@ newEuclidEdge := func(u, v *gbgraph.Vertex) {
 }
 Delaunay(g, newEuclidEdge)
 
-@* 델로네 삼각분할. 평면 위 정점 집합의 델로네 삼각분할은, 두 점 $u$, $v$를 지나
+@ 평면 위 정점 집합의 델로네 삼각분할은, 두 점 $u$, $v$를 지나
 다른 정점을 안에 품지 않는 원이 있는 모든 선분 $uv$로 이루어진다. 곧 델로네
 간선은 정점을 그 ``이웃''과 잇는다. |Delaunay|는 삼각분할을 그래프로 돌려주는
 대신, 델로네 간선으로 이어진 정점 쌍 |u|, |v|마다 콜백 |f(u,v)|를 부른다. |u|나
@@ -145,7 +146,6 @@ func boolInt(b bool) int64 {
 }
 
 @ @<산술 서브루틴@>=
-@<산술 서브루틴@>=
 func intSqrt(x int64) int64 {
 	if x <= 0 {
 		return 0
@@ -302,7 +302,7 @@ if b <= -0x8000 {
 }
 return -s3 * (b*0x4000 + c)
 
-@* 행렬식. |Delaunay|는 두 기하 술어에 기대어 판단한다. |ccw(u,v,w)|는 세 점이
+@ |Delaunay|는 두 기하 술어에 기대어 판단한다. |ccw(u,v,w)|는 세 점이
 반시계 방향일 때 참이고, 이는 행렬식
 $(x_u-x_w)(y_v-y_w)-(y_u-y_w)(x_v-x_w)$이 양수인 것과 같다. 값이 0이면 세 점이
 일직선이라 까다로운 파훼 규칙을 쓴다.
@@ -785,7 +785,7 @@ for i, a := range want {
 	}
 }
 
-@ |Plane|은 |sample.correct|에 없으므로 짜임새를 확인한다. |extend|이고 |prob=0|
+@ |Plane|은 \.{sample.correct}에 없으므로 짜임새를 확인한다. |extend|이고 |prob=0|
 이면 정점 |n+1|개짜리 평면 그래프가 가질 수 있는 최대 간선 수 $3(n-1)$개, 곧 호
 $6(n-1)$개를 가진다.
 
