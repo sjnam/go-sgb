@@ -34,16 +34,15 @@ package main
 
 @<내포하는 패키지들@>
 
-@<자료 구조@>@;
-@<탐욕 알고리즘@>@;
-@<계층 탐욕 알고리즘@>@;
-@<이중 성분 계산@>@;
-@<사슬 찍기@>@;
-@<터미널 상호작용@>@;
+@<자료 구조@>
+@<탐욕 알고리즘@>
+@<계층 탐욕 알고리즘@>
+@<이중 성분 계산@>
+@<터미널 상호작용@>
 
 func main() {
-	@<명령줄 옵션을 읽는다@>@;
-	@<그래프 마련하기@>@;
+	@<명령줄 옵션을 읽는다@>
+	@<그래프 마련하기@>
 	c := &chainer{g: g, width: width, verbose: verbose,
 		rng: gbflip.New(0), out: os.Stdout}
 	c.run()
@@ -495,40 +494,33 @@ v.Z.I = cnt + c.g.N   // 참된 성분 크기는 |cnt+1|
 v.W.V = c.settledStack
 c.settledStack = v
 
-@* 사슬 찍기. 다 끝나면 |cur_node.game.tip|이 |goal|이고, |prev| 고리를 따라
+@ 다 끝나면 |cur_node.game.tip|이 |goal|이고, |prev| 고리를 따라
 |start|까지 되짚을 수 있다. 보기 좋게 |start|에서 |goal| 차례로 찍으려고, 리스트를
 스택처럼 뒤집는다. \CEE/처럼 |next| 자리를 임시 스택 꼭대기로 쓴다.
-
-@<사슬 찍기@>=
-func (c *chainer) printChain(curNode *node, start, goal *gbgraph.Vertex) {
+@<사슬을 찍는다@>=
 	var top *node
-	for curNode != nil {
-		t := curNode
-		curNode = t.prev
+	for chain != nil {
+		t := chain
+		chain = t.prev
 		t.prev = top // 꺼내서
 		top = t      // 다시 얹는다(뒤집힌 차례)
 	}
 	for v := start; v != goal; {
 		a := top.game
 		u := a.Tip
-		c.printScore(a, v, u)
-		fmt.Fprintf(c.out, " (%+d)\n", top.totLen)
+		@<점수를 출력한다@>
 		v, top = u, top.prev
 	}
-}
 
 @ 경기 하나의 점수를 찍는다. |date|(|B.I|)를 달-날로 옮기고, 두 팀의 이름·별명과
 점수를 적는다. |u|의 점수는 |a.len - a.del|이다.
-
-@<사슬 찍기@>=
-func (c *chainer) printScore(a *gbgraph.Arc, v, u *gbgraph.Vertex) {
-	@<경기 날짜를 달과 날로 찍는다@>@;
-	fmt.Fprintf(c.out, ": %s %s %d, %s %s %d",
-		v.Name, v.Y.S, a.Len, u.Name, u.Y.S, a.Len-a.A.I)
-}
+@<점수를 출력한다@>=
+@<경기 날짜를 달과 날로 찍는다@>
+fmt.Fprintf(c.out, ": %s %s %d, %s %s %d",
+	v.Name, v.Y.S, a.Len, u.Name, u.Y.S, a.Len-a.A.I)
+fmt.Fprintf(c.out, " (%+d)\n", top.totLen)
 
 @ 0일은 8월 26일이다. 날짜 |d|를 달 이름과 그달의 날로 옮긴다.
-
 @<경기 날짜를 달과 날로 찍는다@>=
 d := a.B.I // |date|
 var mon string
@@ -589,7 +581,6 @@ func (c *chainer) oneRound(sc *bufio.Scanner) bool {
 
 @ 너비 |c.width|가 0이면 탐욕 알고리즘을, 아니면 계층 탐욕을 써서 |start|에서
 |goal|로 가는 사슬을 찾는다.
-
 @<너비가 0이면 탐욕 알고리즘을, 아니면 계층 탐욕을 써서 사슬을 찾아 찍는다@>=
 var chain *node
 if c.width == 0 {
@@ -597,7 +588,7 @@ if c.width == 0 {
 } else {
 	chain = c.stratified(start, goal)
 }
-c.printChain(chain, start, goal)
+@<사슬을 찍는다@>
 
 @ 사용자는 팀 이름을 |games.dat|의 표기 그대로 쳐야 한다. 빈 줄이면 |nil|을
 준다. 이름을 못 찾으면 아는 팀 하나를 무작위로 귀띔한다.
