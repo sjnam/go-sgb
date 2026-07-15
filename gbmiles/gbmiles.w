@@ -101,6 +101,22 @@ type cityInfo struct {
 // |MilesRNG|는 |Miles|와 같되 난수 생성기 |rng|를 직접 받는다.
 func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64,
 	rng *gbflip.RNG, dir string) (*gbgraph.Graph, error) {
+	g, _, err := MilesRNGDist(n, northWeight, westWeight, popWeight,
+		maxDistance, maxDegree, seed, rng, dir)
+	return g, err
+}
+
+@ |MilesRNGDist|는 |MilesRNG|와 같되, 가지치기로 부호가 바뀌기 전의 원래 (양수)
+거리 행렬도 함께 돌려준다. {\sc GB\_PLANE}의 |PlaneMiles|가 델로네 간선의 길이를
+알아내는 데 쓴다. 행렬은 |MaxN|$\times$|MaxN| 평탄 배열이고, 도시 번호(정점의
+|Z.I|) $i$, $j$의 거리는 |dist[MaxN*i+j]|다.
+
+@<그래프를 짓는 |MilesRNG|@>=
+// |MaxN|은 도시의 최대 수(거리 행렬의 변)다.
+const MaxN = maxN
+
+func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64,
+	rng *gbflip.RNG, dir string) (*gbgraph.Graph, []int64, error) {
 	@<매개변수가 올바른지 확인한다@>@;
 	g := gbgraph.NewGraph(n)
 	g.ID = fmt.Sprintf("miles(%d,%d,%d,%d,%d,%d,%d)",
@@ -110,8 +126,9 @@ func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, see
 	dist := make([]int64, maxN*maxN)
 	@<\.{miles.dat}을 읽어 도시 무게를 셈한다@>@;
 	@<쓸 |n|개 도시를 정한다@>@;
+	origDist := append([]int64(nil), dist...) // 가지치기로 바뀌기 전의 스냅샷
 	@<알맞은 간선을 그래프에 넣는다@>@;
-	return g, nil
+	return g, origDist, nil
 }
 
 @ 매개변수 다듬기와 검증이다. |n|은 1과 128 사이로, |maxDegree|는 0이거나
@@ -130,7 +147,7 @@ if maxDegree == 0 || maxDegree >= n {
 }
 if northWeight > 100000 || westWeight > 100000 || popWeight > 100 ||
 	northWeight < -100000 || westWeight < -100000 || popWeight < -100 {
-	return nil, gbgraph.BadSpecs // 무게 하나의 크기가 너무 크다
+	return nil, nil, gbgraph.BadSpecs // 무게 하나의 크기가 너무 크다
 }
 
 @* 정점. 자료를 읽으며 도시마다 이름·위도·경도·인구·무게를 담은 노드를
@@ -150,14 +167,14 @@ d1 d2 d3 d4 d5 d6 \dots\ (여러 줄일 수도)\cr}}$$
 @<\.{miles.dat}을 읽어 도시 무게를 셈한다@>=
 f, err := gbio.Open(filepath.Join(dir, "miles.dat"))
 if err != nil {
-	return nil, gbgraph.EarlyDataFault
+	return nil, nil, gbgraph.EarlyDataFault
 }
 err = readCities(f, nodes, dist, northWeight, westWeight, popWeight)
 if cerr := f.Close(); err == nil && cerr != nil {
 	err = gbgraph.LateDataFault
 }
 if err != nil {
-	return nil, err
+	return nil, nil, err
 }
 
 @ |readCities|는 도시들을 |k=127|부터 0까지 역순으로 읽는다(파일 차례가 그렇다).

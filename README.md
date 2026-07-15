@@ -33,6 +33,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [gbgames](gbgames/gbgames.w) | 미식축구 점수 그래프 |
 | | [gblisa](gblisa/gblisa.w) | 모나리자 픽셀 행렬·평면·이분 그래프 |
 | | [gbmiles](gbmiles/gbmiles.w) | 북아메리카 도시 간 거리 그래프 |
+| | [gbplane](gbplane/gbplane.w) | 델로네 삼각분할 기반 평면 그래프 |
 | | [gbrand](gbrand/gbrand.w) | 무작위 그래프 |
 | | [gbroget](gbroget/gbroget.w) | Roget 유의어 사전 그래프 |
 | | [gbsave](gbsave/gbsave.w) | 그래프 저장·복원 |
@@ -49,7 +50,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [demos/roget_components](demos/roget_components/roget_components.w) | Roget 그래프의 강한 성분 |
 | | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
 
-남은 것: gb_gates, gb_plane, gb_raman, test_sample.
+남은 것: gb_gates, gb_raman, test_sample.
 
 패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
 각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
