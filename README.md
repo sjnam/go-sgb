@@ -30,13 +30,15 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | 생성기·유틸리티 | [gbbasic](gbbasic/gbbasic.w) | 표준 그래프 여섯 생성기 |
 | | [gbbooks](gbbooks/gbbooks.w) | 문학 작품 인물 관계 그래프 |
 | | [gbgames](gbgames/gbgames.w) | 미식축구 점수 그래프 |
+| | [gblisa](gblisa/gblisa.w) | 모나리자 픽셀 행렬·평면·이분 그래프 |
 | | [gbmiles](gbmiles/gbmiles.w) | 북아메리카 도시 간 거리 그래프 |
 | | [gbrand](gbrand/gbrand.w) | 무작위 그래프 |
 | | [gbroget](gbroget/gbroget.w) | Roget 유의어 사전 그래프 |
 | | [gbsave](gbsave/gbsave.w) | 그래프 저장·복원 |
 | | [gbwords](gbwords/gbwords.w) | 다섯 글자 낱말 그래프 |
 | | [gbdijk](gbdijk/gbdijk.w) | Dijkstra 최단경로 + 우선순위 큐 |
-| 데모 | [demos/book_components](demos/book_components/book_components.w) | 이중연결 성분 |
+| 데모 | [demos/assign_lisa](demos/assign_lisa/assign_lisa.w) | 배정 문제(헝가리 알고리즘) |
+| | [demos/book_components](demos/book_components/book_components.w) | 이중연결 성분 |
 | | [demos/chains](demos/chains/chains.w) | Knuth의 사슬 도전 문제 |
 | | [demos/football](demos/football/football.w) | 팀 사이 승리 사슬 찾기 |
 | | [demos/ladders](demos/ladders/ladders.w) | 낱말 사다리 |
@@ -45,7 +47,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [demos/roget_components](demos/roget_components/roget_components.w) | Roget 그래프의 강한 성분 |
 | | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
 
-남은 것: gb_lisa, gb_econ, gb_gates, gb_plane, gb_raman, test_sample.
+남은 것: gb_econ, gb_gates, gb_plane, gb_raman, test_sample.
 
 패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
 각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
