@@ -13,6 +13,7 @@
 @s iter.Seq int
 @s testing.T int
 @s testing.B int
+@s strings.Builder int
 
 @s RNG int
 @s File int
