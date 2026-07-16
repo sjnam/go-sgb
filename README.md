@@ -49,9 +49,10 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [demos/miles_span](demos/miles_span/miles_span.w) | 최소 신장 트리 |
 | | [demos/queen](demos/queen/queen.w) | 퀸의 행마 |
 | | [demos/roget_components](demos/roget_components/roget_components.w) | Roget 그래프의 강한 성분 |
+| | [demos/take_risc](demos/take_risc/take_risc.w) | RISC 회로로 곱셈·나눗셈 |
 | | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
 
-남은 것: gb_gates 데모(multiply, take_risc), gb_raman, test_sample.
+남은 것: gb_gates 데모(multiply), gb_raman, test_sample.
 
 패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
 각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
