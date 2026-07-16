@@ -29,19 +29,19 @@ package main
 
 @<내포하는 패키지들@>
 
-@<자료 구조@>@;
-@<이름 짓기와 인물 소개@>@;
-@<Hopcroft-Tarjan 알고리즘@>@;
+@<자료 구조@>
+@<이름 짓기와 인물 소개@>
+@<Hopcroft-Tarjan 알고리즘@>
 
 func main() {
-	@<명령줄 옵션을 읽는다@>@;
-	@<그래프를 마련한다@>@;
+	@<명령줄 옵션을 읽는다@>
+	@<그래프를 마련한다@>
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 	s := &solver{g: g, book: fileName == "", out: out}
 	fmt.Fprintf(out, "Biconnectivity analysis of %s\n\n", g.ID)
 	if verbose > 0 {
-		@<선택된 인물들의 명단을 찍는다@>@;
+		@<선택된 인물들의 명단을 찍는다@>
 	}
 	s.hopcroftTarjan()
 }
@@ -108,7 +108,7 @@ num := func(s string) int64 {
 	}
 	return v
 }
-@<인자들을 훑어 옵션을 정한다@>@;
+@<인자들을 훑어 옵션을 정한다@>
 if fileName != "" {
 	verbose = 0
 }
@@ -185,7 +185,7 @@ fmt.Fprintln(s.out)
 @<Hopcroft-Tarjan 알고리즘@>=
 func (s *solver) hopcroftTarjan() {
 	s.dummy = new(gbgraph.Vertex) // rank 0
-	@<모든 정점을 안 본 상태로, 모든 호를 태그 안 됨으로 둔다@>@;
+	@<모든 정점을 안 본 상태로, 모든 호를 태그 안 됨으로 둔다@>
 	for vv := range s.g.AllVertices() {
 		if vv.Z.I == 0 { // 아직 안 봤다
 			s.dfs(vv)
@@ -236,10 +236,10 @@ func (s *solver) makeActive(v *gbgraph.Vertex) {
 func (s *solver) explore(v *gbgraph.Vertex) *gbgraph.Vertex {
 	a := v.X.A // v의 첫 태그 안 된 호
 	if a != nil {
-		@<호 |a|를 태그하고 따라간다@>@;
+		@<호 |a|를 태그하고 따라간다@>
 		return v
 	}
-	@<|v|가 성숙했으니 부모로 되짚어 올라간다@>@;
+	@<|v|가 성숙했으니 부모로 되짚어 올라간다@>
 	return v
 }
 
@@ -282,10 +282,10 @@ v = u
 @<Hopcroft-Tarjan 알고리즘@>=
 func (s *solver) reportBicomponent(v, u *gbgraph.Vertex) {
 	if u == s.dummy {
-		@<외딴 정점이거나 연결 성분의 끝을 알린다@>@;
+		@<외딴 정점이거나 연결 성분의 끝을 알린다@>
 		return
 	}
-	@<이중 성분과 그 정점들을 찍는다@>@;
+	@<이중 성분과 그 정점들을 찍는다@>
 }
 
 @ |u|가 |dummy|이면 |v|는 한 연결 성분의 마지막 이중 성분(또는 외딴 정점)이다.
@@ -313,7 +313,7 @@ fmt.Fprintf(s.out, "Bicomponent %s", s.name(v))
 if t == v {
 	fmt.Fprintln(s.out) // 정점 하나
 } else {
-	@<이중 성분의 나머지 정점들을 찍는다@>@;
+	@<이중 성분의 나머지 정점들을 찍는다@>
 }
 s.articPt = u
 

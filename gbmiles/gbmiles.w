@@ -55,11 +55,11 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataInputDirectory = "/usr/local/sgb/data"
+const DataDirectory = "/usr/local/sgb/data"
 
-@<상수와 자료 구조@>@;
-@<도시 자료를 읽는 함수@>@;
-@<그래프를 짓는 |MilesRNG|@>@;
+@<상수와 자료 구조@>
+@<도시 자료를 읽는 함수@>
+@<그래프를 짓는 |MilesRNG|@>
 
 // |Miles|는 씨앗 |seed|로 난수 스트림을 열어 도시 그래프를 짓는다.
 func Miles(n, northWeight, westWeight, popWeight,
@@ -117,17 +117,17 @@ const MaxN = maxN
 
 func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64,
 	rng *gbflip.RNG, dir string) (*gbgraph.Graph, []int64, error) {
-	@<매개변수가 올바른지 확인한다@>@;
+	@<매개변수가 올바른지 확인한다@>
 	g := gbgraph.NewGraph(n)
 	g.ID = fmt.Sprintf("miles(%d,%d,%d,%d,%d,%d,%d)",
 		n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed)
 	g.UtilTypes = "ZZIIIIZZZZZZZZ"
 	nodes := make([]gbsort.Node[cityInfo], maxN)
 	dist := make([]int64, maxN*maxN)
-	@<\.{miles.dat}을 읽어 도시 무게를 셈한다@>@;
-	@<쓸 |n|개 도시를 정한다@>@;
+	@<\.{miles.dat}을 읽어 도시 무게를 셈한다@>
+	@<쓸 |n|개 도시를 정한다@>
 	origDist := append([]int64(nil), dist...) // 가지치기로 바뀌기 전의 스냅샷
-	@<알맞은 간선을 그래프에 넣는다@>@;
+	@<알맞은 간선을 그래프에 넣는다@>
 	return g, origDist, nil
 }
 
@@ -137,7 +137,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 
 @<매개변수가 올바른지 확인한다@>=
 if dir == "" {
-	dir = DataInputDirectory
+	dir = DataDirectory
 }
 if n == 0 || n > maxN {
 	n = maxN
@@ -185,7 +185,7 @@ if err != nil {
 func readCities(f *gbio.File, nodes []gbsort.Node[cityInfo], dist []int64,
 	northWeight, westWeight, popWeight int64) error {
 	for k := int64(maxN - 1); k >= 0; k-- {
-		@<도시 |k|의 자료를 읽어 저장한다@>@;
+		@<도시 |k|의 자료를 읽어 저장한다@>
 	}
 	return nil
 }
@@ -218,7 +218,7 @@ if p.Data.pop < minPop || p.Data.pop > maxPop {
 }
 p.Key = northWeight*(p.Data.lat-minLat) + westWeight*(p.Data.lon-minLon) +
 	popWeight*(p.Data.pop-minPop) + (1 << 30)
-@<도시 |k|의 거리 자료를 읽는다@>@;
+@<도시 |k|의 거리 자료를 읽는다@>
 f.NextLine()
 
 @ 도시 |k|의 거리 줄에서 앞서 읽은 도시들(|k+1|부터 127까지)까지의 거리를
@@ -245,7 +245,7 @@ var filled int64
 for j := 127; j >= 0; j-- {
 	for p := sorted[j]; p != nil; p = p.Link {
 		if filled < n {
-			@<도시 |p|를 그래프에 더한다@>@;
+			@<도시 |p|를 그래프에 더한다@>
 			filled++
 		} else {
 			p.Data.pop = 0 // 이 도시는 안 쓴다
@@ -272,7 +272,7 @@ v.Name = p.Data.name
 
 @<알맞은 간선을 그래프에 넣는다@>=
 if maxDistance > 0 || maxDegree > 0 {
-	@<원치 않는 간선을 부호를 바꿔 쳐낸다@>@;
+	@<원치 않는 간선을 부호를 바꿔 쳐낸다@>
 }
 for ui := int64(0); ui < n; ui++ {
 	u := &g.Vertices[ui]
@@ -301,7 +301,7 @@ if pruneDist == 0 {
 for i := int64(0); i < maxN; i++ {
 	p := &nodes[i]
 	if p.Data.pop != 0 {
-		@<도시 |p|의 원치 않는 간선을 지운다@>@;
+		@<도시 |p|의 원치 않는 간선을 지운다@>
 	}
 }
 
@@ -353,11 +353,11 @@ import (
 
 const dataDir = "../data"
 
-@<인구 순위 시험@>@;
-@<완전 그래프 시험@>@;
-@<거리 시험@>@;
-@<최근접 이웃 시험@>@;
-@<무게 검증 오류 시험@>@;
+@<인구 순위 시험@>
+@<완전 그래프 시험@>
+@<거리 시험@>
+@<최근접 이웃 시험@>
+@<무게 검증 오류 시험@>
 
 @ |Miles(100,0,0,1,0,0,0)|은 인구가 많은 100개 도시의 완전 그래프다. 무게를
 인구로만 매기므로 정점은 인구 내림차순이다. 표식 문자열의 |maxDegree|는

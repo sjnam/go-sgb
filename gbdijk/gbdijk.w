@@ -45,11 +45,11 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-@<우선순위 큐 인터페이스와 이음 도우미@>@;
-@<|Dijkstra| 절차@>@;
-@<기본 큐: 이중 연결 리스트@>@;
-@<작은 길이용 큐: 128열@>@;
-@<결과를 찍는 |PrintResult|@>@;
+@<우선순위 큐 인터페이스와 이음 도우미@>
+@<|Dijkstra| 절차@>
+@<기본 큐: 이중 연결 리스트@>
+@<작은 길이용 큐: 128열@>
+@<결과를 찍는 |PrintResult|@>
 
 @* 주 알고리즘. Dijkstra의 알고리즘이 나아가는 동안, 그것은 |uu|에서 점점 더
 많은 정점까지의 최단 경로를 ``안다''(known). 처음엔 |uu| 자신만 안다. |vv|를
@@ -92,19 +92,19 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 	if pq == nil {
 		pq = NewDList()
 	}
-	@<|uu|만을 본 정점으로 만들고, 아는 정점으로도 삼는다@>@;
+	@<|uu|만을 본 정점으로 만들고, 아는 정점으로도 삼는다@>
 	t := uu
 	if trace != nil {
-		@<첫 알림을 찍는다@>@;
+		@<첫 알림을 찍는다@>
 	}
 	for t != vv {
-		@<|t|에 이웃한 아직 못 본 정점을 큐에 넣고, 나머지의 거리를 고친다@>@;
+		@<|t|에 이웃한 아직 못 본 정점을 큐에 넣고, 나머지의 거리를 고친다@>
 		t = pq.DelMin()
 		if t == nil {
 			return -1 // 큐가 비면 |vv|로 갈 길이 없다
 		}
 		if trace != nil {
-			@<|t|까지의 거리를 찍는다@>@;
+			@<|t|까지의 거리를 찍는다@>
 		}
 	}
 	return vv.Z.I - vv.X.I + uu.X.I // |uu|에서 |vv|까지의 참거리
@@ -171,9 +171,9 @@ func PrintResult(vv *gbgraph.Vertex, out io.Writer) {
 		fmt.Fprintf(out, "Sorry, %s is unreachable.\n", vv.Name)
 		return
 	}
-	@<|backlink| 사슬을 뒤집는다@>@;
-	@<|uu|에서 |vv|까지 앞쪽으로 찍는다@>@;
-	@<|backlink| 사슬을 되뒤집는다@>@;
+	@<|backlink| 사슬을 뒤집는다@>
+	@<|uu|에서 |vv|까지 앞쪽으로 찍는다@>
+	@<|backlink| 사슬을 되뒤집는다@>
 }
 
 @ 뒤집기는 |p|에서 하나씩 꺼내 |t|에 쌓는다. |uu|의 |backlink|가 자기 자신을
@@ -405,11 +405,11 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-@<시험용 그래프를 짓는다@>@;
-@<최단 거리 시험@>@;
-@<어림 함수 시험@>@;
-@<닿을 수 없는 정점 시험@>@;
-@<경로 출력 시험@>@;
+@<시험용 그래프를 짓는다@>
+@<최단 거리 시험@>
+@<어림 함수 시험@>
+@<닿을 수 없는 정점 시험@>
+@<경로 출력 시험@>
 
 @ 정점 |a|(0)부터 |e|(4)까지 다섯 정점에 다섯 개의 유향 호를 둔다. |e|로 가는
 호는 없어 |e|는 |a|에서 닿을 수 없다.

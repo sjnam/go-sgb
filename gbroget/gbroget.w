@@ -50,7 +50,7 @@ import (
 )
 
 const maxN = 1022 // Roget 책의 범주 수
-const DataInputDirectory = "/usr/local/sgb/data"
+const DataDirectory = "/usr/local/sgb/data"
 
 @<Roget 서브루틴@>
 
@@ -61,7 +61,7 @@ const DataInputDirectory = "/usr/local/sgb/data"
 @<Roget 서브루틴@>=
 func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error) {
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	rng := gbflip.New(seed)
 	if n == 0 || n > maxN {

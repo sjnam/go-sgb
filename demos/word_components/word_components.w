@@ -29,7 +29,7 @@ import (
 	"github.com/sjnam/go-sgb/gbwords"
 )
 
-@<보조 함수@>@;
+@<보조 함수@>
 
 func main() {
 	dir := flag.String("d", "data", "words.dat가 있는 디렉터리")
@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("사전을 짓지 못했습니다: %v", err)
 	}
-	@<성분을 분석해 찍는다@>@;
+	@<성분을 분석해 찍는다@>
 }
 
 @ 정점을 무게순으로 훑으며 성분 구조를 키운다. 정점 |v|의 |arcs| 리스트에서,
@@ -53,10 +53,10 @@ fmt.Fprintf(out, "Component analysis of %s\n", g.ID)
 for i := int64(0); i < g.N; i++ {
 	v := &g.Vertices[i]
 	fmt.Fprintf(out, "%4d: %5d %s", i+1, v.U.I, v.Name)
-	@<정점 |v|를 성분 구조에 더하며, 합쳐지는 성분을 찍는다@>@;
+	@<정점 |v|를 성분 구조에 더하며, 합쳐지는 성분을 찍는다@>
 	fmt.Fprintf(out, "; c=%d,i=%d,m=%d\n", comp, isol, m)
 }
-@<뜻밖의 성분들을 모두 보여 준다@>@;
+@<뜻밖의 성분들을 모두 보여 준다@>
 
 @ 연결 성분은 순환 리스트로 좇는다. 이 방법은
 참으로 무작위인 그래프에서 평균 $O(n)$ 시간이 걸린다고 알려져 있다[Knuth와
@@ -78,7 +78,7 @@ $$\vbox{\halign{\indent#\hfil&\quad#\hfil\cr
 외딴(isolated) 낱말이라 |[1]|을 찍는다.
 
 @<정점 |v|를 성분 구조에 더하며, 합쳐지는 성분을 찍는다@>=
-@<|v|를 홀로 선 성분으로 만든다@>@;
+@<|v|를 홀로 선 성분으로 만든다@>
 a := v.Arcs
 for a != nil && g.Index(a.Tip) > i {
 	a = a.Next
@@ -90,7 +90,7 @@ if a == nil {
 	for ; a != nil; a = a.Next {
 		u := a.Tip
 		m++
-		@<|u|와 |v|의 성분이 다르면 합친다@>@;
+		@<|u|와 |v|의 성분이 다르면 합친다@>
 	}
 	fmt.Fprintf(out, " in %s[%d]", v.Y.V.Name, v.Y.V.X.I) // 최종 성분
 }
@@ -133,7 +133,7 @@ if u != v.Y.V {
 		}
 		relink(wm, u)
 	}
-	@<두 순환 리스트를 잇는다@>@;
+	@<두 순환 리스트를 잇는다@>
 	comp--
 }
 

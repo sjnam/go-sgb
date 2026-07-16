@@ -165,7 +165,7 @@ func (c *chainer) greedy(start, goal *gbgraph.Vertex) *node {
 		v.U.I = 1 // |blocked|
 		curNode = newNode(curNode, 0)
 		c.markReachable(v, goal)
-		@<|v|에서 갈 수 있는 최선의 호를 골라 |curNode.game|으로 삼는다@>@;
+		@<|v|에서 갈 수 있는 최선의 호를 골라 |curNode.game|으로 삼는다@>
 	}
 	return curNode
 }
@@ -218,7 +218,7 @@ func (c *chainer) markReachable(v, goal *gbgraph.Vertex) {
 	for u != nil {
 		a := u.Arcs
 		u = u.W.V // 스택에서 꺼낸다
-		@<|a|의 이웃 가운데 새로 닿는 것을 표시해 스택에 얹는다@>@;
+		@<|a|의 이웃 가운데 새로 닿는 것을 표시해 스택에 얹는다@>
 	}
 }
 
@@ -253,12 +253,12 @@ func (c *chainer) stratified(start, goal *gbgraph.Vertex) *node {
 	for {
 		c.placeChildren(curNode, start, goal)
 		for c.list[m] == nil {
-			@<|m|을 낮추고 다른 리스트를 살필 채비를 한다@>@;
+			@<|m|을 낮추고 다른 리스트를 살필 채비를 한다@>
 		}
 		curNode = c.list[m]
 		c.list[m] = curNode.next // 가장 높은 계층에서 노드 하나를 뺀다
 		if c.verbose {
-			@<|cur_node|의 진행 정보를 찍는다@>@;
+			@<|cur_node|의 진행 정보를 찍는다@>
 		}
 		if m == 0 { // 오직 |list[0]|에 노드 하나가 남는다
 			break
@@ -272,8 +272,8 @@ func (c *chainer) stratified(start, goal *gbgraph.Vertex) *node {
 
 @<계층 탐욕 알고리즘@>=
 func (c *chainer) placeNode(x *node, h int64) {
-	@<리스트가 꽉 찼으면 가장 작은 노드를 밀어낸다@>@;
-	@<노드 |x|를 |tot_len| 차례에 맞게 끼운다@>@;
+	@<리스트가 꽉 찼으면 가장 작은 노드를 밀어낸다@>
+	@<노드 |x|를 |tot_len| 차례에 맞게 끼운다@>
 }
 
 @ 계층이 꽉 찼으면(|h>0|이며 |width|개이거나, |h==0|이며 이미 하나 있으면), |x|가
@@ -351,9 +351,9 @@ $v$에만 이웃한 가상 정점 $o$를 더한 $G^+$의 이중 성분을 $o$에
 
 @<이중 성분 계산@>=
 func (c *chainer) placeChildren(curNode *node, start, goal *gbgraph.Vertex) {
-	@<모든 정점을 안 봄으로, 모든 호를 태그 안 됨으로 둔다@>@;
+	@<모든 정점을 안 봄으로, 모든 호를 태그 안 됨으로 둔다@>
 	c.bicomponentDFS(goal)
-	@<자식마다 새 노드를 만들어 알맞은 계층에 넣는다@>@;
+	@<자식마다 새 노드를 만들어 알맞은 계층에 넣는다@>
 }
 
 @ 정점의 |rank|를 무한대로 두는 것은 그 정점을 그래프에서 뺀 것과 같다. |cur_node|로
@@ -402,7 +402,7 @@ func (c *chainer) bicomponentDFS(goal *gbgraph.Vertex) {
 	for v != c.dummy {
 		v = c.explore(v)
 	}
-	@<|settled_stack|으로 각 정점의 상호 도달 수를 셈한다@>@;
+	@<|settled_stack|으로 각 정점의 상호 도달 수를 셈한다@>
 }
 
 @ @<|settled_stack|으로 각 정점의 상호 도달 수를 셈한다@>=
@@ -431,10 +431,10 @@ func (c *chainer) makeActive(v *gbgraph.Vertex) {
 func (c *chainer) explore(v *gbgraph.Vertex) *gbgraph.Vertex {
 	a := v.X.A // 첫 태그 안 된 호
 	if a != nil {
-		@<호 |a|를 태그하고 따라간다@>@;
+		@<호 |a|를 태그하고 따라간다@>
 		return v
 	}
-	@<|v|가 성숙했으니 부모로 되짚어 올라간다@>@;
+	@<|v|가 성숙했으니 부모로 되짚어 올라간다@>
 	return v
 }
 
@@ -477,7 +477,7 @@ func (c *chainer) reportBicomponent(v, u *gbgraph.Vertex) {
 	if u == c.dummy {
 		return // 자명한 뿌리 성분 (|goal|, |dummy|)
 	}
-	@<활성 스택에서 |v|와 그 자손들을 떼어 이중 성분으로 정착시킨다@>@;
+	@<활성 스택에서 |v|와 그 자손들을 떼어 이중 성분으로 정착시킨다@>
 }
 
 @ @<활성 스택에서 |v|와 그 자손들을 떼어 이중 성분으로 정착시킨다@>=
@@ -574,7 +574,7 @@ func (c *chainer) oneRound(sc *bufio.Scanner) bool {
 			fmt.Fprintln(c.out, " (Um, please give me the names of two DISTINCT teams.)")
 			continue
 		}
-		@<너비가 0이면 탐욕 알고리즘을, 아니면 계층 탐욕을 써서 사슬을 찾아 찍는다@>@;
+		@<너비가 0이면 탐욕 알고리즘을, 아니면 계층 탐욕을 써서 사슬을 찾아 찍는다@>
 		return true
 	}
 }

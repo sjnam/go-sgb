@@ -45,13 +45,12 @@ $$\vbox{\halign{#\hfil\cr
 리스트 |s[j]|에 들어간다. 따라서 키가 모두 $2^{24}$보다 작으면 결과는
 전부 |s[0]| 하나에 모인다.
 @c
-// 패키지 |gbsort|는 GraphBase의 링크드 리스트 정렬 도우미다.
 package gbsort
 
 import "github.com/sjnam/go-sgb/gbflip"
 
-@<노드 타입@>@;
-@<정렬 루틴@>@;
+@<노드 타입@>
+@<정렬 루틴@>
 
 @ |Node|의 |Data| 필드가 원본의 ``뒤따르는 임의의 필드들''을 대신한다.
 원본의 |words| 생성기라면 |Data|에 다섯 글자 단어를 담을 것이다.

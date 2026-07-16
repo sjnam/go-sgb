@@ -34,22 +34,22 @@ package main
 
 @<내포하는 패키지들@>
 
-@<자료 구조@>@;
-@<문제 준비@>@;
-@<경로 이동들@>@;
-@<창 수선@>@;
-@<반복 국소 탐색@>@;
+@<자료 구조@>
+@<문제 준비@>
+@<경로 이동들@>
+@<창 수선@>
+@<반복 국소 탐색@>
 
 func main() {
-	@<명령줄 옵션을 읽는다@>@;
+	@<명령줄 옵션을 읽는다@>
 	p, err := buildProblem(*dir, *from, *to)
 	if err != nil {
 		log.Fatal(err)
 	}
 	deadline := time.Now().Add(*limit)
-	@<일꾼들을 풀어 탐색한다@>@;
-	@<최고 사슬을 연마한다@>@;
-	@<결과를 검사하고 찍는다@>@;
+	@<일꾼들을 풀어 탐색한다@>
+	@<최고 사슬을 연마한다@>
+	@<결과를 검사하고 찍는다@>
 }
 
 @ 이 프로그램은 SGB 이식이 아니라 우리가 새로 짓는 것이라, 난수도 \CEE/ 원본과
@@ -122,7 +122,7 @@ func buildProblem(dir, from, to string) (*problem, error) {
 	n := int(g.N)
 	p := &problem{n: n, names: make([]string, n), nick: make([]string, n),
 		start: -1, goal: -1}
-	@<행렬과 리스트를 채운다@>@;
+	@<행렬과 리스트를 채운다@>
 	if p.start < 0 || p.goal < 0 {
 		return nil, fmt.Errorf("모르는 팀: %q 또는 %q", from, to)
 	}
@@ -132,9 +132,9 @@ func buildProblem(dir, from, to string) (*problem, error) {
 @ 세 단계다: 행렬을 잡고, 정점과 호를 훑어 채운 뒤, 인접 리스트를 짓는다.
 
 @<행렬과 리스트를 채운다@>=
-@<행렬을 할당한다@>@;
-@<정점과 호에서 행렬을 채운다@>@;
-@<인접 리스트를 짓는다@>@;
+@<행렬을 할당한다@>
+@<정점과 호에서 행렬을 채운다@>
+@<인접 리스트를 짓는다@>
 
 @ |del|만 음의 무한대로 초기화하고, 나머지는 |0|값 그대로 둔다.
 
@@ -541,14 +541,14 @@ func (sr *searcher) improveLNS(i, w, budget int) bool {
 	}
 	a, b := s.path[i-1], s.path[i+w]
 	oldSeg := s.pre[i+w-1] - s.pre[i-1] + p.del[s.path[i+w-1]][b]
-	@<풀을 모아 |pool|에 담는다@>@;
+	@<풀을 모아 |pool|에 담는다@>
 	r := &repairer{p: p, pool: pool, b: b, budget: budget, bestVal: oldSeg}
 	r.prepBounds(a)
 	r.dfs(a, 0, 0)
 	if r.bestSeq == nil || r.bestVal <= oldSeg {
 		return false
 	}
-	@<창을 |r.bestSeq|로 갈아 끼운다@>@;
+	@<창을 |r.bestSeq|로 갈아 끼운다@>
 	return true
 }
 
@@ -664,7 +664,7 @@ func (r *repairer) dfs(cur int, mask uint64, val int64) {
 			r.bestSeq = append([]int(nil), r.seq...)
 		}
 	}
-	@<상한을 셈해 가망 없으면 돌아간다@>@;
+	@<상한을 셈해 가망 없으면 돌아간다@>
 	for k, v := range r.pool {
 		if mask&(1<<k) != 0 || !p.exists[cur][v] {
 			continue
@@ -730,13 +730,13 @@ func (sr *searcher) perturb(strength int) {
 		m := len(s.path)
 		switch rng.IntN(4) {
 		case 0:
-			@<무작위 반전을 시도한다@>@;
+			@<무작위 반전을 시도한다@>
 		case 1:
-			@<무작위 삽입을 시도한다@>@;
+			@<무작위 삽입을 시도한다@>
 		case 2:
-			@<무작위 삭제를 시도한다@>@;
+			@<무작위 삭제를 시도한다@>
 		case 3:
-			@<무작위 교환을 시도한다@>@;
+			@<무작위 교환을 시도한다@>
 		}
 	}
 }
@@ -794,14 +794,14 @@ func (sr *searcher) kickAt(i, w int) bool {
 		return false
 	}
 	a, b := s.path[i-1], s.path[i+w]
-	@<풀을 모아 |pool|에 담는다@>@;
+	@<풀을 모아 |pool|에 담는다@>
 	r := &repairer{p: p, pool: pool, b: b, budget: 400_000, bestVal: negInf}
 	r.prepBounds(a)
 	r.dfs(a, 0, 0)
 	if r.bestSeq == nil {
 		return false // 재건 실패---낡은 창을 그대로 둔다
 	}
-	@<창을 |r.bestSeq|로 갈아 끼운다@>@;
+	@<창을 |r.bestSeq|로 갈아 끼운다@>
 	return true
 }
 
@@ -880,11 +880,11 @@ func (sr *searcher) unbanAll() {
 
 @<반복 국소 탐색@>=
 func (sr *searcher) tabuRestart(rounds int) bool {
-	@<최고 사슬의 간선 몇 개를 금지한다@>@;
+	@<최고 사슬의 간선 몇 개를 금지한다@>
 	sr.s.copyFrom(sr.best)
-	@<금지된 간선이 놓인 창들을 강제로 다시 짠다@>@;
+	@<금지된 간선이 놓인 창들을 강제로 다시 짠다@>
 	sr.localSearch()
-	@<금기 아래에서 |rounds|판을 돈다@>@;
+	@<금기 아래에서 |rounds|판을 돈다@>
 	sr.unbanAll()
 	sr.localSearch() // 금기가 풀렸으니 그 간선들도 다시 쓸 수 있다
 	if sr.s.tot > sr.best.tot {
@@ -913,7 +913,7 @@ for _, e := range sr.bans {
 	if pos < 0 {
 		continue // 이 간선은 벌써 우회됐다
 	}
-	@<위치 |pos|의 간선을 품는 창을 다시 짠다@>@;
+	@<위치 |pos|의 간선을 품는 창을 다시 짠다@>
 }
 
 @ 창은 간선의 양 끝(위치 |pos|·|pos+1|)을 안에 품어야 한다. 경로 끝에
@@ -976,11 +976,11 @@ func (sr *searcher) run(deadline time.Time) {
 	sr.sh.publish(sr.best)
 	stale := 0
 	for round := 0; time.Now().Before(deadline); round++ {
-		@<교란하거나 파괴-재건한다@>@;
+		@<교란하거나 파괴-재건한다@>
 		sr.localSearch()
-		@<결과에 따라 최고해와 정체 계수를 손본다@>@;
-		@<이따금 전역 최고해로 갈아탄다@>@;
-		@<정체가 깊으면 대청소하거나 새로 출발한다@>@;
+		@<결과에 따라 최고해와 정체 계수를 손본다@>
+		@<이따금 전역 최고해로 갈아탄다@>
+		@<정체가 깊으면 대청소하거나 새로 출발한다@>
 	}
 }
 
@@ -1108,7 +1108,7 @@ if *chain {
 	for k := 0; k+1 < len(b.path); k++ {
 		u, v := b.path[k], b.path[k+1]
 		run += p.del[u][v]
-		@<경기 하나를 |football|과 같은 꼴로 찍는다@>@;
+		@<경기 하나를 |football|과 같은 꼴로 찍는다@>
 	}
 }
 
@@ -1119,7 +1119,7 @@ if *chain {
 
 @<경기 하나를 |football|과 같은 꼴로 찍는다@>=
 d := p.date[u][v]
-@<날짜 |d|를 달 이름 |mon|과 날 |day|로 옮긴다@>@;
+@<날짜 |d|를 달 이름 |mon|과 날 |day|로 옮긴다@>
 fmt.Printf(" %s %02d: %s %s %d, %s %s %d (%+d)\n",
 	mon, day,
 	p.names[u], p.nick[u], p.uScore[u][v],

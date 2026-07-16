@@ -117,13 +117,13 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataInputDirectory = "/usr/local/sgb/data"
+const DataDirectory = "/usr/local/sgb/data"
 
-@<상수, 표, 자료 구조@>@;
-@<보조 함수@>@;
-@<입력을 읽는 함수@>@;
-@<그래프를 짓는 |Words|@>@;
-@<낱말을 찾는 |FindWord|@>@;
+@<상수, 표, 자료 구조@>
+@<보조 함수@>
+@<입력을 읽는 함수@>
+@<그래프를 짓는 |Words|@>
+@<낱말을 찾는 |FindWord|@>
 
 @ 이제 본론이다. |Words|는 씨앗으로 난수 스트림을 하나 열고, 무게 벡터가
 올바른지 확인한 다음, 자격을 갖춘 낱말들을 연결 리스트로 읽어들이고, 끝으로
@@ -140,13 +140,13 @@ const DataInputDirectory = "/usr/local/sgb/data"
 // 그래프를 짓는다. |wtVector|가 |nil|이면 기본 무게를 쓴다.
 func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*gbgraph.Graph, error) {
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	rng := gbflip.New(seed)
 	usedDefault := wtVector == nil
-	@<가중치 벡터가 올바른지 검증한다@>@;
-	@<자격을 갖춘 낱말들을 연결 리스트로 읽어들인다@>@;
-	@<낱말들을 정렬해 그래프로 출력한다@>@;
+	@<가중치 벡터가 올바른지 검증한다@>
+	@<자격을 갖춘 낱말들을 연결 리스트로 읽어들인다@>
+	@<낱말들을 정렬해 그래프로 출력한다@>
 	return g, nil
 }
 
@@ -168,8 +168,8 @@ $$\max\bigl(\vert a\vert, \vert b\vert\bigr)
 if wtVector == nil {
 	wtVector = defaultWtVector
 } else {
-	@<부동소수점으로 |wtVector|가 터무니없지 않은지 본다@>@;
-	@<정수 연산으로 |wtVector|가 정말 괜찮은지 확인한다@>@;
+	@<부동소수점으로 |wtVector|가 터무니없지 않은지 본다@>
+	@<정수 연산으로 |wtVector|가 정말 괜찮은지 확인한다@>
 }
 
 @ 부동소수점 산술은 시스템마다 다르지만, 적어도 16비트의 정밀도는 쓴다고
@@ -257,7 +257,7 @@ stack *gbsort.Node[string], nn int64, err error,
 			word[j] = f.Char()
 		}
 		var wt int64
-		@<이 낱말의 무게 |wt|를 계산한다@>@;
+		@<이 낱말의 무게 |wt|를 계산한다@>
 		if wt >= wtThreshold { // 자격을 갖췄다
 			stack = &gbsort.Node[string]{Key: wt + weightBias, Data: string(word[:]), Link: stack}
 			nn++
@@ -314,13 +314,13 @@ for j := 0; ; j++ {
 
 @<낱말들을 정렬해 그래프로 출력한다@>=
 sorted := gbsort.LinkSort(stack, rng)
-@<새 그래프의 저장 공간을 마련하고 |n|을 조정한다@>@;
+@<새 그래프의 저장 공간을 마련하고 |n|을 조정한다@>
 ht := makeWordHash()
 var added int64
 Outer:
 for j := 127; j >= 0; j-- {
 	for p := sorted[j]; p != nil; p = p.Link {
-		@<낱말 |p.Data|를 그래프에 더한다@>@;
+		@<낱말 |p.Data|를 그래프에 더한다@>
 		added++
 		if added == n {
 			break Outer
@@ -475,8 +475,8 @@ func FindWord(g *gbgraph.Graph, q string, f func(*gbgraph.Vertex)) *gbgraph.Vert
 	for v := range g.AllVertices() {
 		ht.insert(v, nil)
 	}
-	@<꼭 맞는 낱말이 있으면 돌려준다@>@;
-	@<|q|와 이웃한 낱말마다 |f|를 부른다@>@;
+	@<꼭 맞는 낱말이 있으면 돌려준다@>
+	@<|q|와 이웃한 낱말마다 |f|를 부른다@>
 	return nil
 }
 
@@ -520,11 +520,11 @@ import (
 
 const dataDir = "../data"
 
-@<개수를 대조하는 시험@>@;
-@<구조를 확인하는 시험@>@;
-@<결정성을 확인하는 시험@>@;
-@<|FindWord| 시험@>@;
-@<무게 검증 오류 시험@>@;
+@<개수를 대조하는 시험@>
+@<구조를 확인하는 시험@>
+@<결정성을 확인하는 시험@>
+@<|FindWord| 시험@>
+@<무게 검증 오류 시험@>
 
 @ 무게 벡터 |{1}|은 $a=1$, 나머지 0을 뜻하니, 문턱 1로 거르면 흔한 낱말 3300개만
 남는다. |{1,1}|은 $a=b=1$이라 흔하거나 고급인 4494개다. 기본 무게에 문턱 0이면
@@ -578,7 +578,7 @@ func TestWordStructure(t *testing.T) {
 				i-1, g.Vertices[i-1].U.I, i, g.Vertices[i].U.I)
 		}
 	}
-	@<모든 호를 확인한다@>@;
+	@<모든 호를 확인한다@>
 }
 
 @ @<모든 호를 확인한다@>=

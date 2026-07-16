@@ -55,15 +55,15 @@ import (
 	"github.com/sjnam/go-sgb/gbwords"
 )
 
-@<거리 보조 함수@>@;
-@<빈도 비용 함수@>@;
-@<사다리 찾개 |ladders|@>@;
-@<끝말을 다섯 자로 받는다@>@;
+@<거리 보조 함수@>
+@<빈도 비용 함수@>
+@<사다리 찾개 |ladders|@>
+@<끝말을 다섯 자로 받는다@>
 
 func main() {
-	@<명령줄 옵션을 읽는다@>@;
-	@<낱말 그래프를 짓는다@>@;
-	@<차례로 사다리를 찾는다@>@;
+	@<명령줄 옵션을 읽는다@>
+	@<낱말 그래프를 짓는다@>
+	@<차례로 사다리를 찾는다@>
 }
 
 @* 옵션 훑기. \UNIX/ 명령줄 잡동사니부터 치워, 알맹이에 집중하자. 우리 일은
@@ -90,7 +90,7 @@ num := func(s string) int64 {
 	}
 	return v
 }
-@<인자를 하나씩 훑는다@>@;
+@<인자를 하나씩 훑는다@>
 if alph || randm {
 	freq = false
 }
@@ -138,9 +138,9 @@ if err != nil {
 	fmt.Fprintf(os.Stderr, "Sorry, I couldn't build a dictionary (trouble code %v)!\n", err)
 	os.Exit(1)
 }
-@<고른 옵션을 확인해 준다@>@;
-@<|alph|이나 |freq|이면 간선 길이를 고친다@>@;
-@<우선순위 큐를 고른다@>@;
+@<고른 옵션을 확인해 준다@>
+@<|alph|이나 |freq|이면 간선 길이를 고친다@>
+@<우선순위 큐를 고른다@>
 
 @ 실제 낱말 수는 사전 크기만큼 줄어들 수 있으므로, 그래프를 지은 뒤에야
 사용자가 고른 옵션을 확인해 준다.
@@ -242,11 +242,11 @@ type ladders struct {
 gg := gbgraph.NewGraph(0)
 gg.Vertices = l.g.Vertices // |g|의 정점을 빌린다
 gg.N = l.g.N
-@<새 간선을 심는 |plant|을 마련한다@>@;
-@<|start|와 |goal|을 |gg|에 끼워 넣는다@>@;
-@<둘 다 새 낱말이고 서로 이웃이면 잇는다@>@;
-@<|Dijkstra|에게 궂은일을 맡기고 답을 찍는다@>@;
-@<|gg|의 흔적을 모두 지운다@>@;
+@<새 간선을 심는 |plant|을 마련한다@>
+@<|start|와 |goal|을 |gg|에 끼워 넣는다@>
+@<둘 다 새 낱말이고 서로 이웃이면 잇는다@>
+@<|Dijkstra|에게 궂은일을 맡기고 답을 찍는다@>
+@<|gg|의 흔적을 모두 지운다@>
 
 @ |FindWord|는 |g|에 없는 낱말이면 |nil|을 돌려주는데, 그 전에 두 번째 인자를
 이웃한 낱말마다 부른다. |plant|이 바로 그 인자로, 갓 끼운 정점에서 이웃으로
@@ -390,7 +390,7 @@ for {
 	if !ok {
 		continue // 목적 낱말이 없으면 시작부터 다시
 	}
-	@<|start|에서 |goal|까지 최단 사다리를 찾아 찍는다@>@;
+	@<|start|에서 |goal|까지 최단 사다리를 찾아 찍는다@>
 }
 
 @ |promptForFive|는 정확히 다섯 개의 소문자를 엔터와 함께 받을 때까지 조른다.
@@ -404,7 +404,7 @@ func promptForFive(in *bufio.Reader, out io.Writer, s string, echo bool) (string
 		fmt.Fprintf(out, "%s word: ", s)
 		var buf []byte
 		valid, n := true, 0
-		@<한 줄을 읽어 |buf|에 모은다@>@;
+		@<한 줄을 읽어 |buf|에 모은다@>
 		if n == 5 && valid {
 			return string(buf), true
 		}

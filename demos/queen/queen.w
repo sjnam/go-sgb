@@ -33,13 +33,13 @@ import (
 )
 
 func main() {
-	@<퀸 그래프를 짓는다@>@;
+	@<퀸 그래프를 짓는다@>
 	if err := gbsave.SaveGraph(g, "queen.gb"); err != nil {
 		log.Fatalf("queen.gb를 저장하지 못했습니다: %v", err)
 	}
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
-	@<정점과 간선을 찍는다@>@;
+	@<정점과 간선을 찍는다@>
 }
 
 @ 룩 판과 비숍 판의 합집합이 퀸 그래프다.

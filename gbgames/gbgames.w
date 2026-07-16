@@ -49,12 +49,12 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataInputDirectory = "/usr/local/sgb/data"
+const DataDirectory = "/usr/local/sgb/data"
 
-@<상수 정의@>@;
-@<자료 구조@>@;
-@<|Games| 함수@>@;
-@<그래프를 짓는 도우미들@>@;
+@<상수 정의@>
+@<자료 구조@>
+@<|Games| 함수@>
+@<그래프를 짓는 도우미들@>
 
 @ 자료에서 관찰된 상한들이다. |ma0|·|mu0|·|ma1|·|mu1|은 각 여론조사 점수의
 최댓값으로, 자료가 망가졌는지 살피는 데 쓴다. 호의 |venue|(|A.I|)는 |home|이면
@@ -125,11 +125,11 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		lastDay:    lastDay,
 	}
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	b.fileName = filepath.Join(dir, "games.dat")
-	@<매개변수가 올바른지 확인한다@>@;
-	@<파일을 열어 그래프를 짓는다@>@;
+	@<매개변수가 올바른지 확인한다@>
+	@<파일을 열어 그래프를 짓는다@>
 	return b.g, nil
 }
 
@@ -163,7 +163,7 @@ if err != nil {
 if err := b.readTeams(f); err != nil {
 	return nil, err
 }
-@<빈 그래프를 마련하고 팀을 고른다@>@;
+@<빈 그래프를 마련하고 팀을 고른다@>
 if err := b.readGames(f); err != nil {
 	return nil, err
 }
@@ -194,9 +194,9 @@ $$\hbox{\tt ABBR College Name(Team Nickname)Conference;a0,u0;a1,u1}$$
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readTeam(f *gbio.File) error {
 	var t teamInfo
-	@<약칭·이름·별명·컨퍼런스를 읽는다@>@;
-	@<여론조사 점수를 읽고 무게를 셈한다@>@;
-	@<노드를 만들어 리스트와 map에 엮는다@>@;
+	@<약칭·이름·별명·컨퍼런스를 읽는다@>
+	@<여론조사 점수를 읽고 무게를 셈한다@>
+	@<노드를 만들어 리스트와 map에 엮는다@>
 	f.NextLine()
 	return nil
 }
@@ -270,7 +270,7 @@ b.g.UtilTypes = "IIZSSSIIZZZZZZ"
 b.g.ID = fmt.Sprintf("games(%d,%d,%d,%d,%d,%d,%d,%d)",
 	b.n, b.ap0Weight, b.upi0Weight, b.ap1Weight, b.upi1Weight,
 	b.firstDay, b.lastDay, b.seed)
-@<무게순으로 정렬해 위 |n|개 팀에 정점을 배정한다@>@;
+@<무게순으로 정렬해 위 |n|개 팀에 정점을 배정한다@>
 
 @ |gbsort.LinkSort|로 128개 통에 정렬한 뒤, 무게가 큰 차례로 훑어 앞 |n|개 팀에
 정점을 배정한다. 고르지 못한 팀은 |vert|가 |nil|로 남아, 아래에서 간선을 만들 때
@@ -429,9 +429,9 @@ import "testing"
 
 const dataDir = "../data"
 
-@<전체 그래프 시험@>@;
-@<팀 선택 시험@>@;
-@<호 필드 시험@>@;
+@<전체 그래프 시험@>
+@<팀 선택 시험@>
+@<호 필드 시험@>
 
 @ |Games(0,0,0,0,0,0,0,0)|은 정점 120개, 간선 638개짜리 그래프를 짓는다. 표식과
 정점·간선 수를 확인한다. |lastDay|는 0에서 128로 올라가야 한다.

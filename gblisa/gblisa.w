@@ -42,7 +42,7 @@ const (
 	maxD = 255 // 입력 자료의 최대 픽셀 값
 )
 
-const DataInputDirectory = "/usr/local/sgb/data"
+const DataDirectory = "/usr/local/sgb/data"
 
 @<Matrix 형@>
 @<Lisa 서브루틴@>
@@ -82,7 +82,7 @@ $2^{62}$ 안쪽) 그냥 나눗셈 한 번으로 족하다.
 @<Lisa 서브루틴@>=
 func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	@<매개변수를 검사하고 기본값을 채운다@>
 	matx := make([]int64, m*n)

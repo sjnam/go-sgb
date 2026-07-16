@@ -51,12 +51,12 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const	DataInputDirectory = "/usr/local/sgb/data"
+const	DataDirectory = "/usr/local/sgb/data"
 
-@<상수 정의@>@;
-@<자료 구조@>@;
-@<|Book|과 |BiBook|@>@;
-@<|bgraph|와 그 도우미@>@;
+@<상수 정의@>
+@<자료 구조@>
+@<|Book|과 |BiBook|@>
+@<|bgraph|와 그 도우미@>
 
 @ 어떤 책도 이만큼 많지는 않을 상한들이다.
 
@@ -110,7 +110,7 @@ type bookBuilder struct {
 func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	b := newBuilder(false)
 	return b.bgraph(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)
@@ -120,7 +120,7 @@ func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, se
 func BiBook(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
 	if dir == "" {
-		dir = DataInputDirectory
+		dir = DataDirectory
 	}
 	b := newBuilder(true)
 	return b.bgraph(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)
@@ -147,11 +147,11 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	b.n, b.x = n, x
 	b.firstChapter, b.lastChapter = firstChapter, lastChapter
 	b.inWeight, b.outWeight = inWeight, outWeight
-	@<매개변수가 올바른지 확인한다@>@;
+	@<매개변수가 올바른지 확인한다@>
 	if err := b.skim(); err != nil {
 		return nil, err
 	}
-	@<정점을 골라 빈 그래프에 넣는다@>@;
+	@<정점을 골라 빈 그래프에 넣는다@>
 	if err := b.fill(); err != nil {
 		return nil, err
 	}
@@ -190,8 +190,8 @@ func (b *bookBuilder) skim() error {
 	if err != nil {
 		return gbgraph.EarlyDataFault // 파일을 열 수 없다
 	}
-	@<파일 첫머리의 인물 코드를 읽어 노드를 만든다@>@;
-	@<장 정보를 훑어 각 인물의 등장 장 수를 센다@>@;
+	@<파일 첫머리의 인물 코드를 읽어 노드를 만든다@>
+	@<장 정보를 훑어 각 인물의 등장 장 수를 센다@>
 	if f.Close() != nil {
 		return gbgraph.LateDataFault // 검사합 등 실패
 	}
@@ -227,7 +227,7 @@ for ; k < maxChaps && !f.EOF(); k++ {
 	if len(s) > 0 && s[0] == '&' {
 		k-- // 앞 장의 이어짐
 	}
-	@<이 장에 나오는 인물들의 등장 수를 센다@>@;
+	@<이 장에 나오는 인물들의 등장 수를 센다@>
 	f.NextLine()
 }
 if k == maxChaps {
@@ -275,8 +275,8 @@ if b.lastChapter > b.chapters {
 if b.firstChapter > b.lastChapter {
 	b.firstChapter = b.lastChapter + 1
 }
-@<빈 그래프를 마련하고 표식을 짓는다@>@;
-@<무게를 셈해 고른 노드에 정점을 배정한다@>@;
+@<빈 그래프를 마련하고 표식을 짓는다@>
+@<무게를 셈해 고른 노드에 정점을 배정한다@>
 
 @ @<빈 그래프를 마련하고 표식을 짓는다@>=
 size := b.n - b.x
@@ -311,7 +311,7 @@ for i := int64(0); i < b.characters; i++ {
 	}
 }
 buckets := gbsort.LinkSort(&b.nodes[b.characters-1], b.rng)
-@<정렬된 노드에서 정점을 골라 배정한다@>@;
+@<정렬된 노드에서 정점을 골라 배정한다@>
 
 @ @<정렬된 노드에서 정점을 골라 배정한다@>=
 vi := int64(0)
@@ -342,11 +342,11 @@ func (b *bookBuilder) fill() error {
 	if err != nil {
 		return gbgraph.Impossible + 1 // 앞서 성공했으니 있을 수 없다
 	}
-	@<인물 자료를 다시 읽어 정점 이름과 설명을 적는다@>@;
+	@<인물 자료를 다시 읽어 정점 이름과 설명을 적는다@>
 	if b.bipartite {
-		@<장 정보를 다시 읽어 이분 간선을 만든다@>@;
+		@<장 정보를 다시 읽어 이분 간선을 만든다@>
 	} else {
-		@<장 정보를 다시 읽어 마주침 간선을 만든다@>@;
+		@<장 정보를 다시 읽어 마주침 간선을 만든다@>
 	}
 	if f.Close() != nil {
 		return gbgraph.Impossible + 2
@@ -401,7 +401,7 @@ for k := int64(1); !f.EOF(); k++ {
 		k--
 	}
 	if k >= b.firstChapter && k <= b.lastChapter {
-		@<이 장의 클릭들을 읽어 정점 쌍을 잇는다@>@;
+		@<이 장의 클릭들을 읽어 정점 쌍을 잇는다@>
 	}
 	f.NextLine()
 }
@@ -422,7 +422,7 @@ for c != '\n' {
 			break
 		}
 	}
-	@<클릭 안 모든 쌍을 잇는다@>@;
+	@<클릭 안 모든 쌍을 잇는다@>
 }
 
 @ @<클릭 안 모든 쌍을 잇는다@>=
@@ -461,7 +461,7 @@ for k := int64(1); !f.EOF(); k++ {
 		k--
 	}
 	if k >= b.firstChapter && k <= b.lastChapter {
-		@<이 장의 이분 간선을 만든다@>@;
+		@<이 장의 이분 간선을 만든다@>
 	}
 	f.NextLine()
 }
@@ -508,9 +508,9 @@ import (
 
 const dataDir = "../data"
 
-@<기본 anna 그래프 시험@>@;
-@<가중 선택과 장 한정 시험@>@;
-@<이분 그래프 시험@>@;
+@<기본 anna 그래프 시험@>
+@<가중 선택과 장 한정 시험@>
+@<이분 그래프 시험@>
 
 @ |Book("anna",0,0,0,0,0,0,0)|은 정점 138개짜리 그래프를 짓는다. 표식과
 정점 수, 그리고 한 인물의 코드·이름을 확인한다.

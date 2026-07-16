@@ -63,9 +63,9 @@ const (
 	unexpectedChar = 127 // |imap|에 없는 문자
 )
 
-@<유틸리티 필드 도우미@>@;
-@<그래프를 되살리는 |RestoreGraph|@>@;
-@<그래프를 저장하는 |SaveGraph|@>@;
+@<유틸리티 필드 도우미@>
+@<그래프를 되살리는 |RestoreGraph|@>
+@<그래프를 저장하는 |SaveGraph|@>
 
 @ |util_types|의 자리 0--5는 정점의 |U|--|Z|, 6--7은 호의 |A|--|B|, 8--13은
 그래프의 |UU|--|ZZ|에 대응한다. 각 도우미는 그 자리의 유틸리티 필드를 가리키는
@@ -142,8 +142,8 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 	}
 	r.g = &gbgraph.Graph{Vertices: make([]gbgraph.Vertex, nV), UtilTypes: utilTypes}
 	r.arcs = make([]gbgraph.Arc, mA)
-	@<그래프·정점·호 레코드를 읽는다@>@;
-	@<짝 호를 잇고 검사합을 확인한다@>@;
+	@<그래프·정점·호 레코드를 읽는다@>
+	@<짝 호를 잇고 검사합을 확인한다@>
 	return r.g, nil
 }
 
@@ -297,13 +297,13 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 	c := r.f.Char()
 	switch t {
 	case 'I':
-		@<수치 필드를 채운다@>@;
+		@<수치 필드를 채운다@>
 	case 'V':
-		@<정점 포인터를 채운다@>@;
+		@<정점 포인터를 채운다@>
 	case 'A':
-		@<호 포인터를 채운다@>@;
+		@<호 포인터를 채운다@>
 	case 'S':
-		@<문자열 포인터를 채운다@>@;
+		@<문자열 포인터를 채운다@>
 	}
 	return nil
 }
@@ -507,7 +507,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	}
 	defer file.Close()
 	w := &writer{out: bufio.NewWriter(file)}
-	@<그래프를 외부 형식으로 옮긴다@>@;
+	@<그래프를 외부 형식으로 옮긴다@>
 	return w.out.Flush()
 }
 
@@ -531,9 +531,9 @@ w.out.WriteString(strconv.FormatInt(int64(len(g.Vertices)), 10))
 w.out.WriteString("V,")
 w.out.WriteString(strconv.FormatInt(int64(len(arcRecords)), 10))
 w.out.WriteString("A)\n")
-@<그래프 레코드를 옮긴다@>@;
-@<정점 레코드를 옮긴다@>@;
-@<호 레코드를 옮긴다@>@;
+@<그래프 레코드를 옮긴다@>
+@<정점 레코드를 옮긴다@>
+@<호 레코드를 옮긴다@>
 w.out.WriteString("* Checksum ")
 w.out.WriteString(strconv.FormatInt(w.magic, 10))
 w.out.WriteString("\n")
@@ -683,7 +683,7 @@ func TestRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RestoreGraph: %v", err)
 	}
-	@<되살린 그래프가 원본과 같은지 확인한다@>@;
+	@<되살린 그래프가 원본과 같은지 확인한다@>
 }
 
 @ @<되살린 그래프가 원본과 같은지 확인한다@>=
@@ -702,7 +702,7 @@ for i := int64(0); i < g.N; i++ {
 		v2.Y.I != v.Y.I || v2.Z.I != v.Z.I {
 		t.Fatalf("정점 %d 불일치: %q %v vs %q %v", i, v.Name, v, v2.Name, v2)
 	}
-	@<정점 |i|의 인접 구조를 견준다@>@;
+	@<정점 |i|의 인접 구조를 견준다@>
 }
 
 @ 두 인접 리스트를 나란히 훑어, 이웃의 번호와 간선 길이가 같은지 본다. 첫 호의
