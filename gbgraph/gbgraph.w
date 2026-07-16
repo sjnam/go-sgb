@@ -233,11 +233,21 @@ const extraN = 4 // |NewGraph|가 여분으로 마련하는 그림자 정점의 
 
 func NewGraph(n int64) *Graph {
 	return &Graph{
-		Vertices:  make([]Vertex, n+extraN),
+		Vertices:  make([]Vertex, n+extraN, n+2*extraN),
 		N:         n,
 		ID:        fmt.Sprintf("gb_new_graph(%d)", n),
 		UtilTypes: "ZZZZZZZZZZZZZZ",
 	}
+}
+
+// |AllocVertex|는 그래프의 정점 배열에 정점 하나를 이어 붙여 그 포인터를
+// 준다. \CEE/의 |gb_typed_alloc(1,Vertex,g->data)|에 대응한다: 배열 뒤에
+// 자리 잡으므로 |Index|로 참조되고, {\sc GB\_\,SAVE}가 함께 저장한다.
+// |NewGraph|가 마련한 여분 자리 안에서는 제자리로 늘어나 기존 정점·호
+// 포인터를 깨지 않는다.
+func (g *Graph) AllocVertex(name string) *Vertex {
+	g.Vertices = append(g.Vertices, Vertex{Name: name})
+	return &g.Vertices[len(g.Vertices)-1]
 }
 
 @ 그래프의 |ID|는 다른 그래프의 |ID|로부터 만들어질 때가 있다. 다음 두
