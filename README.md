@@ -7,16 +7,6 @@ Donald Knuth의 [Stanford GraphBase](https://www-cs-faculty.stanford.edu/~knuth/
 
 module: `github.com/sjnam/go-sgb` · Go 1.26.5
 
-## 원본과의 관계
-
-`cweb-sgb/`에 SGB 원본 배포판(CWEB 소스, `.dat` 데이터 파일, 검증용
-`test.correct`/`sample.correct`)을 그대로 두고 참조한다. SGB 라이선스가 수정을
-금지하므로 이 디렉터리는 **읽기 전용**이며 통째로 gitignore되어 있다. 데이터
-파일만 무수정 복사로 `data/`에 두고 커밋한다.
-
-이 저장소는 예전에 순수 Go로 한 번 이식했던 것을 폐기하고, 원본 CWEB의
-전통을 이어받아 문학적 프로그램으로 다시 쓴 결과다.
-
 ## 구조
 
 SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
