@@ -33,7 +33,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [gbdijk](gbdijk/gbdijk.w) | Dijkstra 최단경로 + 우선순위 큐 |
 | 데모 | [demos/assign_lisa](demos/assign_lisa/assign_lisa.w) | 배정 문제(헝가리 알고리즘) |
 | | [demos/book_components](demos/book_components/book_components.w) | 이중연결 성분 |
-| | [demos/chains](demos/chains/chains.w) | Knuth의 사슬 도전 문제 |
+| | [demos/chains](demos/chains/chains.w) | Knuth의 사슬 도전 문제(최적값 2473 증명) |
 | | [demos/econ_order](demos/econ_order/econ_order.w) | 경제 부문 준삼각 순서 |
 | | [demos/football](demos/football/football.w) | 팀 사이 승리 사슬 찾기 |
 | | [demos/girth](demos/girth/girth.w) | Ramanujan 그래프의 둘레·지름 |
