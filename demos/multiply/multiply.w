@@ -22,16 +22,8 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"math/big"
-	"os"
-	"strings"
-	@#
-	"github.com/sjnam/go-sgb/gbgates"
-	"github.com/sjnam/go-sgb/gbgraph"
+	@<필요한 패키지들@>
 )
-
 @<깊이 재기 서브루틴@>
 @<입력받기 서브루틴@>
 
@@ -60,6 +52,16 @@ func main() {
 		@<곱 |z|를 찍는다@>
 	}
 }
+
+@ @<필요한 패키지들@>=
+	"bufio"
+	"fmt"
+	"math/big"
+	"os"
+	"strings"
+	@#
+	"github.com/sjnam/go-sgb/gbgates"
+	"github.com/sjnam/go-sgb/gbgraph"
 
 @ 인자는 셋이나 넷이어야 한다. |m|과 |n|은 \CEE/의 |sscanf("%ld")|처럼 앞쪽
 정수만 읽고, 음수 부호가 붙었으면 절댓값을 취한다. 씨앗은 넷째 인자가 정수일
@@ -187,7 +189,7 @@ if len(x)+len(y) > 35 {
 }
 fmt.Printf("%sx%s=%s%s.\n", x, y, sep, z)
 
-@* 입력 다루기. |parseArg|는 명령줄 인자에서 앞쪽 정수를 읽는다. |getNumber|는
+@ |parseArg|는 명령줄 인자에서 앞쪽 정수를 읽는다. |getNumber|는
 프롬프트를 찍고 한 줄을 읽어, 앞 0을 떼고 음 아닌 십진 숫자열만 받아들인다.
 빈 줄이거나 파일 끝이면 거짓을 돌려주어 실행을 끝내고, 숫자가 아니거나 너무
 길면 채근하고 다시 묻는다. \CEE/ 원본의 |goto|는 반복문으로 옮긴다.
