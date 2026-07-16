@@ -29,6 +29,8 @@ dag를 짓는다. |PrintGates|는 그런 dag를 기호로 찍고, |GateEval|은 
 정수 0·1을 숨겨 넣었지만, \GO/에서는 값이 0·1로 고정된 불변 센티넬 정점
 |gateFalse|·|gateTrue| 둘을 두어 이를 대신한다. 이들은 어느 그래프에도 속하지
 않고 절대 바뀌지 않으므로, |tipValue|는 언제나 |tip.X.I|를 읽으면 된다.
+공개 술어 |IsBoolean|은 응용이 출력 |tip|이 이런 상수인지 가려낼 수 있게 한다
+--- 이를테면 회로의 깊이를 잴 때 상수 출력을 건너뛰는 데 쓴다.
 @d AND OR NOT XOR DELAY
 @c
 package gbgates
@@ -60,6 +62,9 @@ func isBoolean(v *gbgraph.Vertex) bool { return v == gateFalse || v == gateTrue 
 func theBoolean(v *gbgraph.Vertex) int64 { if v == gateTrue { return 1 }; return 0 }
 func tipValue(v *gbgraph.Vertex) int64   { return v.X.I }
 func boolGate(bit int64) *gbgraph.Vertex { if bit != 0 { return gateTrue }; return gateFalse }
+
+// IsBoolean은 v가 상수 게이트(0이나 1)인지 알려주는 공개 술어다.
+func IsBoolean(v *gbgraph.Vertex) bool { return isBoolean(v) }
 
 @<게이트 만들기@>
 @<GateEval@>
