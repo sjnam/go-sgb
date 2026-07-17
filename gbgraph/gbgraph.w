@@ -193,7 +193,6 @@ type Graph struct {
 하나를 바꿔치기할 수 없으니 작은 도우미를 마련해 둔다.
 
 @<그래프 키우기@>=
-// |SetUtilType|은 |UtilTypes|의 |k|번째 자리를 |c|로 바꾼다.
 func (g *Graph) SetUtilType(k int, c byte) {
 	t := []byte(g.UtilTypes)
 	t[k] = c
@@ -206,12 +205,10 @@ func (g *Graph) SetUtilType(k int, c byte) {
 $n-n_1$이다.
 
 @<그래프 키우기@>=
-// |N1|은 이분 그래프의 첫 부분 크기다.
 func (g *Graph) N1() int64 {
 	return g.UU.I
 }
-
-// |MarkBipartite|는 이분 그래프의 첫 부분 크기 |n1|을 새겨 둔다.
+@#
 func (g *Graph) MarkBipartite(n1 int64) {
 	g.UU.I = n1
 	g.SetUtilType(8, 'I')
@@ -227,7 +224,6 @@ func (g *Graph) MarkBipartite(n1 int64) {
 |make|는 실패를 모른다(정말 메모리가 바닥나면 실행 시간 패닉이다).
 정점 이름의 초기값은 \CEE/의 |null_string|, 곧 빈 문자열이었다 — \GO/에서는
 |string|의 영값이 이미 빈 문자열이라 따로 할 일이 없다.
-
 @<그래프 키우기@>=
 const extraN = 4 // |NewGraph|가 여분으로 마련하는 그림자 정점의 수
 
@@ -240,11 +236,12 @@ func NewGraph(n int64) *Graph {
 	}
 }
 
-// |AllocVertex|는 그래프의 정점 배열에 정점 하나를 이어 붙여 그 포인터를
-// 준다. \CEE/의 |gb_typed_alloc(1,Vertex,g->data)|에 대응한다: 배열 뒤에
-// 자리 잡으므로 |Index|로 참조되고, {\sc GB\_\,SAVE}가 함께 저장한다.
-// |NewGraph|가 마련한 여분 자리 안에서는 제자리로 늘어나 기존 정점·호
-// 포인터를 깨지 않는다.
+@ |AllocVertex|는 그래프의 정점 배열에 정점 하나를 이어 붙여 그 포인터를
+준다. \CEE/의 |gb_typed_alloc()|에 대응한다: 배열 뒤에
+자리 잡으므로 |Index|로 참조되고, {\sc GB\_\,SAVE}가 함께 저장한다.
+|NewGraph|가 마련한 여분 자리 안에서는 제자리로 늘어나 기존 정점·호
+포인터를 깨지 않는다.
+@<그래프 키우기@>=
 func (g *Graph) AllocVertex(name string) *Vertex {
 	g.Vertices = append(g.Vertices, Vertex{Name: name})
 	return &g.Vertices[len(g.Vertices)-1]
@@ -254,7 +251,6 @@ func (g *Graph) AllocVertex(name string) *Vertex {
 루틴은 그런 합성을 하되, 거듭 복사해도 문자열이 한없이 길어지지 않도록
 160자에서 말줄임표로 끊는다. 저장 파일 형식이 이 길이를 전제하므로 \CEE/의
 상수를 그대로 쓴다.
-|MakeCompoundID|는 |g|의 |ID|를 |s1+gg.ID+s2|로 만든다.
 @<그래프 키우기@>=
 const idFieldSize = 161 // \CEE/의 |ID| 배열 크기; 문자로는 160자까지
 
@@ -377,8 +373,9 @@ func (g *Graph) ArcRecords() []*Arc {
 	return records
 }
 
-// |SetArcStore|는 되살린 그래프의 호 레코드를 파일 순서대로 등록해,
-// {\sc GB\_\,SAVE}가 그 그래프를 똑같이 다시 저장할 수 있게 한다.
+@ |SetArcStore|는 되살린 그래프의 호 레코드를 파일 순서대로 등록해,
+{\sc GB\_\,SAVE}가 그 그래프를 똑같이 다시 저장할 수 있게 한다.
+@<그래프 키우기@>=
 func (g *Graph) SetArcStore(arcs []*Arc) {
 	g.arcs = arcs
 }
@@ -390,9 +387,7 @@ func (g *Graph) SetArcStore(arcs []*Arc) {
 안의 |break|가 제대로 먹는다. 이제 그래프의 모든 호는
 |for v := range g.AllVertices()|와 |for a := range v.AllArcs()|를 겹쳐
 방문하면 된다.
-
 @<그래프 키우기@>=
-// |AllArcs|는 정점 |v|에서 나가는 호들을 차례로 내주는 반복자다.
 func (v *Vertex) AllArcs() iter.Seq[*Arc] {
 	return func(yield func(*Arc) bool) {
 		for a := v.Arcs; a != nil; a = a.Next {
@@ -402,8 +397,7 @@ func (v *Vertex) AllArcs() iter.Seq[*Arc] {
 		}
 	}
 }
-
-// |AllVertices|는 그래프 |g|의 정점들을 차례로 내주는 반복자다.
+@#
 func (g *Graph) AllVertices() iter.Seq[*Vertex] {
 	return func(yield func(*Vertex) bool) {
 		for i := range g.Vertices[:g.N] {
@@ -429,7 +423,6 @@ func (g *Graph) AllVertices() iter.Seq[*Vertex] {
 
 경고: 이 해시 방식을 쓰는 동안 |g.N|을 보존해야 한다. |g.N|이 바뀌면
 해시표는 휴지 조각이다---|HashSetup|으로 전부 다시 해싱하기 전에는.
-
 @<정점 찾기@>=
 const (
 	hashMult  = 314159    // 무작위 곱수; 이 양반 파이($\pi$)를 참 좋아하는군.
