@@ -26,7 +26,7 @@ $$\vbox{\halign{\indent#\hfil\cr
 `\.{wordy}' 따위로 한 걸음씩 옮겨 갈 수 있다. 우리가 지금 짓는 그래프는 바로 이
 ``한 글자만 다른'' 관계를 간선으로 삼는다.
 
-@ |Words| 호출 |Words(n, wtVector, wtThreshold, seed, dir)|은 |dir|
+@ |Words(n, wtVector, wtThreshold, seed, dir)|은 |dir|
 디렉터리의 \.{words.dat}에 담긴 다섯 글자 낱말들로 그래프를 짓는다. 그래프의
 정점 하나가 낱말 하나에 대응하며, 두 낱말이 정확히 한 글자 자리에서만 다르면
 그래프에서 서로 이웃한다.
@@ -136,9 +136,9 @@ const DataDirectory = "/usr/local/sgb/data"
 견주었지만, 여기서는 |nil| 여부를 한 번 적어 두는 편이 깔끔하다.
 
 @<그래프를 짓는 |Words|@>=
-// |Words|는 |dir| 디렉터리의 \.{words.dat}에 담긴 다섯 글자 낱말들로
-// 그래프를 짓는다. |wtVector|가 |nil|이면 기본 무게를 쓴다.
-func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*gbgraph.Graph, error) {
+func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (
+	*gbgraph.Graph, error,
+) {
 	if dir == "" {
 		dir = DataDirectory
 	}
@@ -191,7 +191,7 @@ if flacc >= float64(0x60000000) {
 
 @ 거꾸로, 방금 한 부동소수점 시험을 통과했다면 참값의 합은
 $2^{30}+2^{29}+2^{29}=2^{31}$보다 작다. 따라서 다음의 더 정밀한 정수 시험에서
-넘침은 결코 일어나지 않는다. 문턱은 $\.{0x40000000}=2^{30}$이다.
+넘침은 결코 일어나지 않는다. 문턱은 $|0x40000000|=2^{30}$이다.
 
 @<정수 연산으로 |wtVector|가 정말 괜찮은지 확인한다@>=
 acc := iabs(wtVector[0])

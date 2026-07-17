@@ -194,15 +194,13 @@ var icode = func() (t [256]byte) {
 같은 일을 한다.
 
 @<검사합@>=
-// |ImapChr|는 내부 부호 |d|에 대응하는 문자를 준다(범위 밖이면 0).
 func ImapChr(d int64) byte {
 	if d < 0 || d >= int64(len(imap)) {
 		return 0
 	}
 	return imap[d]
 }
-
-// |ImapOrd|는 문자 |c|의 내부 부호를 준다.
+@#
 func ImapOrd(c byte) int64 {
 	return int64(icode[c])
 }
@@ -211,7 +209,6 @@ func ImapOrd(c byte) int64 {
 |magic| 값을 바꿀 수는 없다.
 
 @<검사합@>=
-// |NewChecksum|은 문자열 |s|의 문자들로 검사합 |old|를 갱신한 값을 준다.
 func NewChecksum(s string, old int64) int64 {
 	a := old
 	for i := range len(s) {
@@ -225,7 +222,6 @@ func NewChecksum(s string, old int64) int64 {
 줄이 마법을 깨지 않도록 한 배려다.
 
 @<검사합@>=
-// |NextLine|은 데이터 파일의 다음 줄로 나아간다.
 func (f *File) NextLine() {
 	f.lineNo++
 	if f.lineNo > f.totLines {
@@ -242,7 +238,6 @@ func (f *File) NextLine() {
 @ 데이터를 다 읽었는지는 |EOF|로 알아본다.
 
 @<검사합@>=
-// |EOF|는 데이터를 다 읽었으면 참이다.
 func (f *File) EOF() bool {
 	return !f.moreData
 }
@@ -255,7 +250,6 @@ func (f *File) EOF() bool {
 있었다면 그대로다. 반대로 |Backup|은 |pos|를 한 자리 왼쪽으로 옮긴다---%
 이미 줄 머리에 있었다면 그대로다.
 @<줄 파싱@>=
-// |Char|는 현재 줄의 다음 문자를 준다. 줄이 끝났으면 |'\n'|을 준다.
 func (f *File) Char() byte {
 	if f.pos < len(f.buffer) {
 		c := f.buffer[f.pos]
@@ -264,8 +258,7 @@ func (f *File) Char() byte {
 	}
 	return '\n'
 }
-
-// |Backup|은 문자 하나를 다시 읽을 수 있게 물러선다.
+@#
 func (f *File) Backup() {
 	if f.pos > 0 {
 		f.pos--
@@ -287,7 +280,6 @@ func (f *File) Backup() {
 대신한다. 진법 |d|는 개행의 내부 부호인 95 이하라야 안전한데, 실제로
 쓰이는 진법은 물론 10과 16이다.
 @<줄 파싱@>=
-// |Digit|은 0과 |d-1| 사이의 숫자 한 자를 읽는다(숫자가 아니면 $-1$).
 func (f *File) Digit(d int64) int64 {
 	if f.pos == len(f.buffer) {
 		return -1
@@ -299,8 +291,7 @@ func (f *File) Digit(d int64) int64 {
 	f.pos++
 	return v
 }
-
-// |Number|는 |d|진법의 부호 없는 수를 읽는다(숫자가 없으면 0).
+@#
 func (f *File) Number(d int64) int64 {
 	var a int64
 	for f.pos < len(f.buffer) {
@@ -326,7 +317,6 @@ func (f *File) Number(d int64) int64 {
 연기처럼 사라진다.
 
 @<줄 파싱@>=
-// |String|은 문자 |c| 직전까지의 문자열을 읽는다.
 func (f *File) String(c byte) string {
 	start := f.pos
 	for f.pos < len(f.buffer) && f.buffer[f.pos] != c {
@@ -348,7 +338,6 @@ func (f *File) String(c byte) string {
 \GO/의 링커는 이름을 자르지 않으므로 침대는 치웠다.
 
 @<파일 열기@>=
-// |RawOpen|은 아무 파일이나 열어 GraphBase 입력을 준비한다.
 func RawOpen(name string) (*File, error) {
 	file, err := os.Open(name)
 	if err != nil {
@@ -384,7 +373,6 @@ $$\vbox{\halign{\quad\.{#}\hfill\cr
 파일을 도로 닫고 오류를 돌려주는---를 작은 클로저 |bad|에 맡긴다.
 
 @<파일 열기@>=
-// |Open|은 GraphBase 데이터 파일을 열고 머리글 넉 줄을 검증한다.
 func Open(name string) (*File, error) {
 	f, err := RawOpen(name)
 	if err != nil {
@@ -442,7 +430,6 @@ if f.Char() != ')' {
 아니면 |nil|을 돌려준다.
 
 @<파일 닫기@>=
-// |Close|는 GraphBase 데이터 파일을 닫으며 줄 수와 검사합을 대조한다.
 func (f *File) Close() error {
 	if f.file == nil {
 		f.errors |= NoFileOpen
@@ -476,7 +463,6 @@ func (f *File) Close() error {
 버금가게 든든한---시스템 독립 입력을 꾸리는 것을 보게 될 것이다.
 
 @<파일 닫기@>=
-// |RawClose|는 파일을 닫고 검사합을 돌려준다.
 func (f *File) RawClose() int64 {
 	if f.file != nil {
 		f.file.Close()

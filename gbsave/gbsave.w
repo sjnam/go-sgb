@@ -96,7 +96,7 @@ func arcUtil(a *gbgraph.Arc, pos int) *gbgraph.Util {
 	}
 	return &a.B
 }
-
+@#
 func graphUtil(g *gbgraph.Graph, pos int) *gbgraph.Util {
 	switch pos {
 	case 8:
@@ -128,7 +128,6 @@ type reader struct {
 	commaExpected bool
 }
 
-// |RestoreGraph|는 |.gb| 파일을 읽어 그래프를 되살린다.
 func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 	f, err := gbio.RawOpen(filename)
 	if err != nil {
@@ -489,7 +488,6 @@ func (w *writer) moveItem(item string) {
 호와 그 짝을 나란히 번호 매기면, 짝이 이웃해 되살릴 때 |Partner|를 세울 수 있다.
 
 @<그래프를 저장하는 |SaveGraph|@>=
-// |SaveGraph|는 그래프 |g|를 |.gb| 파일로 저장한다.
 func SaveGraph(g *gbgraph.Graph, filename string) error {
 	if g == nil || g.Vertices == nil {
 		return gbgraph.MissingOperand
