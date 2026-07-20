@@ -1,6 +1,6 @@
 % 이 문서는 Stanford GraphBase의 gb_io.w((c) 1993 Stanford University)를
 % 한글 GWEB(Go)로 옮긴 것으로, Stanford GraphBase의 일부가 아니다.
-@i ../types.w
+@i ../gbtypes.w
 
 \input kotexgweb
 \def\title{GB\_\,IO}

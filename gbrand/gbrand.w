@@ -1,6 +1,6 @@
 % go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 gb_rand.w를 Go로 이식한다.
-@i ../types.w
+@i ../gbtypes.w
 
 \input kotexgweb
 \def\title{GB\_\,RAND}
@@ -142,7 +142,7 @@ type walkerNode struct {
 
 @ |walker|는 길이 |n|짜리 분포 |dist|로, 길이 |nn|짜리 마법 표를 짓는다. 표를
 채우는 순서는 뒤에 쓰일 |RandomGraph|·|RandomLengths|의 재현성과는 무관하다
---- 표 자체가 정점 뽑기의 확률을 결정하므로, \CEE/ 원본과 자리 하나 어긋나지
+---표 자체가 정점 뽑기의 확률을 결정하므로, \CEE/ 원본과 자리 하나 어긋나지
 않아야 훗날 {\sc TEST\_SAMPLE}에서 같은 그래프가 나온다.
 
 @<Walker의 별칭법@>=
@@ -216,7 +216,6 @@ for len(lo) > 0 {
 |m|개 채운다.
 
 @<랜덤 함수들@>=
-// |RandomGraph|는 정점 |n|개, 호(또는 간선) |m|개짜리 무작위 그래프를 짓는다.
 func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int64,
 	minLen, maxLen, seed int64) (*gbgraph.Graph, error) {
 	@<|RandomGraph|의 매개변수를 확인한다@>
@@ -235,7 +234,6 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 
 @ |n|은 0일 수 없고, 길이 범위는 거꾸로거나 너무 넓으면 안 된다. 두 분포도
 올바라야 한다.
-
 @<|RandomGraph|의 매개변수를 확인한다@>=
 if n == 0 {
 	return nil, gbgraph.BadSpecs // 정점이 하나는 있어야 한다

@@ -1,6 +1,6 @@
 % go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 Knuth의 도전 문제(최장 점수 사슬)에 대한 우리의 답이다.
-@i ../../types.w
+@i ../../gbtypes.w
 
 \input kotexgweb
 \def\title{CHAINS}

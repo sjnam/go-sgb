@@ -1,6 +1,6 @@
 % go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 take_risc.w를 Go로 이식한다.
-@i ../../types.w
+@i ../../gbtypes.w
 
 \input kotexgweb
 \def\title{TAKE\_\,RISC}

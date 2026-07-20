@@ -51,7 +51,7 @@ SGB 전 모듈 이식 완료.
 패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
 각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
 `demos/`의 시연 프로그램에는 시험이 없다. 공유하는 \.{GWEB} 서식 힌트는
-루트 [types.w](types.w)에 모아 `@i`로 끌어와 쓴다.
+루트 [gbtypes.w](gbtypes.w)에 모아 `@i`로 끌어와 쓴다.
 
 **tangle로 생성되는 `.go`·`.tex`·`.pdf`는 커밋하지 않는다** — `.gitignore`
 참고. 일차 산출물은 어디까지나 `.w`다.
