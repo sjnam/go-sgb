@@ -1514,6 +1514,7 @@ func upperBound(p *problem, chain []int, limit time.Duration) (int64, int64, []i
 	@<행과 열의 사상과 기본 행렬을 만든다@>
 	root := bd.solve(nil, nil)
 	fmt.Printf("배정 완화의 상계: %d\n", root.bound)
+	@<뿌리 완화의 생김새를 찍는다@>
 	h := &bbHeap{root}
 	heap.Init(h)
 	nodes := 0
@@ -1540,6 +1541,91 @@ func upperBound(p *problem, chain []int, limit time.Duration) (int64, int64, []i
 		proven = true
 	}
 	return ub, bd.inc, bd.incPath, nodes, proven
+}
+
+@* 뿌리 완화의 해부. 상계가 왜 하필 그 값인지는 완화 해를 뜯어보면 눈에
+보인다. 배정 해는 언제나 경로 하나와 서로소인 순환 몇 개, 그리고 대각 원소를
+고른(안 쓴) 정점들로 갈라지니, 그 조각들의 점수를 따로 세어 보면 된다.
+|decompose|가 그 일을 한다.
+
+@<자료 구조@>=
+type piece struct {
+	len  int   // 이 조각이 지나는 정점 수
+	tot  int64 // 이 조각이 버는 점수
+	head int   // 조각을 대표해 이름을 보일 정점
+}
+
+@ @<상계 탐사@>=
+func (bd *bounder) decompose(succ []int) (int, int64, []piece, int) {
+	p := bd.p
+	seen := make([]bool, p.n)
+	plen, ptot := 0, int64(0)
+	for v := p.start; v != p.goal; v = succ[v] {
+		seen[v] = true
+		ptot += p.del[v][succ[v]]
+		plen++
+	}
+	seen[p.goal] = true
+	var cycles []piece
+	skipped := 0
+	for s := 0; s < p.n; s++ {
+		@<정점 |s|가 여는 조각을 갈무리한다@>
+	}
+	return plen, ptot, cycles, skipped
+}
+
+@ 경로에 이미 든 정점은 건너뛰고, 자기를 가리키는 정점은 안 쓴 것으로 센다.
+나머지는 새 순환의 첫 정점이다.
+
+@<정점 |s|가 여는 조각을 갈무리한다@>=
+if seen[s] {
+	continue
+}
+if succ[s] == s {
+	seen[s] = true
+	skipped++
+	continue
+}
+c := piece{head: s}
+for v := s; !seen[v]; v = succ[v] {
+	seen[v] = true
+	c.len++
+	c.tot += p.del[v][succ[v]]
+}
+cycles = append(cycles, c)
+
+@ 스탠퍼드$\to$하버드에서 뿌리 완화를 뜯어보면 이렇다:
+$$\vbox{\halign{\hfil#\quad&\hfil#\quad&\hfil#\cr
+\noalign{\smallskip\hrule\smallskip}
+조각&크기&점수\cr
+\noalign{\smallskip\hrule\smallskip}
+경로 (Stanford$\to$Harvard)&43경기&1058\cr
+순환 1 (Texas A\&M \dots)&58팀&$+1156$\cr
+순환 2 (Temple \dots)&5팀&$+79$\cr
+순환 3 (Princeton \dots)&8팀&$+157$\cr
+순환 4 (Pennsylvania \dots)&3팀&$+48$\cr
+안 쓴 팀&2팀&---\cr
+\noalign{\smallskip\hrule\smallskip}
+합&&2498\cr
+\noalign{\smallskip\hrule\smallskip}}}$$
+완화가 사슬보다 얼마나 후한지가 여기 다 드러난다. 사슬이라면 120개 팀을 한
+줄로 꿰어야 하는데, 완화는 43경기짜리 짧은 경로만 놓고 나머지 팀들은 자기들끼리
+순환을 이뤄 점수를 벌게 둔다---한 줄로 이을 걱정 없이 좋은 경기만 골라 담는
+것이다. 그런데도 그 특권이 사 주는 값은 $2498-2473=25$점, 겨우 1\%밖에 되지
+않는다. 분지한정이 353노드 만에 끝나는 까닭이 바로 이것이다: 완화가 이미
+정답의 코앞에 서 있다. 반대로 이 격차가 컸다면 분지 나무가 폭발했을 테고, 그
+때는 앞 장들의 휴리스틱이 여전히 우리가 가진 전부였을 것이다.
+
+@ @<뿌리 완화의 생김새를 찍는다@>=
+plen, ptot, cycles, skipped := bd.decompose(root.succ)
+var ctot int64
+for _, c := range cycles {
+	ctot += c.tot
+}
+fmt.Printf("  경로 %d경기 합 %d, 순환 %d개 합 %+d, 안 쓴 팀 %d\n",
+	plen, ptot, len(cycles), ctot, skipped)
+for _, c := range cycles {
+	fmt.Printf("    순환: %d팀, %+d  [%s …]\n", c.len, c.tot, p.names[c.head])
 }
 
 @ 순환이 없는 노드의 경로는 상계값을 통째로 달성하는 진짜 사슬이므로 하계
