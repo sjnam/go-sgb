@@ -99,7 +99,7 @@ a sequence of distinct teams in which consecutive teams played each other. If
 which |u| beat |v| in their game (a negative number if |u| actually lost).
 So the problem is to find the simple path from |start| to |goal| that
 maximizes $\sum|del|$. This is a longest-path problem, and longest path is
-{\bf NP}-hard; but there are only 120 teams here, and as we shall see the
+NP-hard; but there are only 120 teams here, and as we shall see the
 instance is far from the worst case.
 
 @<Type declarations@>=
@@ -654,7 +654,7 @@ but the instance itself, approached from above, is nearly trivial. My own
 local-search program spent a hundred and fifty seconds to get within five
 points of the optimum and could not certify even that. So the moral is not
 that heuristics were the wrong tool, but that it is worth measuring the
-relaxation gap before assuming that {\bf NP}-hardness describes your instance.
+relaxation gap before assuming that NP-hardness describes your instance.
 
 Here, finally, is what the first instance looks like when the program is asked
 to show its work, with all but the ends of the chain elided:
