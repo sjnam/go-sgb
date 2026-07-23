@@ -12,31 +12,56 @@
 |Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed, dir)|은
 \.{miles.dat}의 정보로 그래프를 짓는다. 각 정점은 1949년판 Rand McNally사의
 {\sl Standard Highway Mileage Guide\/}에서 이름이 `Ravenna, Ohio' 이상인 128개
-도시 가운데 하나에 대응한다. 간선의 길이는 두 도시 사이의 거리(마일)다. 이
-거리들은 삼각 부등식을 지키도록 손보아졌다---곧 |u|에서 |v|를 거쳐 |w|로
-가는 거리가 |u|에서 |w|로 곧장 가는 거리 이상이다.
+도시 가운데 하나에 대응한다. 간선의 길이는 두 도시 사이의 거리(마일)다.
 
-그래프는 $\min(n,128)$개의 정점을 가지며, |n=0|이면 기본값 128을 쓴다. |n|이
+거리는 대개 그 안내서에서 왔지만, 수십 개 항목은 누가 봐도 너무 크거나 너무
+작아서 크게 손보아야 했다. 그런 경우에는 어림짐작으로 값을 매겼다. 나아가 약
+5\%의 항목은 모든 거리가 ``삼각 부등식''을 지키도록 조금씩 조정했다. 그래서
+|Miles|가 짓는 그래프에서는 |u|에서 |v|까지의 거리에 |v|에서 |w|까지의 거리를
+더하면 언제나 |u|에서 |w|까지의 거리 이상이 된다.
+
+@ 그래프는 $\min(n,128)$개의 정점을 가지며, |n=0|이면 기본값 128을 쓴다. |n|이
 128보다 작으면, 각 도시에 무게를 매겨 가장 무거운 |n|개를 고른다(같은 무게는
 난수로 가른다). 무게는
 $$|northWeight|\cdot|lat|+|westWeight|\cdot|lon|+|popWeight|\cdot|pop|$$
-로 셈하는데, |lat|은 위도, |lon|은 경도(둘 다 100분의 1도 단위), |pop|은 1980년
-인구다. 무게 계수는 $\vert|northWeight|\vert\le100000$,
+로 셈한다. 여기서 |lat|은 적도로부터 북쪽으로 잰 위도, |lon|은 그리니치로부터
+서쪽으로 잰 경도이고, |pop|은 1980년 인구다. 위도와 경도는 모두
+``100분의 1도'' 단위로 적는다. 이를테면 샌프란시스코는 |lat=3778|,
+|lon=12242|, |pop=678974|인데, 이는 최근의 지진이 있기 전 그 도시가 북위
+$37.78^\circ$, 서경 $122.42^\circ$에 자리했고 1980년 인구조사에서 678,974명이
+살았다는 뜻이다. 무게 계수는 $\vert|northWeight|\vert\le100000$,
 $\vert|westWeight|\vert\le100000$, $\vert|popWeight|\vert\le100$을 지켜야 한다.
 
-|maxDistance|가 0이 아니면 그보다 먼 간선은 빠지고, |maxDegree|가 0이 아니면
-각 정점은 가장 짧은 간선 |maxDegree|개까지만 갖는다. 둘 다 특별한 값이
-아니면 그래프는 ``완전''(complete)하다---모든 도시 쌍 사이에 간선이 있다.
+|maxDistance|나 |maxDegree|에 특별한 값을 주지 않으면 그래프는
+``완전''(complete)하다---모든 도시 쌍 사이에 간선이 있다. |maxDistance|가
+0이 아니면 그보다 먼 간선은 나타나지 않고, |maxDegree|가 0이 아니면 각 정점은
+자기의 가장 짧은 간선 |maxDegree|개까지만 갖는다.
 
-@ 예: |Miles(100, 0, 0, 1, 0, 0, 0, dir)|은 자료의 가장 인구 많은 100개
+그래프의 정점들은 무게가 큰 차례로 놓인다. |seed| 인자는 무게가 같은 정점
+사이나 길이가 같은 간선 사이에서 ``무작위'' 선택을 해야 할 때 쓰이는 유사난수를
+정한다.
+
+@ 보기를 들자. |Miles(100,0,0,1,0,0,0,dir)|은 자료에서 인구가 가장 많은 100개
 도시로 완전 그래프를 짓는다. 이 기준의 승자는 인구 875,538의 San Diego이고,
 San Antonio(786,023), San Francisco(678,974), Washington D.C.(638,432)가
 뒤를 잇는다.
 
-서부 도시들을 얻으려면 $|Miles|(n,0,1,0,\ldots)$, 북동부는 $(n,1,-1,0,\ldots)$
-꼴로 부른다. |Miles(n,a,b,c,0,1,0,dir)|처럼 |maxDegree=1|이면, 두 도시가
-서로에게 가장 가까운 이웃일 때에만 간선이 생긴다. |seed|가 다르면 다른
-무작위 선택을 얻되, 같은 매개변수로는 어느 컴퓨터에서나 같은 결과를 얻는다.
+무게 계수를 달리하면 지역을 골라낼 수 있다:
+$$\vbox{\halign{$#$\hfil\qquad&#\hfil\cr
+|Miles|(n,0,1,0,\ldots)&미국과 캐나다 서부의 도시 |n|개\cr
+|Miles|(n,1,-1,0,\ldots)&북동부의 도시 |n|개\cr
+|Miles|(50,-500,0,1,\ldots)&북쪽의 큰 도시 몇을 뺀 대체로 남부 도시들\cr}}$$
+
+|Miles(n,a,b,c,0,1,0,dir)|처럼 |maxDegree=1|을 청하면, 고른 |n|개 도시 가운데
+두 도시가 서로에게 가장 가까운 이웃일 때에만 그 둘 사이에 간선이 생긴다.
+(그래프는 언제나 무향이다: |u|에서 |v|로 가는 호가 있으면 |v|에서 |u|로 가는
+같은 길이의 호도 반드시 있다.)
+
+도시를 무작위로 고르려면 |Miles(n,0,0,0,m,d,s,dir)|을 부르면 된다. 씨앗 |s|를
+달리하면 다른 선택을 얻되, 그 방식은 시스템에 무관하다. 곧 같은 매개변수를
+주면 어느 컴퓨터에서나 같은 결과가 나오므로, 세계 어디에 있는 연구자든 그래프
+알고리즘에 대해 동등한 실험을 해 볼 수 있다. |s|는 $0\le s<2^{31}$의 아무
+값이나 좋다.
 
 @ 프로그램의 뼈대다. \CEE/ 원본의 전역 |gb_flip| 스트림 대신, |Miles|는
 씨앗으로 스트림을 하나 열어 쓴다. 다만 {\sc GB\_PLANE}의 |plane_miles|처럼
@@ -156,10 +181,26 @@ if northWeight > 100000 || westWeight > 100000 || popWeight > 100 ||
 $$\vbox{\halign{\.{#}\hfil\cr
 City Name, ST[lat,lon]pop\cr
 d1 d2 d3 d4 d5 d6 \dots\ (여러 줄일 수도)\cr}}$$
-꼴이다. \.{d1}, \.{d2}, \dots\ 는 앞서 이름난 도시들까지의 거리를 역순으로
-적은 것으로, 빈칸이나 줄바꿈으로 나뉜다. 예컨대 Worcester의 거리 줄
-\.{2964 1520 604}에서, Worcester에서 Yakima까지가 2964마일, Youngstown까지가
-604마일임을 안다.
+꼴이다. \.{City Name}은 도시 이름(빈칸이 들어갈 수도 있다), \.{ST}는 두 글자
+주 코드, \.{lat}과 \.{lon}은 100분의 1도 단위의 위도와 경도, \.{pop}은
+인구다. 이어지는 \.{d1}, \.{d2}, \dots\ 는 앞서 이름난 도시들까지의 거리를
+역순으로 적은 것으로, 각 거리는 빈칸이나 줄바꿈으로 앞 항목과 나뉜다.
+이를테면
+$$\hbox{\tt San Francisco, CA[3778,12242]678974}$$
+는 앞에서 말한 샌프란시스코의 자료를 적은 것이다. 파일 첫머리의 몇 묶음
+$$\vbox{\halign{\.{#}\hfil\cr
+Youngstown, OH[4110,8065]115436\cr
+Yankton, SD[4288,9739]12011\cr
+966\cr
+Yakima, WA[4660,12051]49826\cr
+1513 2410\cr
+Worcester, MA[4227,7180]161799\cr
+2964 1520 604\cr}}$$
+에서 우리는 매사추세츠주 Worcester에서 워싱턴주 Yakima까지가 2964마일이고,
+Worcester에서 Youngstown까지가 604마일임을 읽어 낸다.
+
+캐나다의 주에는 다음 두 글자 코드를 쓴다: \.{BC}는 브리티시컬럼비아,
+\.{MB}는 매니토바, \.{ON}은 온타리오, \.{SK}는 서스캐처원이다.
 
 파일을 열고, 도시들을 읽고, 닫는다. 여는 데 실패하면 |EarlyDataFault|,
 닫는 데 실패하면 |LateDataFault|다.
@@ -269,6 +310,20 @@ v.Name = p.Data.name
 @* 간선. 넣지 않을 간선은 거리 행렬 항목의 부호를 음으로 바꿔 쳐낸다.
 |maxDistance|나 |maxDegree|가 특별한 값일 때만 쳐낼 일이 생긴다. 그런 다음
 모든 도시 쌍을 훑어, 양방향 거리가 모두 양수인 쌍에만 간선을 놓는다.
+
+양방향을 다 보아야 하는 까닭이 있다. 쳐내기는 도시마다 따로 이뤄지므로
+행렬이 비대칭이 될 수 있다. |maxDegree| 제약이 |u|에서는 어떤 거리를 눌렀는데
+|v|에서는 누르지 않았다면, |u|에서 |v|로 가는 항목은 음수인데 |v|에서 |u|로
+가는 항목은 양수인 일이 생긴다. 그럴 때 간선을 놓지 않기로 하는 것이 곧
+``각 정점이 자기의 가장 짧은 간선 |maxDegree|개까지만 갖는다''는 약속을
+지키는 길이다.
+
+\CEE/ 원본은 거리 행렬을 바깥에서 들여다보라고 |miles_distance(u,v)| 함수를
+내놓았다. 다만 ``가장 최근에 |miles|가 만든 그래프에만, 그 |aux_data|가
+아직 회수되지 않았을 때만, |z| 유틸리티 필드가 딴 용도로 쓰이지 않았을 때만''
+쓸 수 있다는 조건이 줄줄이 붙었다. 우리는 이 함수를 옮기지 않았다. 전역
+상태에 기댄 접근자인 데다, 필요한 거리는 이미 간선의 |Len|에 실려 있기
+때문이다.
 
 @<알맞은 간선을 그래프에 넣는다@>=
 if maxDistance > 0 || maxDegree > 0 {
@@ -483,6 +538,70 @@ func TestMilesBadSpecs(t *testing.T) {
 	}
 	if _, err := Miles(10, 0, 0, 200, 0, 0, 0, dataDir); err != gbgraph.BadSpecs {
 		t.Errorf("err = %v, 원함 BadSpecs", err)
+	}
+}
+
+@ 들어가며에서 자료의 거리가 삼각 부등식을 지키도록 손보아졌다고 했다. 그
+말이 정말인지 완전 그래프에서 모든 세 도시 쌍을 훑어 확인한다. 도시가 128개면
+쌍이 200만 개를 넘으므로, 40개만 골라 본다.
+
+@(gbmiles_test.go@>=
+func TestTriangleInequality(t *testing.T) {
+	g, err := Miles(40, 0, 0, 1, 0, 0, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	@<거리 행렬 |d|를 간선에서 되읽는다@>
+	for u := int64(0); u < g.N; u++ {
+		for v := int64(0); v < g.N; v++ {
+			for w := int64(0); w < g.N; w++ {
+				if u == v || v == w || u == w {
+					continue
+				}
+				if d[u][v]+d[v][w] < d[u][w] {
+					t.Fatalf("삼각 부등식 위반: %s→%s→%s (%d+%d < %d)",
+						g.Vertices[u].Name, g.Vertices[v].Name, g.Vertices[w].Name,
+						d[u][v], d[v][w], d[u][w])
+				}
+			}
+		}
+	}
+}
+
+@ 완전 그래프이므로 모든 쌍에 간선이 있다.
+
+@<거리 행렬 |d|를 간선에서 되읽는다@>=
+d := make([][]int64, g.N)
+for i := range d {
+	d[i] = make([]int64, g.N)
+}
+for u := int64(0); u < g.N; u++ {
+	for a := range g.Vertices[u].AllArcs() {
+		d[u][g.Index(a.Tip)] = a.Len
+	}
+}
+
+@ 좌표는 위도·경도의 선형 변환이라 $0\le x\le5132$, $0\le y\le3555$ 안에
+들어야 한다. 인구는 |W.I|에, 도시 번호는 |Z.I|에 담긴다고 했으니 그것도 함께
+확인한다.
+
+@(gbmiles_test.go@>=
+func TestCoordinateRanges(t *testing.T) {
+	g, err := Miles(0, 0, 0, 0, 0, 0, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := int64(0); i < g.N; i++ {
+		v := &g.Vertices[i]
+		if v.X.I < 0 || v.X.I > 5132 {
+			t.Errorf("%s: x = %d, 범위 밖", v.Name, v.X.I)
+		}
+		if v.Y.I < 0 || v.Y.I > 3555 {
+			t.Errorf("%s: y = %d, 범위 밖", v.Name, v.Y.I)
+		}
+		if v.Z.I < 0 || v.Z.I >= maxN {
+			t.Errorf("%s: 도시 번호 = %d, 범위 밖", v.Name, v.Z.I)
+		}
 	}
 }
 

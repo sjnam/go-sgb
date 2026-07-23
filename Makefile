@@ -14,26 +14,39 @@ GWEAVE  ?= gweave
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
 PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks gbgames gbrand gbroget gblisa gbecon gbplane gbgates gbraman
 DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains demos/sham demos/roget_components demos/assign_lisa demos/econ_order demos/take_risc demos/multiply demos/girth
+# 설치 검증 프로그램은 데모가 아니라서 원본처럼 저장소 루트에 둔다.
+ROOTS := test_sample
 
-.PHONY: all tangle doc test clean $(PKGS) $(DEMOS)
+.PHONY: all tangle doc test clean $(PKGS) $(DEMOS) $(ROOTS)
 .DEFAULT_GOAL := all
 
 all: tangle test
 
-tangle: $(PKGS) $(DEMOS)
+tangle: $(PKGS) $(DEMOS) $(ROOTS)
 
 $(PKGS) $(DEMOS):
 	cd $@ && $(GTANGLE) $(notdir $@).w
+
+$(ROOTS):
+	$(GTANGLE) $@.w
 
 test:
 	go vet ./...
 	go test ./...
 
+# luatex은 nonstopmode라야 오류가 나도 멈추지 않고 .log에 다 남긴다.
 doc:
 	for p in $(PKGS) $(DEMOS); do \
-	  (cd $$p && $(GWEAVE) $$(basename $$p).w && luatex $$(basename $$p).tex </dev/null); \
+	  (cd $$p && $(GWEAVE) $$(basename $$p).w && \
+	   luatex --interaction=nonstopmode $$(basename $$p).tex); \
+	done
+	for r in $(ROOTS); do \
+	  $(GWEAVE) $$r.w && luatex --interaction=nonstopmode $$r.tex; \
 	done
 
 clean:
 	rm -f */*.go */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf
 	rm -f demos/*/*.go demos/*/*.tex demos/*/*.idx demos/*/*.scn demos/*/*.toc demos/*/*.log demos/*/*.pdf
+	for r in $(ROOTS); do \
+	  rm -f $$r.go $$r.tex $$r.idx $$r.scn $$r.toc $$r.log $$r.pdf; \
+	done

@@ -84,6 +84,36 @@ $C_4=460$, $C_5=6976$, $C_6=756$, $C_7=362$이다. 이 값들은 흔한 낱말
 `고급', 1263개가 `드묾'이다. 드문 낱말 가운데 891개는
 $c_1=\cdots=c_7=0$이라서, 무게 벡터가 무엇이든 무게가 늘 0이다.
 
+@ 보기를 들어 보자. |Words(2000,nil,0,0,dir)|을 부르면 기본 무게를 써서 영어에서
+가장 흔한 다섯 글자 낱말 2000개의 그래프를 얻는다. GraphBase 프로그램들은 시스템에
+상관없이 같은 결과를 내도록 설계돼 있으므로, |Words(2000,nil,0,0,dir)|을 청한
+사람은 누구나 똑같은 그래프를 얻는다. 그래서 세계 어디에 있는 연구자든 그래프
+알고리즘에 대해 동등한 실험을 해 볼 수 있다.
+
+|Words(2000,nil,0,s,dir)|은 씨앗 |s|에 따라 조금씩 다른 그래프를 낸다. 무게가 같은
+낱말들이 있기 때문이다. 그렇더라도 |s| 값 하나를 정하면 그 그래프는 어느
+컴퓨터에서나 같다. 씨앗은 $0\le s<2^{31}$ 범위의 아무 정수나 된다.
+
+@ 이번에는 |wtVector|를 직접 주는 보기들이다. |w|를
+$$|w := []int64{1}| \hbox{\rm (나머지는 0)}$$
+로 두고 |Words(0,w,1,0,dir)|을 부른다고 하자. 이는 $a=1$이고
+$b=w_1=\cdots=w_7=0$이라는 뜻이므로, `흔함'으로 분류된 3300개 낱말만 담은 그래프를
+얻는다. 마찬가지로 무게 벡터를
+$$|w := []int64{1, 1}| \hbox{\rm (나머지는 0)}$$
+로 주면 $a=b=1$이고 $w_1=\cdots=w_7=0$이 되어, `드묾'이 아닌
+$3300+1194=4494$개 낱말을 얻는다. 이 두 보기에서는 자격을 갖춘 낱말의 무게가 모두
+1이므로, 그래프의 정점들이 유사난수 차례로 나타난다.
+
+|w|가 0 아홉 개의 배열을 가리키면 |Words(n,w,0,s,dir)|은 |n|개 낱말의 무작위
+표본을 주는데, 그 표본은 시스템에 상관없이 |s|에만 달려 있다.
+
+무게 벡터의 성분이 모두 음이 아니고 무게 문턱이 0이면 \.{words.dat}의 모든 낱말이
+자격을 얻으므로, 정점이 $\min(n,5757)$개인 그래프를 얻는다.
+
+|w|가 {\sl 음의\/} 무게를 담은 배열을 가리키면
+|Words(n,w,-0x7fffffff,0,dir)|은 \.{words.dat}에서 {\sl 가장 덜\/} 흔한 낱말
+|n|개를 고른다.
+
 @ 두 표는 이 패키지 안에만 두는 사적인 자료다. |maxC|는 방금 말한 최대
 빈도수이고, |defaultWtVector|는 |wtVector|가 |nil|일 때 쓰는 기본 무게 벡터다.
 정렬 키는 음수가 아니어야 하므로(이는 |gbsort|의 요구다) 무게에 $2^{30}$을
@@ -168,8 +198,23 @@ $$\max\bigl(\vert a\vert, \vert b\vert\bigr)
 if wtVector == nil {
 	wtVector = defaultWtVector
 } else {
+	@<아홉보다 짧은 |wtVector|를 0으로 채운다@>
 	@<부동소수점으로 |wtVector|가 터무니없지 않은지 본다@>
 	@<정수 연산으로 |wtVector|가 정말 괜찮은지 확인한다@>
+}
+
+@ \CEE/에서 |long w[9] = {1};|은 나머지 여덟 성분이 0으로 채워진 아홉 원소
+배열이다. 그런데 \GO/에서 |[]int64{1}|은 원소가 하나뿐인 조각이라, 앞의 보기들을
+적힌 그대로 옮겨 쓰면 나머지 성분을 읽다가 프로그램이 죽어 버린다. 그래서 아홉보다
+짧은 무게 벡터는 0으로 채워 \CEE/의 뜻과 맞춘다. 그러면 |[]int64{1}|이 정확히
+|long w[9] = {1};|을 뜻하고, |[]int64{1,1}|이 |long w[9] = {1,1};|을 뜻한다.
+아홉보다 긴 벡터의 남는 성분은 \CEE/에서와 마찬가지로 거들떠보지 않는다.
+
+@<아홉보다 짧은 |wtVector|를 0으로 채운다@>=
+if len(wtVector) < 9 {
+	padded := make([]int64, 9)
+	copy(padded, wtVector)
+	wtVector = padded
 }
 
 @ 부동소수점 산술은 시스템마다 다르지만, 적어도 16비트의 정밀도는 쓴다고
@@ -620,6 +665,56 @@ func TestWordDeterminism(t *testing.T) {
 	for i := int64(0); i < g1.N; i++ {
 		if g1.Vertices[i].Name != g2.Vertices[i].Name {
 			t.Fatalf("정점 %d: %q != %q", i, g1.Vertices[i].Name, g2.Vertices[i].Name)
+		}
+	}
+}
+
+@ 들어가며에서 든 보기들이 정말 그 값을 내는지 확인한다. 짧은 무게 벡터를
+그대로 넘겨 \CEE/의 |long w[9] = {1};|과 같은 뜻이 되는지도 함께 본다.
+
+@<개수를 대조하는 시험@>=
+func TestDocumentedExamples(t *testing.T) {
+	cases := []struct {
+		name string
+		w    []int64
+		th   int64
+		want int64
+	}{
+		{"흔함", []int64{1}, 1, 3300},
+		{"드묾 아님", []int64{1, 1}, 1, 4494},
+		{"모두", make([]int64, 9), 0, 5757},
+	}
+	for _, c := range cases {
+		g, err := Words(0, c.w, c.th, 0, dataDir)
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		if g.N != c.want {
+			t.Errorf("%s: 정점 수 = %d, 원함 %d", c.name, g.N, c.want)
+		}
+	}
+}
+
+@ 음의 무게로는 가장 덜 흔한 낱말을 고른다. 그렇게 고른 낱말들은 기본 무게로
+고른 흔한 낱말들과 겹치지 않아야 한다.
+
+@<개수를 대조하는 시험@>=
+func TestLeastCommon(t *testing.T) {
+	neg := []int64{-1, -1, -1, -1, -1, -1, -1, -1, -1}
+	rare, err := Words(10, neg, -0x7fffffff, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rare.N != 10 {
+		t.Fatalf("정점 수 = %d, 원함 10", rare.N)
+	}
+	common, err := Words(2000, nil, 0, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := int64(0); i < rare.N; i++ {
+		if FindWord(common, rare.Vertices[i].Name, nil) != nil {
+			t.Errorf("%q가 흔한 2000개에도 있다", rare.Vertices[i].Name)
 		}
 	}
 }

@@ -13,7 +13,7 @@
 120개(\\{I-A} 106팀에 아이비리그와 패트리엇리그의 \\{I-AA} 14팀을 더한 것)
 가운데 하나이고, 각 간선은 1990년 시즌에 그 팀들이 치른 638경기 가운데 하나다.
 
-@ |u|에서 |v|로 가는 호에는 |u|가 |v|와 겨뤄 낸 점수가 길이로 매겨진다. 그래서
+|u|에서 |v|로 가는 호에는 |u|가 |v|와 겨뤄 낸 점수가 길이로 매겨진다. 그래서
 이 그래프는 사실 완전한 ``무향''은 아니지만, 호는 짝을 이룬다(|u|가 |v|와 겨뤘다면
 |v|도 |u|와 겨뤘다). {\sc GB\_BASIC}의 |Complement|를 쓰면 같은 정점·간선의 참된
 무향 그래프를 얻는다.
@@ -26,11 +26,60 @@ $$|ap0Weight|\cdot|ap0|+|upi0Weight|\cdot|upi0|
 Press International) 여론조사 점수이고, |ap1|·|upi1|은 시즌 끝 점수다. 네 무게
 계수는 절댓값이 $2^{17}=131072$ 이하여야 한다.
 
-@ |firstDay|과 |lastDay| 사이(양끝 포함)에 치른 경기만 간선으로 넣어 간선 수를
-조절할 수 있다. 0일은 1990년 8월 26일, 128일은 1991년 1월 1일(마지막 보울
-경기)이다. |lastDay|가 0이면 128로 올린다. 여느 GraphBase 루틴처럼 $n=0$은 최대치
-120을 뜻한다. 이를테면 |Games(53,1,1,1,1,0,0,0)|은 어느 여론조사에서든 한 번은
-뽑힌 53팀을, |Games(67,-1,-1,-1,-1,0,0,0)|은 한 번도 안 뽑힌 67팀을 고른다.
+두 점수가 어떻게 매겨졌는지 알아 두면 무게를 고르는 데 도움이 된다. \\{AP}
+점수는 기자 60명에게 상위 25팀을 골라 순위를 매기게 해서, 1위 팀에 25점을
+주고 25위 팀에 1점을 주는 식으로 얻었다. 그래서 모든 팀의 \\{AP} 점수를 합하면
+19500이 된다. \\{UPI} 점수는 감독들에게 상위 15팀을 고르게 해서 1위에 15점,
+15위에 1점을 주어 얻었다. |upi0|은 감독 48명이 투표해 모두 5760점이고,
+|upi1|은 59명이 투표해 모두 7080점이다. 감독들은 \\{NCAA} 규정을 어겨
+보호관찰 중인 팀에는 투표하지 않기로 약속했지만, 기자들에게는 그런 방침이
+없었다.
+
+|firstDay|과 |lastDay| 사이(양끝 포함)에 치른 경기만 간선으로 넣어 간선 수를
+조절할 수 있다. 0일은 1990년 8월 26일로, 콜로라도와 테네시가 디즈니랜드
+피그스킨 클래식에서 맞붙은 날이다. 128일은 1991년 1월 1일로, 시즌을 닫는
+마지막 보울 경기들이 열린 날이다. 각 팀이 치른 경기의 절반쯤은 0일과 50일
+사이에 놓인다. |lastDay|가 0이면 128로 올린다.
+
+여느 GraphBase 루틴처럼 $n=0$은 최대치 120을 뜻해서, |Games(0,0,0,0,0,0,0,0)|과
+|Games(120,0,0,0,0,0,0,0)|은 똑같이 전체 그래프를 낸다. ``가장 좋은'' 30팀을
+고르는 한 방법은 |Games(30,0,0,1,2,0,0,0)|인데, 기자의 표에 감독의 표를 곱절로
+얹은 것이다(감독의 1위표는 30점어치, 기자의 1위표는 25점어치인 셈이다). 네
+여론조사 어디에서도 표를 못 받은 팀이 67개이므로, |Games(53,1,1,1,1,0,0,0)|은
+한 번이라도 뽑힌 53팀을, |Games(67,-1,-1,-1,-1,0,0,0)|은 한 번도 못 뽑힌 67팀을
+고른다. |Games(60,0,0,0,0,0,0,s)|는 60팀을 무작위로 고르는데, 씨앗 |s|를 달리하면
+시스템에 상관없이 다른 선택을 얻는다($0\le s<2^{31}$). |n|이 120이면 씨앗이
+무엇이든 늘 전체 그래프가 나오지만, 정점이 놓이는 차례가 씨앗에 따라 달라진다.
+
+@ 팀은 대개 ``컨퍼런스''에 속하고, 같은 컨퍼런스의 거의 모든 팀과 한 번씩
+겨룬다. 이를테면 스탠퍼드는 다른 아홉 팀과 함께 퍼시픽텐에 속하는데, 스탠퍼드가
+치른 열한 경기 가운데 여덟 경기가 퍼시픽텐의 다른 팀과 벌인 것이었다. 나머지
+셋은 콜로라도(빅에이트), 새너제이 주립(빅웨스트), 노터데임(독립)과 겨뤘다.
+그래서 |Games|가 짓는 그래프는 사회적 교류의 ``패거리진'' 모습을 잘 보여 준다.
+
+\.{games.dat}에는 컨퍼런스가 열한 개 나온다. 정점의 |Z.S|에 그 팀의 컨퍼런스
+이름을 두되, 독립 팀이면 빈 문자열로 둔다. \CEE/ 원본은 컨퍼런스 이름을 한 벌만
+간직하고 포인터를 견주어 같은 컨퍼런스인지 가렸지만, \GO/의 문자열은 값으로
+견주므로 |u.Z.S|와 |v.Z.S|가 같고 빈 문자열이 아니면 같은 컨퍼런스다.
+
+(원본은 1990년에 독립이던 \\{I-A} 팀이 ``정확히 24팀''이라고 적었는데,
+\.{games.dat}을 세어 보면 25팀이다. 배포판의 정오표에도 이 대목은 없다.)
+
+@ 팀마다 별명이 있어 정점의 |Y.S|에 담는다. 이를테면 조지아 공대의 팀은
+옐로재킷이다. 여섯 팀(오번, 클렘슨, 멤피스 주립, 미주리, 퍼시픽, 프린스턴)이
+타이거스이고 다섯 팀(프레즈노 주립, 조지아, 루이지애나 공대, 미시시피 주립,
+예일)이 불도그스이지만, 대개는 저마다 다른 별명이어서 서로 다른 별명이 94개다.
+
+팀 이름을 줄여 쓴 약칭은 |X.S|에 담는다. 자료 파일의 둘째 부분이 이 약칭으로
+경기를 적으므로, 약칭은 자료를 읽는 동안 팀을 찾는 열쇠 노릇도 한다.
+
+@ |u|에서 |v|로 가는 호 |a|의 |a.A.I|에는 |u|가 홈팀이면 3(|away|), |v|가 홈팀이면
+1(|home|), 두 팀이 중립 경기장에서 겨뤘으면 2(|neutral|)를 둔다. 그 경기가 열린
+날은 1990년 8월 26일로부터 며칠째인지를 세어 |a.B.I|에 둔다.
+
+정점의 호 목록에는 경기가 날짜의 역순으로---마지막 경기가 맨 앞에, 첫 경기가
+맨 뒤에---놓인다. 자료 파일이 날짜순으로 적혀 있는데 |NewEdge|가 새 호를 목록
+앞에 붙이기 때문이다. 이 성질은 시험 절에서 확인한다.
 
 @ 프로그램의 뼈대다. \CEE/ 원본은 정적 전역 |node_block|·|hash_block|·
 |conf_block|에 기대지만, 우리는 패키지 수준 가변 상태를 피해 이들을
@@ -78,7 +127,6 @@ const (
 @ 팀 하나를 |teamInfo|로 나타낸다. 이것을 |gbsort.Node|의 딸림 데이터로 실어
 무게순 정렬에 부친다. |a0|·|u0|·|a1|·|u1|은 여론조사 점수, |conf|는 소속
 컨퍼런스 이름(독립이면 빈 문자열), |vert|는 이 팀에 배정된 정점이다.
-
 @<자료 구조@>=
 type teamInfo struct {
 	name, nick, abb string
@@ -91,7 +139,6 @@ type teamInfo struct {
 |maxN+2|로 미리 잡아, 뒤에 원소를 더해도 재할당되지 않게 한다---그래야
 |lookup|이 담은 포인터가 그대로 유효하다. |lookup|은 약칭(\.{ABBR}) 코드로 노드를
 찾는 map이다.
-
 @<자료 구조@>=
 type gamesBuilder struct {
 	g      *gbgraph.Graph
@@ -104,11 +151,10 @@ type gamesBuilder struct {
 	n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay int64
 }
 
-@ 함수 |Games|는 씨앗으로 난수 스트림을 열고, 매개변수를 다듬고, 자료 파일을 한 번
-훑어 그래프를 짓는다. 파일의 앞 120줄은 팀 정보, 나머지는 경기 점수다.
-
+@ 함수 |Games|는 대학 미식축구 점수를 무향 그래프로 짓는다. 씨앗으로 난수 스트림을 열고,
+매개변수를 다듬고, 자료 파일을 한 번 훑어 그래프를 짓는다. 파일의 앞 120줄은 팀 정보,
+나머지는 경기 점수다.
 @<|Games|...@>=
-// |Games|는 대학 미식축구 점수를 무향 그래프로 짓는다.
 func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, dir string) (*gbgraph.Graph, error) {
 	b := &gamesBuilder{
@@ -135,7 +181,6 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 
 @ |n==0|이거나 120을 넘으면 120으로, |firstDay<0|이면 0으로, |lastDay==0|이거나
 128을 넘으면 128로 바로잡는다. 무게 계수가 너무 크면 물러난다.
-
 @<매개변수가 올바른지 확인한다@>=
 if b.n == 0 || b.n > maxN {
 	b.n = maxN
@@ -154,7 +199,6 @@ if b.lastDay == 0 || b.lastDay > maxDay {
 }
 
 @ 파일을 열고, 팀을 읽고, 그래프를 마련한 뒤 간선을 넣고 파일을 닫는다.
-
 @<파일을 열어 그래프를 짓는다@>=
 f, err := gbio.Open(b.fileName)
 if err != nil {
@@ -176,7 +220,6 @@ if f.Close() != nil {
 
 |readTeams|는 앞 120줄을 읽어 노드를 만들고, 무게(정렬 키)를 셈해 리스트로 엮는다.
 정렬 리스트는 \CEE/처럼 마지막 노드가 머리이고 |Link|가 앞 노드를 가리키게 한다.
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readTeams(f *gbio.File) error {
 	for k := 0; k < maxN; k++ {
@@ -187,10 +230,10 @@ func (b *gamesBuilder) readTeams(f *gbio.File) error {
 	return nil
 }
 
-@ 팀 자료 한 줄의 꼴은
+@ \.{games.dat}의 자료는 두 부분으로 나뉜다. 앞의 120줄은 팀의 기본 정보를
 $$\hbox{\tt ABBR College Name(Team Nickname)Conference;a0,u0;a1,u1}$$
-이다. \.{ABBR}은 둘째 부분에서 팀을 가리키는 내부 약칭이다.
-
+꼴로 적는다. \.{ABBR}은 둘째 부분에서 팀을 가리키는 내부 약칭이다. 둘째 부분은
+경기 점수를 담는데, 그 꼴은 뒤의 ``호'' 장에서 다시 본다.
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readTeam(f *gbio.File) error {
 	var t teamInfo
@@ -203,7 +246,6 @@ func (b *gamesBuilder) readTeam(f *gbio.File) error {
 
 @ 약칭은 빈칸까지, 이름은 |'('|까지, 별명은 |')'|까지, 컨퍼런스는 |';'|까지
 읽는다. 컨퍼런스가 |"Independent"|이면 빈 문자열로 둔다.
-
 @<약칭·이름·별명·컨퍼런스를 읽는다@>=
 t.abb = f.String(' ')
 if len(t.abb) > 5 || f.Char() != ' ' {
@@ -226,8 +268,8 @@ if t.conf == "Independent" {
 }
 
 @ 네 점수는 |','|와 |';'|로 갈린다. 각 점수가 관찰된 최댓값을 넘거나 구분자가
-어긋나면 물러난다. 무게에 |weightBias|를 더해 음이 아닌 정렬 키로 만든다.
-
+어긋나면 물러난다. 무게에 |weightBias|를 더해 음이 아닌 정렬 키로 만드는데,
+무게 계수에 씌운 한계 덕분에 이 키는 늘 0과 $2^{31}$ 사이에 놓인다.
 @<여론조사 점수를 읽고 무게를 셈한다@>=
 t.a0 = f.Number(10)
 if t.a0 > ma0 || f.Char() != ',' {
@@ -250,7 +292,6 @@ key := b.ap0Weight*t.a0 + b.upi0Weight*t.u0 +
 
 @ 노드를 만들어 |nodes| 리스트 끝에 붙이고, |Link|로 앞 노드를 가리키게 하고,
 약칭을 열쇠로 map에 넣는다.
-
 @<노드를 만들어 리스트와 map에 엮는다@>=
 b.nodes = append(b.nodes, gbsort.Node[teamInfo]{Key: key, Data: t})
 i := len(b.nodes) - 1
@@ -263,7 +304,6 @@ b.lookup[t.abb] = &b.nodes[i]
 못박는다. |"IIZSSSIIZZZZZZ"|는 정점의 |U.I|에 |ap|($($|a0|$\ll16)+$|a1|$)$,
 |V.I|에 |upi|, |X.S|에 |abbr|, |Y.S|에 |nickname|, |Z.S|에 |conference|를,
 호의 |A.I|에 |venue|, |B.I|에 |date|를 둔다는 뜻이다.
-
 @<빈 그래프를 마련하고 팀을 고른다@>=
 b.g = gbgraph.NewGraph(b.n)
 b.g.UtilTypes = "IIZSSSIIZZZZZZ"
@@ -273,9 +313,9 @@ b.g.ID = fmt.Sprintf("games(%d,%d,%d,%d,%d,%d,%d,%d)",
 @<무게순으로 정렬해 위 |n|개 팀에 정점을 배정한다@>
 
 @ |gbsort.LinkSort|로 128개 통에 정렬한 뒤, 무게가 큰 차례로 훑어 앞 |n|개 팀에
-정점을 배정한다. 고르지 못한 팀은 |vert|가 |nil|로 남아, 아래에서 간선을 만들 때
-걸러진다.
-
+정점을 배정한다. 무게가 같으면 난수가 차례를 가른다. 고르지 못한 팀은 |vert|가
+|nil|로 남아, 아래에서 간선을 만들 때 걸러진다---\CEE/ 원본은 같은 일을 하려고
+고르지 못한 팀의 약칭을 빈 문자열로 지워 해시 탐색에서 걸리지 않게 했다.
 @<무게순으로 정렬해 위 |n|개 팀에 정점을 배정한다@>=
 buckets := gbsort.LinkSort(&b.nodes[maxN-1], b.rng)
 vi := int64(0)
@@ -292,7 +332,6 @@ for j := 127; j >= 0; j-- {
 
 @ 팀 |p|를 정점 |v|에 배정한다: 여론조사 점수를 |ap|·|upi|로 꾸리고, 약칭·별명·
 컨퍼런스·이름을 옮기고, |vert|를 |v|로 둔다.
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) addTeam(v *gbgraph.Vertex, p *gbsort.Node[teamInfo]) {
 	d := &p.Data
@@ -308,9 +347,23 @@ func (b *gamesBuilder) addTeam(v *gbgraph.Vertex, p *gbsort.Node[teamInfo]) {
 @* 호. 끝으로 \.{games.dat}의 나머지를 읽어, 고른 시간 구간에 놓이고 고른 두 팀이
 치른 경기마다 호 한 쌍을 더한다.
 
-|readGames|는 파일이 끝날 때까지 경기 줄을 읽는다. |'>'|로 시작하는 줄은 현재
-날짜를 바꾼다.
+자료의 둘째 부분에는 두 가지 줄이 섞여 있다. 첫 글자가 |'>'|인 줄은 ``현재
+날짜를 바꾸라''는 뜻으로, 나머지 글자가 한 글자 월 코드와 그달의 날을 적는다.
+그 밖의 줄은 두 팀의 \.{ABBR} 약칭으로 경기 점수를 적는데, 두 점수 사이의
+|'@@'|는 둘째 팀이 홈팀이었음을, |','|는 두 팀이 중립 경기장에서 겨뤘음을 뜻한다.
 
+@ 이를테면 12월 8일에는 두 경기가 있었다. 해마다 열리는 육군-해군 경기와
+캘리포니아 레이즌 보울이다. 이 둘이 \.{games.dat}에 세 줄로 이렇게 적혀 있다:
+$$\vbox{\halign{\tt#\hfil\cr
+>D8\cr
+NAVY20@@ARMY30\cr
+SJSU48,CMICH24\cr}}$$
+여기서 해군이 육군의 홈구장에서 20 대 30으로 졌고, 새너제이 주립이 중부 미시간과
+중립 경기장에서 겨뤄 48 대 24로 이겼음을 읽어 낼 수 있다(캘리포니아 레이즌
+보울은 빅웨스트와 미드아메리칸 컨퍼런스의 우승 팀이 겨루는 것이 관례다).
+
+@ |readGames|는 파일이 끝날 때까지 경기 줄을 읽는다. |'>'|로 시작하는 줄은 현재
+날짜를 바꾼다.
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readGames(f *gbio.File) error {
 	today := int64(0)
@@ -332,7 +385,6 @@ func (b *gamesBuilder) readGames(f *gbio.File) error {
 
 @ 날짜 줄은 한 글자 월 코드에 그달의 날을 붙인 것이다. 코드를 시즌 일수로 옮기고
 날을 더한다. 이 절은 다음 경기 줄을 읽을 채비까지 마친다(|NextLine|).
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) changeDate(f *gbio.File, today *int64) error {
 	var d int64
@@ -364,7 +416,6 @@ func (b *gamesBuilder) changeDate(f *gbio.File, today *int64) error {
 @ 경기 줄 하나는 두 팀의 약칭과 점수를 담는다. 점수 사이의 |'@@'|는 둘째 팀이
 홈팀임을, |','|는 중립 경기임을 뜻한다. 두 팀이 다 고른 팀이고 날짜가 구간 안이면
 간선을 넣는다.
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readOneGame(f *gbio.File, today int64) error {
 	u := b.teamLookup(f)
@@ -391,7 +442,6 @@ func (b *gamesBuilder) readOneGame(f *gbio.File, today int64) error {
 
 @ 약칭을 읽어 정점을 찾는다. 숫자(점수)를 만날 때까지 글자를 모으고, 그 숫자는
 되돌려 놓는다. 고르지 못한 팀이거나 모르는 약칭이면 |nil|을 준다.
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) teamLookup(f *gbio.File) *gbgraph.Vertex {
 	var sb strings.Builder
@@ -408,7 +458,6 @@ func (b *gamesBuilder) teamLookup(f *gbio.File) *gbgraph.Vertex {
 @ 간선을 이루는 두 호를 만든다. |u|에서 |v|로 가는 호의 길이는 |su|, 그 짝의 길이는
 |sv|다. |venue|와 |date|를 두 호에 적는다. \CEE/ 원본은 |edge_trick|을 위해 |u<v|가
 되도록 두 팀을 맞바꾸지만, 우리는 |Partner| 필드로 짝을 밝히므로 맞바꿀 필요가 없다.
-
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) newGame(u, v *gbgraph.Vertex, su, sv, venue, today int64) {
 	b.g.NewEdge(u, v, su)
@@ -509,6 +558,72 @@ func TestVertexFields(t *testing.T) {
 		v := &g.Vertices[i]
 		if v.Name == "" || v.X.S == "" || v.Y.S == "" {
 			t.Fatalf("정점 %d의 이름/약칭/별명이 비었다", i)
+		}
+	}
+}
+
+@ 앞서 산문에서 말한 것들이 참인지 확인한다: 컨퍼런스는 열한 개, 서로 다른
+별명은 94개, 스탠퍼드는 퍼시픽텐 소속으로 열한 경기 가운데 여덟 경기를 같은
+컨퍼런스 팀과 치렀다. 독립 팀은 원본이 24라 했지만 자료대로 25다.
+
+@<팀 선택 시험@>=
+func TestConferencesAndNicknames(t *testing.T) {
+	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	confs, nicks := map[string]bool{}, map[string]bool{}
+	indep := 0
+	for i := int64(0); i < g.N; i++ {
+		v := &g.Vertices[i]
+		nicks[v.Y.S] = true
+		if v.Z.S == "" {
+			indep++
+		} else {
+			confs[v.Z.S] = true
+		}
+	}
+	if len(confs) != 11 || len(nicks) != 94 || indep != 25 {
+		t.Errorf("컨퍼런스 %d(원함 11), 별명 %d(원함 94), 독립 %d(원함 25)",
+			len(confs), len(nicks), indep)
+	}
+	@<스탠퍼드의 컨퍼런스 경기 수를 확인한다@>
+}
+
+@ @<스탠퍼드의 컨퍼런스 경기 수를 확인한다@>=
+for i := int64(0); i < g.N; i++ {
+	v := &g.Vertices[i]
+	if v.Name != "Stanford" {
+		continue
+	}
+	all, same := 0, 0
+	for a := range v.AllArcs() {
+		all++
+		if a.Tip.Z.S == v.Z.S {
+			same++
+		}
+	}
+	if v.Z.S != "Pacific Ten" || all != 11 || same != 8 {
+		t.Errorf("Stanford: %q, %d경기 중 같은 컨퍼런스 %d경기", v.Z.S, all, same)
+	}
+}
+
+@ 호 목록은 날짜의 역순이어야 한다---마지막 경기가 맨 앞이다.
+
+@<호 필드 시험@>=
+func TestArcsInReverseDateOrder(t *testing.T) {
+	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := int64(0); i < g.N; i++ {
+		prev := int64(maxDay + 1)
+		for a := range g.Vertices[i].AllArcs() {
+			if a.B.I > prev {
+				t.Fatalf("정점 %d의 호가 날짜 역순이 아니다: %d 뒤에 %d",
+					i, prev, a.B.I)
+			}
+			prev = a.B.I
 		}
 	}
 }

@@ -17,29 +17,83 @@
 없다. 정점은 |g.Vertices|에 있고, 호는 정점의 |Arcs| 리스트를 훑어 모으며,
 문자열은 그냥 |string|이다. 그래서 우리 |SaveGraph|는 원본보다 훨씬 단출하다.
 
-제약: 문자열에는 표준 인쇄 가능 문자만 담기며(\.\\나 \."나 줄바꿈은 안 됨),
-|g.ID|는 154자 이하여야 한다. \.G(그래프 속 그래프) 유틸리티 타입은 허용하지
-않는다.
+@ 제약이 몇 가지 있다. 문자열에는 표준 인쇄 가능 문자만 담을 수 있고
+(\.\\나 \."나 줄바꿈은 안 된다), 길이는 4095자 이하라야 한다. |g.ID|는
+154자 이하라야 한다. 모든 유틸리티 필드는 그래프의 |UtilTypes| 문자열이 정한
+약속을 지켜야 하며, 그래프 속 그래프로 이어지는 \.G 선택지는 그 문자열에
+쓸 수 없다.
 
-@ 파일 형식은 다음 예가 잘 보여 준다.
+원본에는 이 밖에도 제약이 더 있었다. 모든 포인터가 |g->data| 구역 안의 블록에
+갇혀 있어야 하고(|g->aux_data| 안의 블록은 저장되지도 되살려지지도 않는다),
+그 블록들이 ``순수''해야 한다는 것이다---한 블록은 |Vertex| 레코드만, 또는
+|Arc| 레코드만, 또는 문자열의 문자만 담아야 했다. \GO/에서는 타입이 그것을
+저절로 보장하므로 이 제약이 사라졌다.
+
+다만 원본에도 남는 한 가지가 있었고 우리에게도 그대로 남는다. 저장은 문자열이
+메모리에서 공유되던 사정을 보존하지 않는다. 저장하기 전 그래프에서 |u.Name|과
+|v.Name|이 똑같은 자리를 가리키고 있었더라도, 되살린 그래프에서는 값은 같되
+서로 다른 두 문자열이 된다.
+
+@ 파일 형식은 다음의 다소 억지스러운 예가 잘 보여 준다.
 $$\vbox{\halign{\.{#}\hfil\cr
 * GraphBase graph (util\_types IZAZZZZVZZZZSZ,3V,4A)\cr
-"pi",1,3,"pi"\cr
+"somewhat\_contrived\_example(3.14159265358979323846264338327\\\cr
+9502884197169399375105820974944592307816406286208998628)",1,\cr
+3,"pi"\cr
 * Vertices\cr
 "look",A0,15,A1\cr
 "feel",0,-9,A1\cr
+"",0,0,0\cr
 * Arcs\cr
 V0,A2,3,V1\cr
 V1,0,5,0\cr
+V1,0,-8,1\cr
+0,0,0,0\cr
 * Checksum 271828\cr}}$$
-첫 줄은 |util_types| 14자와 정점·호 레코드 총수를 준다. 다음 줄(들)은 |Graph|
-레코드의 |ID|·|N|·|M|과 무시되지 않는 그래프 유틸리티 필드를 준다. 그 뒤
-`\.{* Vertices}' 다음에 각 정점의 |Name|·|Arcs|와 유틸리티 필드가, `\.{* Arcs}'
-다음에 각 호의 |Tip|·|Next|·|Len|과 유틸리티 필드가 온다. 정점 포인터는
-|V|〈번호〉, 호 포인터는 |A|〈번호〉, |nil|은 |0|으로 쓴다(정점 포인터는 특별한
-값 |1|도 가질 수 있다). 필드는 쉼표로 나뉘고, 줄이 쉼표로 끝나면 다음 줄에 같은
-레코드의 필드가 이어진다. 문자열은 줄 끝을 \.\\로 맺어 여러 줄로 나눌 수 있다.
-`\.{* Checksum}' 줄이 자료의 검사합을 확인한다.
+
+@ 첫 줄은 |util_types|의 14자와 |Vertex|·|Arc| 레코드의 총수를 정한다. 이
+예에서는 정점이 3개, 호가 4개다.
+
+다음 줄(들)은 |Graph| 레코드의 |ID|·|N|·|M| 필드와, 무시되지 않는 유틸리티
+필드를 정한다. 여기서는 |ID|가 꽤 긴 문자열인데, 문자열은 앞 조각의 끝을
+백슬래시로 맺어 여러 줄로 쪼갤 수 있다---그래야 파일의 어느 줄도 79자를 넘지
+않는다. |util_types|의 마지막 여섯 글자는 |Graph| 레코드의 유틸리티 필드를
+가리키며, 이 예에서는 \.{ZZZZSZ}다. 그러니 뒤에서 둘째인 |YY|만 살아 있고
+그것이 문자열 타입이다. |RestoreGraph|는 이 예에서 |g.N=1|, |g.M=3|,
+|g.YY.S="pi"|인 |Graph| 레코드를 짓는다.
+
+한 레코드의 필드 값들은 쉼표로 나뉜다. 줄이 쉼표로 끝나면 다음 줄에 같은
+레코드의 필드가 더 이어진다는 뜻이다.
+
+@ |Graph| 레코드의 필드가 끝나면 `\.{* Vertices}'라는 특별한 줄이 오고, 그
+뒤로 정점마다 그 필드들이 차례로 온다. 먼저 |Name|, 다음 |Arcs|, 그다음
+무시되지 않는 유틸리티 필드다. 이 예에서 |Vertex| 쪽 |util_types|는
+\.{IZAZZZ}이므로 유틸리티 필드 값은 |U.I|와 |W.A|다. |v|가 첫 |Vertex|
+레코드를, |a|가 첫 |Arc| 레코드를 가리킨다고 하면, 이 예에서는
+$$|v.Name="look"|,\qquad |v.Arcs|=a,\qquad |v.U.I|=15,\qquad |v.W.A|=a+1$$
+이 된다.
+
+|Vertex| 레코드 다음에는 `\.{* Arcs}'라는 특별한 줄이 오고, 그 뒤로 |Arc|
+레코드의 필드가 똑같은 방식으로 온다. 먼저 |Tip|, 다음 |Next|, 그다음 |Len|,
+마지막으로 (있다면) 유틸리티 필드다. 이 예에서 |Arc| 쪽 |util_types|는
+\.{ZV}이므로 |A| 필드는 무시되고 |B| 필드가 |Vertex| 포인터다. 그래서
+$$|a.Tip|=v,\qquad |a.Next|=a+2,\qquad |a.Len|=3,\qquad |a.B.V|=v+1$$
+이 된다.
+
+@ 널 포인터는 \.0으로 적는다. 그리고 |Vertex| 포인터만은 특별한 값 \.1도 가질
+수 있는데, {\sc GB\_\,GATES}에서 설명한 규약 때문이다(위 예에서 셋째 호의
+넷째 필드가 그렇다). |RestoreGraph|는 |Vertex| 포인터가 1보다 큰 상수 값을
+갖는 것은 허용하지 않으며, |Arc| 포인터가 와야 할 자리에 \.1이 오는 것도
+허용하지 않는다.
+
+|Vertex|와 |Arc| 명세는 파일 첫머리의 유틸리티 타입 뒤에 적힌 수와 정확히
+같은 개수라야 한다. 마지막 |Arc| 다음에는 특별한 검사합 줄이 와야 하는데,
+앞선 모든 줄의 자료와 아귀가 맞는 수이거나, 아니면 음수라야 한다(음수는
+검사하지 않는다). 검사합 줄 뒤의 정보는 모두 무시된다.
+
+|SaveGraph|가 만든 파일을 손으로 고치지 않는 것이 좋다. 검사합이 어긋나면
+모든 것이 헛수고가 되기 쉽다. 다만 파일 맨 앞에는 `\.*'로 시작하는 줄을
+주석으로 더 넣어도 된다. 그런 줄은 검사합의 대상이 되지 않는다.
 
 @ 프로그램의 뼈대다. |gbio|의 입출력 관례로 파일을 읽고, 표준 라이브러리로
 쓴다. |util_types|의 각 자리가 어느 유틸리티 필드를 가리키는지 짚어 주는 세
@@ -433,9 +487,33 @@ func parseChecksum(line string, sum *int64) (int, error) {
 	return 1, nil
 }
 
-@* 그래프 저장하기. |SaveGraph(g, "foo.gb")|는 |RestoreGraph("foo.gb")|로
-|g|와 동등한 그래프를 되살릴 수 있는 파일을 만든다. |g|가 |nil|이거나 파일을
-열 수 없으면 오류다.
+@* 그래프 저장하기. 되살리는 법을 알았으니 이제 저장하는 법을 쓸 차례다.
+|SaveGraph(g, "foo.gb")|는 파일 \.{foo.gb}를 만드는데, |g|가 앞서 말한
+제약을 지킨다면 |RestoreGraph("foo.gb")|가 그 파일에서 |g|와 동등한 그래프를
+되살릴 수 있어야 한다.
+
+원본은 거의 모든 경우에 {\it 문법적으로 옳은\/} 파일을 만들도록 짜여 있었다.
+주어진 그래프의 어떤 대목을 어쩔 수 없이 고쳐야 했다면, 그 사실을 파일 끝에
+또렷이 적어 두는 식이다. 고칠 거리와 그때 취하는 조치는 이러했다:
+$$\vbox{\halign{\hfil#\hfil&\quad#\hfil\cr
+|0x1|&쓸 수 없는 타입 문자 --- |'Z'|로 바꾼다\cr
+|0x2|&너무 긴 문자열 --- 잘라 낸다\cr
+|0x4|&자료 구역 밖의 주소 --- 널로 바꾼다\cr
+|0x8|&순수하지 않은 블록 안의 주소 --- 널로 바꾼다\cr
+|0x10|&쓸 수 없는 문자열 문자 --- |'?'|로 바꾼다\cr
+|0x20|&|'Z'| 형식인데 값이 0이 아니다 --- 내보내지 않는다\cr}}$$
+이 가운데 |0x4|와 |0x8|은 \GO/에서는 일어날 수 없다. 주소를 손수 분류할 일이
+없기 때문이다. |g|가 |nil|이면 $-1$, 파일을 열 수 없으면 $-2$를 돌려주던 규약도
+\GO/에서는 |error| 값으로 바뀐다.
+
+@ 원본에는 파일을 {\it 이진 모드\/}로 여는 대목에 다음과 같은 주석이 붙어
+있었다. 유닉스 계열에서는 차이가 없지만, 윈도우 계열에서 내부의 |'\n'| 한
+글자가 바깥의 |'\r'|과 |'\n'| 두 글자로 바뀌는 것을 막아 준다는 것이다.
+실제로 텍스트 모드에서는 윈도우에서 저장한 그래프를 리눅스에서 되살릴 수
+없었다. (이 주석 자체가 SGB 정오표의 2025년 12월 항목이다.)
+
+\GO/의 |os.Create|는 언제나 이진 모드이므로 이 함정은 아예 없다. 우리가
+|'\n'|을 쓰면 파일에도 |'\n'| 한 글자가 들어간다.
 
 쓰기 상태를 |writer| 구조체에 담는다. 물리적 줄 하나를 |buf|에 쌓다가 79자를
 넘기기 전에 흘려보내며, 그때마다 검사합 |magic|을 갱신한다. \.* 로 시작하는
@@ -662,9 +740,13 @@ for _, a := range arcRecords {
 package gbsave
 
 import (
+	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/sjnam/go-sgb/gbgraph"
 	"github.com/sjnam/go-sgb/gbmiles"
 )
 
@@ -719,6 +801,135 @@ for a != nil && a2 != nil {
 }
 if a != nil || a2 != nil {
 	t.Fatalf("정점 %d 인접 리스트 길이 불일치", i)
+}
+
+@ 형식 명세도 말로만 두지 않고 못박는다. 저장한 파일의 첫 줄이 문서에 적은
+꼴이라야 하고, 어느 줄도 79자를 넘지 않아야 하며, 마지막 자료 줄이
+`\.{* Checksum}'이라야 한다.
+
+@(gbsave_test.go@>=
+func TestFileFormat(t *testing.T) {
+	g, err := gbmiles.Miles(20, 0, 0, 0, 0, 5, 0, "../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "fmt.gb")
+	if err := SaveGraph(g, path); err != nil {
+		t.Fatal(err)
+	}
+	lines := readLines(t, path)
+	@<첫 줄·줄 길이·검사합 줄을 확인한다@>
+}
+
+@ 첫 줄이 담는 것은 |g.N|·|g.M|이 아니라 {\it 블록 전체\/}의 크기임을 여기서
+못박는다. 정점 수는 그림자 정점까지 포함한 |len(g.Vertices)|이고, 호 수는
+102의 배수로 채운 값이다. 이 규약을 어기면 SGB가 뽑은 \.{.gb} 파일과 바이트가
+어긋난다.
+
+@<첫 줄·줄 길이·검사합 줄을 확인한다@>=
+const pre = "* GraphBase graph (util_types "
+body, ok := strings.CutPrefix(lines[0], pre)
+if !ok {
+	t.Fatalf("첫 줄 = %q", lines[0])
+}
+body, ok = strings.CutSuffix(body, ")")
+if !ok {
+	t.Fatalf("첫 줄이 %q로 끝나지 않는다", ")")
+}
+parts := strings.Split(body, ",")
+if len(parts) != 3 {
+	t.Fatalf("첫 줄의 항목이 %d개다: %q", len(parts), lines[0])
+}
+if parts[0] != g.UtilTypes {
+	t.Errorf("util_types = %q, 원함 %q", parts[0], g.UtilTypes)
+}
+gotV := mustCount(t, parts[1], "V")
+gotA := mustCount(t, parts[2], "A")
+if gotV != int64(len(g.Vertices)) {
+	t.Errorf("정점 수 = %d, 원함 %d(그림자 포함)", gotV, len(g.Vertices))
+}
+if gotA%102 != 0 || gotA < g.M {
+	t.Errorf("호 수 = %d, 102의 배수이면서 %d 이상이라야 한다", gotA, g.M)
+}
+for i, l := range lines {
+	if len(l) > 79 {
+		t.Errorf("%d번째 줄이 %d자다(79자 넘음): %q", i, len(l), l)
+	}
+}
+if !strings.HasPrefix(lines[len(lines)-1], "* Checksum ") {
+	t.Errorf("마지막 줄 = %q, 검사합 줄이라야 한다", lines[len(lines)-1])
+}
+
+@ 검사합 규약도 확인한다. 검사합 값을 음수로 바꾸면 검사를 건너뛰므로 여전히
+되살려져야 하고, 자료 줄을 망가뜨리면 검사합이 어긋나 실패해야 한다. 그리고
+파일 맨 앞에 |'*'| 주석 줄을 더해도 검사합에 들지 않으므로 탈이 없어야 한다.
+
+@(gbsave_test.go@>=
+func TestChecksumConventions(t *testing.T) {
+	g, err := gbmiles.Miles(20, 0, 0, 0, 0, 5, 0, "../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	base := filepath.Join(dir, "base.gb")
+	if err := SaveGraph(g, base); err != nil {
+		t.Fatal(err)
+	}
+	orig := readLines(t, base)
+	@<음수 검사합·주석 줄·망가진 자료를 시험한다@>
+}
+
+@ @<음수 검사합·주석 줄·망가진 자료를 시험한다@>=
+neg := append([]string(nil), orig...)
+neg[len(neg)-1] = "* Checksum -1"
+if _, err := restoreLines(t, dir, "neg.gb", neg); err != nil {
+	t.Errorf("음수 검사합인데 실패했다: %v", err)
+}
+cmt := append([]string{"* 주석 줄", "* 또 하나"}, orig...)
+if _, err := restoreLines(t, dir, "cmt.gb", cmt); err != nil {
+	t.Errorf("머리 주석 줄 때문에 실패했다: %v", err)
+}
+bad := append([]string(nil), orig...)
+bad[len(bad)-2] = strings.Replace(bad[len(bad)-2], "0", "9", 1)
+if _, err := restoreLines(t, dir, "bad.gb", bad); err == nil {
+	t.Error("자료를 망가뜨렸는데 검사합이 통과했다")
+}
+
+@ 잔심부름 셋: |"24V"| 꼴에서 수를 떼어 내는 것, 파일을 줄 단위로 읽는 것,
+그리고 줄들을 새 파일로 써서 되살리는 것.
+
+@(gbsave_test.go@>=
+func mustCount(t *testing.T, s, suffix string) int64 {
+	t.Helper()
+	body, ok := strings.CutSuffix(s, suffix)
+	if !ok {
+		t.Fatalf("%q가 %q로 끝나지 않는다", s, suffix)
+	}
+	n, err := strconv.ParseInt(body, 10, 64)
+	if err != nil {
+		t.Fatalf("%q를 수로 읽을 수 없다", s)
+	}
+	return n
+}
+
+func readLines(t *testing.T, path string) []string {
+	t.Helper()
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
+}
+
+func restoreLines(t *testing.T, dir, name string,
+	lines []string) (*gbgraph.Graph, error) {
+	t.Helper()
+	path := filepath.Join(dir, name)
+	body := strings.Join(lines, "\n") + "\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return RestoreGraph(path)
 }
 
 @* 찾아보기.

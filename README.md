@@ -43,7 +43,7 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [demos/queen](demos/queen/queen.w) | 퀸의 행마 |
 | | [demos/roget_components](demos/roget_components/roget_components.w) | Roget 그래프의 강한 성분 |
 | | [demos/take_risc](demos/take_risc/take_risc.w) | RISC 회로로 곱셈·나눗셈 |
-| | [demos/test_sample](demos/test_sample/test_sample.w) | 설치 검증(모든 생성기 표본) |
+| 설치 검증 | [test_sample](test_sample.w) | 모든 생성기 표본 (저장소 루트) |
 | | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
 
 SGB 전 모듈 이식 완료.
@@ -82,7 +82,7 @@ go vet ./...
 ## 검증
 
 데모 출력은 Knuth가 발표한 값과 `cweb-sgb/test.correct`,
-`cweb-sgb/sample.correct`에 대조해 확인한다. `demos/test_sample`은 거의 모든
+`cweb-sgb/sample.correct`에 대조해 확인한다. 루트의 `test_sample`은 거의 모든
 생성기를 불러 그 표준 출력이 `sample.correct`와 **바이트 단위로 일치**하고, 부차
 산출물 `test.gb`도 `test.correct`와 **바이트 단위로 일치**함을 확인했다(자료는
 `/usr/local/sgb/data`에서 읽는다).
