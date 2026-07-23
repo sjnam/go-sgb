@@ -17,18 +17,24 @@ DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/
 # 설치 검증 프로그램은 데모가 아니라서 원본처럼 저장소 루트에 둔다.
 ROOTS := test_sample
 
-.PHONY: all tangle doc test clean $(PKGS) $(DEMOS) $(ROOTS)
+.PHONY: all tangle doc test clean queen_wrap $(PKGS) $(DEMOS) $(ROOTS)
 .DEFAULT_GOAL := all
 
 all: tangle test
 
-tangle: $(PKGS) $(DEMOS) $(ROOTS)
+tangle: $(PKGS) $(DEMOS) $(ROOTS) queen_wrap
 
 $(PKGS) $(DEMOS):
 	cd $@ && $(GTANGLE) $(notdir $@).w
 
 $(ROOTS):
 	$(GTANGLE) $@.w
+
+# queen_wrap은 .w가 따로 없다 — 변경 파일 queen_wrap.ch를 queen.w에 물려 얻는다.
+# 출력이 queen.go라는 이름으로 나오므로 원본과 겹치지 않게 다른 디렉터리에 둔다.
+queen_wrap:
+	mkdir -p demos/queen_wrap
+	cd demos/queen && $(GTANGLE) -o ../queen_wrap queen.w queen_wrap.ch
 
 test:
 	go vet ./...
@@ -43,6 +49,9 @@ doc:
 	for r in $(ROOTS); do \
 	  $(GWEAVE) $$r.w && luatex --interaction=nonstopmode $$r.tex; \
 	done
+	mkdir -p demos/queen_wrap
+	cd demos/queen && $(GWEAVE) -o ../queen_wrap queen.w queen_wrap.ch
+	cd demos/queen_wrap && luatex --interaction=nonstopmode queen.tex
 
 clean:
 	rm -f */*.go */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf */*.dvi
