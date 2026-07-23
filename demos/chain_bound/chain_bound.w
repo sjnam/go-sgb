@@ -2,6 +2,14 @@
 % The Stanford GraphBase, written as a GWEB literate program in Go.
 @i ../../gbtypes.w
 
+\def\verbatim{\begingroup
+  \def\do##1{\catcode`##1=12 } \dospecials
+  \parskip 0pt \parindent 2em \let\!=!
+  \catcode`\ =13 \catcode`\^^M=13
+  \tt \catcode`\!=0 \verbatimdefs \verbatimgobble}
+{\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
+  \gdef\verbatimgobble#1^^M{}}
+
 \def\title{CHAIN\_BOUND}
 \def\bs{\char`\\} % a literal backslash, as printed in team names
 
@@ -650,25 +658,29 @@ relaxation gap before assuming that {\bf NP}-hardness describes your instance.
 
 Here, finally, is what the first instance looks like when the program is asked
 to show its work, with all but the ends of the chain elided:
-$$\vbox{\halign{\tt#\hfil\cr
-relaxation bound 2498\cr
-\ \ path of 43 games worth 1058, 4 cycles worth +1440, 2 teams sitting out\cr
-\ \ \ \ cycle of 58 teams, +1156\ \ [Texas A\bs\&M ...]\cr
-\ \ \ \ cycle of 5 teams, +79\ \ [Temple ...]\cr
-\ \ \ \ cycle of 8 teams, +157\ \ [Princeton ...]\cr
-\ \ \ \ cycle of 3 teams, +48\ \ [Pennsylvania ...]\cr
-Stanford to Harvard: upper bound 2473, chain +2473 (351 nodes, proven optimal)\cr
-\ Oct 06: Stanford Cardinal 36, Notre Dame Fighting Irish 31 (+5)\cr
-\ Oct 20: Notre Dame Fighting Irish 29, Miami Hurricanes 20 (+14)\cr
-\ Jan 01: Miami Hurricanes 46, Texas Longhorns 3 (+57)\cr
-\ ...\cr
-\ Sep 29: Bucknell Bisons 42, Cornell Big Red 21 (+2435)\cr
-\ Nov 10: Cornell Big Red 41, Columbia Lions 0 (+2476)\cr
-\ Sep 15: Columbia Lions 6, Harvard Crimson 9 (+2473)\cr}}$$
+\medskip
+\begingroup
+\verbatim
+relaxation bound 2498
+	path of 43 games worth 1058, 4 cycles worth +1440, 2 teams sitting out
+		cycle of 58 teams, +1156  [Texas A\&M ...]
+		cycle of 5 teams, +79  [Temple ...]
+		cycle of 8 teams, +157  [Princeton ...]
+		cycle of 3 teams, +48  [Pennsylvania ...]
+Stanford to Harvard: upper bound 2473, chain +2473 (351 nodes, proven optimal)
+ Oct 06: Stanford Cardinal 36, Notre Dame Fighting Irish 31 (+5)
+ Oct 20: Notre Dame Fighting Irish 29, Miami Hurricanes 20 (+14)
+ Jan 01: Miami Hurricanes 46, Texas Longhorns 3 (+57)
+                      ...
+ Sep 29: Bucknell Bisons 42, Cornell Big Red 21 (+2435)
+ Nov 10: Cornell Big Red 41, Columbia Lions 0 (+2476)
+ Sep 15: Columbia Lions 6, Harvard Crimson 9 (+2473)
+!endgroup
+\endgroup
+\medskip\noindent
 The last line is the dip promised earlier: Columbia lost to Harvard, so the
 running total falls from 2476 to 2473 on the very step that completes the
 optimal chain.
-
 @ @<Solve the problem and report@>=
 ub, lb, chain, nodes, proven := solveExactly(p, *limit)
 verdict := "not proven"
