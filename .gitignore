@@ -7,5 +7,7 @@
 *.scn
 *.toc
 *.log
+*.dvi
 *.pdf
-
+!chain_bound.pdf
+chain_bound_ko
