@@ -154,11 +154,25 @@ type gamesBuilder struct {
 @ 함수 |Games|는 대학 미식축구 점수를 무향 그래프로 짓는다. 씨앗으로 난수 스트림을 열고,
 매개변수를 다듬고, 자료 파일을 한 번 훑어 그래프를 짓는다. 파일의 앞 120줄은 팀 정보,
 나머지는 경기 점수다.
+
+\CEE/ 원본은 전역 난수 스트림 하나를 온 GraphBase가 나눠 쓰므로, |games|를 부른
+{\sc FOOTBALL} 같은 프로그램이 그 뒤에 |gb_unif_rand|를 부르면 |games|가 쓰다 만
+스트림을 {\sl 이어서\/} 쓴다. 우리가 |Games| 안에서 새 |RNG|를 열어 버리면 그
+호출자가 깨진다. 그래서 |RNG|를 직접 받는 변형 |GamesRNG|를 함께 내놓는다.
+|Games|는 그 위에 씌운 얇은 껍데기다.
 @<|Games|...@>=
 func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, dir string) (*gbgraph.Graph, error) {
+	return GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
+		firstDay, lastDay, seed, gbflip.New(seed), dir)
+}
+
+@ |GamesRNG|는 |Games|와 같되 난수 생성기 |rng|를 직접 받는다.
+@<|Games|...@>=
+func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
+	firstDay, lastDay, seed int64, rng *gbflip.RNG, dir string) (*gbgraph.Graph, error) {
 	b := &gamesBuilder{
-		rng:        gbflip.New(seed),
+		rng:        rng,
 		seed:       seed,
 		nodes:      make([]gbsort.Node[teamInfo], 0, maxN+2),
 		lookup:     make(map[string]*gbsort.Node[teamInfo]),
