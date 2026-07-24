@@ -4,6 +4,7 @@
 
 \input kotexgweb
 \def\title{GB\_\,WORDS}
+\font\logosl=logosl10
 
 @* 들어가며. 이 모듈은 \.{GWEB} 생성기 층의 첫 주자다. 앞선 네 커널 모듈
 (|gbflip|, |gbio|, |gbgraph|, |gbsort|)이 지금까지 각자의 자리에서 조용히
@@ -56,7 +57,7 @@ $$\vbox{\halign{$c_#$번 나타남:\quad&#\hfil\cr
 3&영국 읽기 자료 Lancaster-Oslo/Bergen Corpus;\cr
 4&오스트레일리아 신문 Melbourne-Surrey Corpus;\cr
 5&개정 표준역 성경(RSV);\cr
-6&Knuth의 {\sl The \TeX book\/}과 {\sl The METAFONT book\/};\cr
+6&Knuth의 {\sl The \TeX book\/}과 {\sl The {\logosl METAFONT\kern1pt}book\/};\cr
 7&Graham, Knuth, Patashnik의 {\sl Concrete Mathematics\/}.\cr}}$$
 
 예컨대 \.{words.dat}의 한 항목은 $$\.{happy*774,92,121,2,26,8,1}$$
@@ -550,7 +551,7 @@ if f != nil {
 	}
 }
 
-@* 시험. 아래 시험들은 \.{words.dat}가 |../data|에 있다고 보고 그래프를 지어,
+@* 시험. 아래 시험들은 \.{words.dat}가 \.{../data}에 있다고 보고 그래프를 지어,
 Knuth가 발표한 여러 값과 대조한다. 자격을 갖춘 낱말의 수---흔한 낱말 3300개,
 흔하거나 고급인 낱말 4494개, 모든 낱말 5757개---는 훌륭한 닻이다.
 

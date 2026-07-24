@@ -148,13 +148,13 @@ func (bd *builder) prepareTables(p int64) error {
 	bd.qSqr = make([]int64, q)
 	bd.qSqrt = make([]int64, q)
 	bd.qInv = make([]int64, q)
-	@<qSqr와 qSqrt 표를 셈한다@>
-	@<원시근 a와 그 역원 aa를 찾는다@>
-	@<qInv 표를 셈한다@>
+	@<|qSqr|와 |qSqrt| 표를 셈한다@>
+	@<원시근 |a|와 그 역원 |aa|를 찾는다@>
+	@<|qInv| 표를 셈한다@>
 	return nil
 }
 
-@ @<qSqr와 qSqrt 표를 셈한다@>=
+@ @<|qSqr|와 |qSqrt| 표를 셈한다@>=
 for a := int64(1); a < q; a++ {
 	bd.qSqrt[a] = -1
 }
@@ -169,7 +169,7 @@ for a := int64(1); a < q; a++ {
 @ 원시근이면 그 거듭제곱이 모든 것을 낳는다. |q|가 소수가 아니면 안쪽 반복이
 |k>=q|로 끝난다.
 
-@<원시근 a와 그 역원 aa를 찾는다@>=
+@<원시근 |a|와 그 역원 |aa|를 찾는다@>=
 var a, aa int64
 FindRoot:
 for a = 2; ; a++ {
@@ -193,7 +193,7 @@ for a = 2; ; a++ {
 @ 원시근을 찾으면 역원을 모두 쉽게 낳는다. |qInv[0]=q|로 두어 $\infty$를 안에서
 나타낸다.
 
-@<qInv 표를 셈한다@>=
+@<|qInv| 표를 셈한다@>=
 b, bb := a, aa
 for b != bb {
 	bd.qInv[b] = bb
