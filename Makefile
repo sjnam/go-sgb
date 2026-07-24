@@ -57,7 +57,11 @@ doc:
 
 clean:
 	rm -f */*.go */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf */*.dvi
-	rm -f demos/*/*.go demos/*/*.tex demos/*/*.idx demos/*/*.scn demos/*/*.toc demos/*/*.log demos/*/*.pdf demos/*/*.dvi
+	rm -f demos/*/*.go demos/*/*.tex demos/*/*.idx demos/*/*.scn demos/*/*.toc demos/*/*.log demos/*/*.dvi
+	# 커밋된 PDF(.gitignore에서 !로 예외 처리한 chain_bound.pdf, perec.pdf)는 남기고
+	# 재생성 가능한 나머지 데모 PDF만 지운다.
+	find demos -mindepth 2 -maxdepth 2 -name '*.pdf' \
+	  ! -name chain_bound.pdf ! -name perec.pdf -delete
 	rm -f demos/*/*.mpx demos/*/*.[0-9]*        # MetaPost 중간물 (pic.tex, *.mp 원본은 남김)
 	for r in $(ROOTS); do \
 	  rm -f $$r.go $$r.tex $$r.idx $$r.scn $$r.toc $$r.log $$r.pdf; \
