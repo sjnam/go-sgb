@@ -38,7 +38,7 @@ consecutive chapters are joined by a line. The first chapter is the ringed |1|
 at the center, and the bottom-left corner---the unvisited clinamen---is left
 empty with a cross. The dashed line from $65$ to $66$ is that one illegal,
 non-knight move.
-\bigskip
+\medskip
 \centerline{\pic{perec-1.pdf}}
 \medskip\noindent
 Perec had a second constraint. He gathered 42 lists of ten items into
@@ -85,7 +85,6 @@ func main() {
 @ A cell of the board is a |cell|. Here |x| is the column (1 at the left, 10 at
 the right) and |y| the floor (1 at the top, 10 at the bottom). |tour[k]| is the
 cell the $(k+1)$th chapter sits in.
-
 @<Types and data@>=
 type cell struct{ x, y int }
 
@@ -108,7 +107,6 @@ first four arguments are the board's dimensions; a zero dimension is unused, so
 |piece=5| is the knight---a knight's move is exactly the one whose Euclidean
 distance between two cells is $\sqrt5$. The last two arguments are wrapping and
 directedness, both unused here.
-
 @<Build the knight board@>=
 g, err := gbbasic.Board(10, 10, 0, 0, 5, 0, false)
 if err != nil {
@@ -120,7 +118,6 @@ floor |y| and column |x| is |"y-1.x-1"| (both counted from 0). Verification need
 not the vertices themselves but only whether two cells are neighbors on the
 board, so we sweep all of the board's arcs into a single set of name pairs. Then
 one lookup tells whether two cells are joined by a knight's move.
-
 @<Extract the board's adjacency@>=
 adj := make(map[[2]string]bool)
 for v := range g.AllVertices() {
@@ -131,7 +128,6 @@ for v := range g.AllVertices() {
 
 @ This |name| is the bridge from a coordinate to a vertex name: floor |y| first,
 column |x| second, each decremented to count from 0.
-
 @<Types and data@>=
 func name(c cell) string { return fmt.Sprintf("%d.%d", c.y-1, c.x-1) }
 
@@ -140,7 +136,6 @@ board, collecting the links that are not neighbors and the cells stepped on
 twice. Then we pick out the cell, among the 100, that is never stepped on. If
 Perec's tour is right, the only non-adjacent link is the clinamen, and the only
 unvisited cell is the cellar corner.
-
 @<Verify and print the tour@>=
 fmt.Fprint(out, "PEREC: the knight's tour of Life A User's Manual\n\n")
 fmt.Fprintf(out, "  The board's official name is\n  %s\n", g.ID)
@@ -154,7 +149,6 @@ fmt.Fprintf(out, "  with %d vertices and %d arcs.\n\n", g.N, g.M)
 neighbors on the board. If not, we record the link in |breaks|. We also record
 in |chapterAt| the first chapter to step on each cell, so a cell stepped on
 twice shows up at once.
-
 @<Find non-adjacent links and repeated cells@>=
 chapterAt := make(map[string]int)
 var breaks [][2]int // (earlier chapter, later chapter) of a non-adjacent link
@@ -171,7 +165,6 @@ for k, c := range tour {
 
 @ We walk all 100 cells of the board and gather those not in |chapterAt|,
 forming the coordinates by |Board|'s naming rule from floor |y| and column |x|.
-
 @<Find the unvisited cell@>=
 var missing []cell
 for y := 1; y <= 10; y++ {
@@ -185,7 +178,6 @@ for y := 1; y <= 10; y++ {
 @ The chapter-number grid is a copy of the novel's facade. From the top-left
 |(1,1)| to the bottom-right |(10,10)|, each cell is stamped with the chapter
 that treats that room. The unvisited cellar corner is left blank with three dots.
-
 @<Print the chapter-number grid@>=
 fmt.Fprint(out, "  Chapter-number grid (top-left is (1,1), top row is the attic):\n\n")
 for y := 1; y <= 10; y++ {
@@ -205,7 +197,6 @@ fmt.Fprint(out, "\n")
 non-adjacent link we tell between which chapters, and to which cell, it strayed,
 and whether the stray is a single diagonal step. Perec's clinamen is exactly
 that one move from the 65th chapter to the 66th.
-
 @<Print the verification result@>=
 fmt.Fprintf(out, "  chapters: %d, repeated cells: %d\n", len(tour), repeats)
 for _, m := range missing {
@@ -220,7 +211,6 @@ for _, b := range breaks {
 }
 
 @ A small hand for the absolute value of a coordinate difference.
-
 @<Types and data@>=
 func abs(n int) int {
 	if n < 0 {
@@ -303,7 +293,6 @@ do exactly as Parker did: we run a search that builds a random Latin square and
 hunts for its orthogonal mate, obtain one square (a matter of seconds on today's
 machines), and set the result down here as |square|. Each cell is a
 two-component |[2]int{a, b}|.
-
 @<Types and data@>=
 var square = [10][10][2]int{
 	{{4, 0}, {2, 1}, {5, 2}, {1, 3}, {3, 4}, {6, 5}, {9, 6}, {0, 7}, {7, 8}, {8, 9}},
@@ -324,7 +313,6 @@ component and the lower by the second. Because each component is Latin, the ten
 colours each appear once in every row and column; because the two are
 orthogonal, no upper-lower pair of colours repeats across the hundred cells.
 That is the visible proof that this picture is a genuine Graeco-Latin square.
-
 \medskip
 \centerline{\pic width 10cm{perec-2.pdf}}
 
@@ -333,7 +321,6 @@ check, in the same spirit as for the knight's tour. Three things: is the first
 component Latin, is the second Latin, and are all 100 pairs distinct (which is
 exactly the orthogonality of the two components). If all three hold, we hold in
 our hands the very thing Euler said could not exist.
-
 @<Verify the square and print the assignment@>=
 fmt.Fprint(out, "\nPEREC: an order-10 Graeco-Latin square\n\n")
 @<Check that the square is Graeco-Latin@>
@@ -344,7 +331,6 @@ fmt.Fprint(out, "\nPEREC: an order-10 Graeco-Latin square\n\n")
 symbols $0$ through $9$ each appear once, so it is enough to OR ten bits and see
 whether they make |1023|. Orthogonality we check by putting the 100 pairs into a
 set and seeing that its size is 100.
-
 @<Check that the square is Graeco-Latin@>=
 latinA, latinB := true, true
 for i := 0; i < 10; i++ {
@@ -378,7 +364,6 @@ if latinA && latinB && len(seen) == 100 {
 @ To show the square itself, we print each cell as two digits |ab|. That these
 hundred pairs run over $00$ through $99$ exactly once each is guaranteed by the
 check above.
-
 @<Print the square as a grid@>=
 fmt.Fprint(out, "  The square (each cell is two components ab):\n\n")
 for i := 0; i < 10; i++ {
@@ -401,7 +386,6 @@ Perec kept twenty-one such couples, but his lists in full and their cell-by-cell
 assignment fill the vast material of his working notebook (the {\it cahier des
 charges\/}). Here, only to show the structure, we use one illustrative couple:
 ten animals and ten colours.
-
 @<Assign one couple of lists to chapters@>=
 animals := [10]string{"cat", "dog", "horse", "fox", "bear", "deer", "rabbit", "wolf", "hawk", "mouse"}
 colours := [10]string{"red", "orange", "yellow", "green", "blue", "indigo", "violet", "black", "white", "gray"}
@@ -421,7 +405,6 @@ for k, c := range tour {
 the hundred is missing---the combination the unvisited clinamen cell $(1,10)$
 would have held. The blemish in the tour that fixes the order has taken away one
 of the things to write as well.
-
 @<Show the missing combination is the clinamen's@>=
 fmt.Fprintf(out, "\n  combinations used: %d (of 100)\n", len(used))
 q := square[10-1][1-1] // clinamen cell (1,10)
