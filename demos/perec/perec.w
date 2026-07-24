@@ -11,8 +11,8 @@
 {\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
   \gdef\verbatimgobble#1^^M{}}
 
-@* The knight's tour. Georges Perec's novel ``{\sl Life A User's Manual\/}
-({\sl La Vie mode d'emploi\/}, 1978)'' is set in an apartment building at 11 rue
+@** The knight's tour. Georges Perec's novel ``{\sl Life A User's Manual\/}
+({\it La Vie mode d'emploi\/}, 1978)'' is set in an apartment building at 11 rue
 Simon-Crubellier in Paris. Perec cut the building's facade away like a doll's
 house, imagining a $10\times10=100$-cell grid from the cellars to the attic.
 Each chapter of the novel dwells in one of those 100 cells and tells the story
@@ -393,7 +393,7 @@ left out---the flawless tour of which Perec's is the deliberate scarring.
 \medskip
 \centerline{\pic{perec-3.pdf}}
 
-@* A Graeco-Latin square. If the knight's tour decides {\it where to write},
+@** A Graeco-Latin square. If the knight's tour decides {\it where to write},
 {\it what to write} is decided by Perec's second constraint. As we said, he
 gathered 42 lists of material into twenty-one pairs and, by a $10\times10$
 Graeco-Latin square, assigned to each chapter its combination of material. But
