@@ -79,7 +79,7 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 |BiBook|이 만든 장 정점---에서는 그 이름이 정점의 |Name|으로 그대로 남으니,
 쓰는 쪽이 아쉬울 일은 별로 없다.
 
-@ 원본은 문제가 생기면 |NULL|을 돌려주고 외부 변수 |panic_code|에 실패의
+@ 원본은 문제가 생기면 \.{NULL}을 돌려주고 외부 변수 |panic_code|에 실패의
 종류를 적었다. \GO/에서는 그 대신 |error|를 돌려주는데, 값은
 {\sc GB\_\,GRAPH}가 정의한 |gbgraph.PanicCode| 상수들이다. 그래서 원본의
 |panic(c)| 매크로 자리마다 |return nil, c|가 놓인다.
