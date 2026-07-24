@@ -407,7 +407,7 @@ would have held. The blemish in the tour that fixes the order has taken away one
 of the things to write as well.
 @<Show the missing combination is the clinamen's@>=
 fmt.Fprintf(out, "\n  combinations used: %d (of 100)\n", len(used))
-q := square[10-1][1-1] // clinamen cell (1,10)
+q := square[9][0] // |square[10-1][1-1]|, clinamen cell $(1,10)$
 fmt.Fprintf(out, "  missing combination: %s, %s  <- the share of clinamen cell (1,10)\n",
 	animals[q[0]], colours[q[1]])
 
