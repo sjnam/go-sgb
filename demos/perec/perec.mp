@@ -7,7 +7,10 @@
 %   fig 2: the embedded order-10 Graeco-Latin square, coloured like the
 %          Scientific American cover (upper triangle = first component,
 %          lower = second), with small digits.
-% Build with: mptopdf perec.mp  (-> perec-1.pdf, perec-2.pdf)
+%   fig 3: a genuine complete knight's tour of all 100 cells, found by
+%          Warnsdorff's rule, on a plain grid (no doll's house). Start (6,6)
+%          ringed solid, finish (6,5) ringed dashed; every step a knight's move.
+% Build with: mptopdf perec.mp  (-> perec-1.pdf, perec-2.pdf, perec-3.pdf)
 % Every label is a plain digit, so no btex/LaTeX preamble is needed.
 
 beginfig(1);
@@ -124,6 +127,58 @@ beginfig(2);
   endfor;
   pickup pencircle scaled 1.1bp;
   draw (0,0)--(10u,0)--(10u,-10u)--(0,-10u)--cycle;
+endfig;
+
+% fig 3: a genuine complete knight's tour of all 100 cells, found by Warnsdorff's
+% rule. A plain grid, not a doll's house: this tour belongs to no novel. The
+% hundred cells are joined in visiting order; the start (6,6) is ringed solid and
+% the finish (6,5) ringed dashed. Every link is a true knight's move.
+beginfig(3);
+  numeric u; u := 28;
+  pair q[];                        % q[k] is the cell visited at step k (x=col, y=floor)
+  q[1]:=(6,6); q[2]:=(5,8); q[3]:=(4,10); q[4]:=(2,9); q[5]:=(1,7); q[6]:=(2,5); q[7]:=(1,3);
+  q[8]:=(2,1); q[9]:=(4,2); q[10]:=(6,1); q[11]:=(8,2); q[12]:=(10,1); q[13]:=(9,3); q[14]:=(10,5);
+  q[15]:=(9,7); q[16]:=(10,9); q[17]:=(8,10); q[18]:=(6,9); q[19]:=(7,7); q[20]:=(8,5); q[21]:=(10,4);
+  q[22]:=(9,2); q[23]:=(7,1); q[24]:=(6,3); q[25]:=(5,1); q[26]:=(3,2); q[27]:=(1,1); q[28]:=(2,3);
+  q[29]:=(1,5); q[30]:=(2,7); q[31]:=(1,9); q[32]:=(3,10); q[33]:=(4,8); q[34]:=(5,10); q[35]:=(3,9);
+  q[36]:=(1,10); q[37]:=(2,8); q[38]:=(1,6); q[39]:=(2,4); q[40]:=(1,2); q[41]:=(3,1); q[42]:=(5,2);
+  q[43]:=(4,4); q[44]:=(3,6); q[45]:=(5,5); q[46]:=(4,7); q[47]:=(5,9); q[48]:=(7,10); q[49]:=(9,9);
+  q[50]:=(10,7); q[51]:=(8,8); q[52]:=(9,10); q[53]:=(10,8); q[54]:=(9,6); q[55]:=(8,4); q[56]:=(10,3);
+  q[57]:=(9,1); q[58]:=(7,2); q[59]:=(6,4); q[60]:=(7,6); q[61]:=(9,5); q[62]:=(8,3); q[63]:=(10,2);
+  q[64]:=(8,1); q[65]:=(7,3); q[66]:=(9,4); q[67]:=(10,6); q[68]:=(9,8); q[69]:=(10,10); q[70]:=(8,9);
+  q[71]:=(6,10); q[72]:=(7,8); q[73]:=(8,6); q[74]:=(7,4); q[75]:=(6,2); q[76]:=(4,3); q[77]:=(3,5);
+  q[78]:=(5,4); q[79]:=(7,5); q[80]:=(6,7); q[81]:=(7,9); q[82]:=(8,7); q[83]:=(6,8); q[84]:=(5,6);
+  q[85]:=(3,7); q[86]:=(4,9); q[87]:=(2,10); q[88]:=(1,8); q[89]:=(2,6); q[90]:=(3,8); q[91]:=(4,6);
+  q[92]:=(3,4); q[93]:=(2,2); q[94]:=(1,4); q[95]:=(3,3); q[96]:=(4,1); q[97]:=(5,3); q[98]:=(4,5);
+  q[99]:=(5,7); q[100]:=(6,5);
+
+  def C(expr c) = ((xpart c)*u, -(ypart c)*u) enddef;
+
+  % room partitions (thin) and the border (thick).
+  pickup pencircle scaled 0.3bp;
+  for i=0 upto 10:
+    draw C((0.5,0.5+i))--C((10.5,0.5+i));
+    draw C((0.5+i,0.5))--C((0.5+i,10.5));
+  endfor;
+  pickup pencircle scaled 1.1bp;
+  draw C((0.5,0.5))--C((10.5,0.5))--C((10.5,10.5))--C((0.5,10.5))--cycle;
+
+  % the tour: join consecutive cells; every link is a knight's move.
+  pickup pencircle scaled 0.7bp;
+  for k=1 upto 99:
+    draw C(q[k])--C(q[k+1]) withcolor 0.55white;
+  endfor;
+
+  % stamp each cell with its step number.
+  defaultscale := 0.62;
+  for k=1 upto 100:
+    label(decimal k, C(q[k]));
+  endfor;
+
+  % ring the start (6,6) solid, the finish (6,5) dashed.
+  pickup pencircle scaled 0.6bp;
+  draw fullcircle scaled 0.78u shifted C(q[1]);
+  draw fullcircle scaled 0.78u shifted C(q[100]) dashed evenly scaled 0.5;
 endfig;
 
 end.

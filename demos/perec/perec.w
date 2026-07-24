@@ -11,8 +11,8 @@
 {\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
   \gdef\verbatimgobble#1^^M{}}
 
-@* The knight's tour. Georges Perec's novel {\sl Life A User's Manual\/}
-({\sl La Vie mode d'emploi\/}, 1978) is set in an apartment building at 11 rue
+@* The knight's tour. Georges Perec's novel ``{\sl Life A User's Manual\/}
+({\sl La Vie mode d'emploi\/}, 1978)'' is set in an apartment building at 11 rue
 Simon-Crubellier in Paris. Perec cut the building's facade away like a doll's
 house, imagining a $10\times10=100$-cell grid from the cellars to the attic.
 Each chapter of the novel dwells in one of those 100 cells and tells the story
@@ -79,6 +79,7 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 	@<Verify and print the tour@>
+	@<Generate and print a complete tour@>
 	@<Verify the square and print the assignment@>
 }
 
@@ -249,6 +250,148 @@ PEREC: the knight's tour of Life A User's Manual
   non-knight move: ch.65 (2,8) -> ch.66 (3,9), offset (1,1)
 !endgroup
 \endgroup
+
+@* A genuine complete tour. Perec's path is a knight's tour with a deliberate
+scar: ninety-nine cells, one illegal diagonal step, one room left forever empty.
+It is fair to ask whether the board forced his hand---whether a $10\times10$
+board admits any flawless tour of all one hundred cells at all. It does, and to
+see it we now set the novel aside and let the program find such a tour on its
+own, on the very same board.
+
+The oldest and simplest rule for the purpose is {\it Warnsdorff's\/} (1823):
+from the cell you stand on, always step to the unvisited cell that has the fewest
+unvisited neighbors of its own. The idea is to visit the awkward, hard-to-reach
+cells early, while reaching them is still easy, and to save the roomy ones for
+last. On the $10\times10$ board the rule walks clean through all hundred cells
+without ever having to turn back; so, fittingly, we start it at Perec's own
+central landing |(6,6)| and let it finish what he chose to leave undone.
+
+@ The rule needs, for each cell, the list of its knight-neighbors, which we read
+straight off the board's arcs. Vertex names are coordinates |"row.col"|, so a
+small reverse map |rev| turns a name back into a |cell|, and |nbr[c]| collects
+the cells a knight can reach from~|c|.
+@<Generate and print a complete tour@>=
+fmt.Fprint(out, "\nPEREC: a genuine complete knight's tour (Warnsdorff)\n\n")
+@<Build the neighbor lists from the board@>
+@<Grow a tour by Warnsdorff's rule@>
+@<Verify and print the complete tour@>
+
+@ @<Build the neighbor lists from the board@>=
+rev := make(map[string]cell)
+for y := 1; y <= 10; y++ {
+	for x := 1; x <= 10; x++ {
+		rev[name(cell{x, y})] = cell{x, y}
+	}
+}
+nbr := make(map[cell][]cell)
+for v := range g.AllVertices() {
+	for a := range v.AllArcs() {
+		nbr[rev[v.Name]] = append(nbr[rev[v.Name]], rev[a.Tip.Name])
+	}
+}
+
+@ We start at |(6,6)|, mark it walked, and grow the path one cell at a time. At
+each step we scan the unvisited neighbors of the current cell and keep the one
+with the |fewest| onward moves. Should the scan ever find nothing, Warnsdorff has
+run into a dead end and we stop; but on this board it never does.
+@<Grow a tour by Warnsdorff's rule@>=
+start := cell{6, 6}
+walked := map[cell]bool{start: true}
+full := []cell{start}
+for len(full) < 100 {
+	cur := full[len(full)-1]
+	next, fewest, found := cell{}, 99, false
+	for _, n := range nbr[cur] {
+		if walked[n] {
+			continue
+		}
+		@<Let |onward| count |n|'s unvisited neighbors@>
+		if onward < fewest {
+			fewest, next, found = onward, n, true
+		}
+	}
+	if !found {
+		break
+	}
+	walked[next] = true
+	full = append(full, next)
+}
+
+@ This is the crux of the rule: how crowded the cell~|n| still is, measured as
+the number of its neighbors not yet walked.
+@<Let |onward| count |n|'s unvisited neighbors@>=
+onward := 0
+for _, m := range nbr[n] {
+	if !walked[m] {
+		onward++
+	}
+}
+
+@ We verify the finished tour on the board's own arcs, exactly as we did Perec's,
+and this time expect no flaw at all: a hundred cells, every step a knight's move,
+and---unlike the novel---no clinamen. The step-number grid is laid out like the
+facade, so it can be read against the chapter grid above.
+@<Verify and print the complete tour@>=
+grid := make(map[cell]int)
+var flaws int
+for k, c := range full {
+	grid[c] = k + 1
+	if k > 0 && !adj[[2]string{name(full[k-1]), name(c)}] {
+		flaws++
+	}
+}
+@<Print the complete-tour grid@>
+fmt.Fprintf(out, "  cells visited: %d, non-knight moves: %d\n", len(full), flaws)
+if len(full) == 100 && flaws == 0 {
+	fmt.Fprint(out, "  => a flawless knight's tour of all 100 cells (no clinamen).\n")
+}
+
+@ @<Print the complete-tour grid@>=
+fmt.Fprint(out, "  Step-number grid (top-left is (1,1), top row is the attic):\n\n")
+for y := 1; y <= 10; y++ {
+	fmt.Fprint(out, "   ")
+	for x := 1; x <= 10; x++ {
+		fmt.Fprintf(out, " %3d", grid[cell{x, y}])
+	}
+	fmt.Fprint(out, "\n")
+}
+fmt.Fprint(out, "\n")
+
+@ Run it and the program prints this for the complete tour: the step-number grid,
+then a line confirming that all hundred cells were visited with not one
+non-knight move. The |1| sits at the central landing |(6,6)|, right where Perec
+began; from there the rule reaches every room, the bottom-left cellar included.
+\medskip
+\begingroup
+\verbatim
+PEREC: a genuine complete knight's tour (Warnsdorff)
+
+  Step-number grid (top-left is (1,1), top row is the attic):
+
+     27   8  41  96  25  10  23  64  57  12
+     40  93  26   9  42  75  58  11  22  63
+      7  28  95  76  97  24  65  62  13  56
+     94  39  92  43  78  59  74  55  66  21
+     29   6  77  98  45 100  79  20  61  14
+     38  89  44  91  84   1  60  73  54  67
+      5  30  85  46  99  80  19  82  15  50
+     88  37  90  33   2  83  72  51  68  53
+     31   4  35  86  47  18  81  70  49  16
+     36  87  32   3  34  71  48  17  52  69
+
+  cells visited: 100, non-knight moves: 0
+  => a flawless knight's tour of all 100 cells (no clinamen).
+!endgroup
+\endgroup
+
+@ And here is that tour drawn out. This time the grid is plain, not a doll's
+house cut away for a novel: this tour belongs to no story, only to the board. The
+hundred cells are joined in the order Warnsdorff's rule visited them; the start
+|(6,6)|, Perec's central landing, is ringed with a solid circle, and the finish
+|(6,5)| with a dashed one. Every link is a true knight's move, and no cell is
+left out---the flawless tour of which Perec's is the deliberate scarring.
+\medskip
+\centerline{\pic{perec-3.pdf}}
 
 @* A Graeco-Latin square. If the knight's tour decides {\it where to write},
 {\it what to write} is decided by Perec's second constraint. As we said, he
