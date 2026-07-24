@@ -1,4 +1,4 @@
-% perec_en.mp -- figures for perec_en.w.
+% perec.mp -- figures for perec.w.
 %   fig 1: the facade of 11 rue Simon-Crubellier cut away like a doll's house
 %          into a 10x10 grid, with Perec's knight's tour laid on it. Each cell
 %          bears its chapter number; consecutive chapters are joined by a line.
@@ -7,7 +7,7 @@
 %   fig 2: the embedded order-10 Graeco-Latin square, coloured like the
 %          Scientific American cover (upper triangle = first component,
 %          lower = second), with small digits.
-% Build with: mptopdf perec_en.mp  (-> perec_en-1.pdf, perec_en-2.pdf)
+% Build with: mptopdf perec.mp  (-> perec-1.pdf, perec-2.pdf)
 % Every label is a plain digit, so no btex/LaTeX preamble is needed.
 
 beginfig(1);

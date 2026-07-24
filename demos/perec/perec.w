@@ -1,4 +1,4 @@
-% perec_en: Georges Perec's Life A User's Manual reconstructed with the
+% perec: Georges Perec's Life A User's Manual reconstructed with the
 % Stanford GraphBase, as a GWEB literate program in Go.
 @i ../../gbtypes.w
 
