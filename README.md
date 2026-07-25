@@ -5,8 +5,6 @@ Donald Knuth의 [Stanford GraphBase](https://www-cs-faculty.stanford.edu/~knuth/
 `.w` 문서가 일차 산출물이고, 여기서 `gtangle`로 Go 소스를, `gweave`+`luatex`로
 한글 PDF 문서를 뽑아낸다.
 
-module: `github.com/sjnam/go-sgb` · Go 1.26.5
-
 ## 구조
 
 SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
@@ -44,8 +42,6 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 | | [demos/take_risc](demos/take_risc/take_risc.w) | RISC 회로로 곱셈·나눗셈 |
 | 설치 검증 | [test_sample](test_sample.w) | 모든 생성기 표본 (저장소 루트) |
 | | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
-
-SGB 전 모듈 이식 완료.
 
 패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
 각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
