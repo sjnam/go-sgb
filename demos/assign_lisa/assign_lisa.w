@@ -362,7 +362,7 @@ $\sigma_k=\min\{a_{k0},\ldots,a_{k(n-1)}\}$으로 둔다. $m=n$이면 모든 $k$
 매크로 |o|·|oo|·|ooo|로 각각 한둘셋 mem을 셌는데, \GO/에는 매크로가 없으니 그
 자리에 |p.mems|를 직접 늘린다. 원본의 |aa(k,l)| 매크로는 |p.mtx[k*p.n+l]|로
 편다.
-@^\\{mems} 이야기@>
+@:mems}{\\{mems} 이야기@>
 
 @<배정 문제를 푼다@>=
 func (p *solver) solve() {
