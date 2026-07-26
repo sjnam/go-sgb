@@ -345,14 +345,18 @@ func (f *File) String(c byte) string {
 
 @<파일 열기@>=
 func RawOpen(name string) (*File, error) {
+	baseName := filepath.Base(name)
 	file, err := os.Open(name)
 	if err != nil {
-		return nil, CantOpenFile
+		file, err = os.Open(filepath.Join("/usr/local/sgb/data", baseName))
+		if err != nil {
+			return nil, CantOpenFile
+		}
 	}
 	f := &File{
 		file:     file,
 		rd:       bufio.NewReader(file),
-		name:     filepath.Base(name),
+		name:     baseName,
 		moreData: true,
 		totLines: 0x7fffffff, // ``무한히 많은'' 줄을 허용
 	}

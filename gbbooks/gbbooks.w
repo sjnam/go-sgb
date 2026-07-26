@@ -102,8 +102,6 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const	DataDirectory = "/usr/local/sgb/data"
-
 @<상수 정의@>
 @<자료 구조@>
 @<|Book|과 |BiBook|@>
@@ -149,9 +147,6 @@ type bookBuilder struct {
 // |Book|은 책의 인물 마주침을 무향 그래프로 짓는다.
 func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
-	if dir == "" {
-		dir = DataDirectory
-	}
 	b := newBuilder(false)
 	return b.bgraph(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)
 }
@@ -159,9 +154,6 @@ func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, se
 // |BiBook|은 인물과 장 사이의 이분 그래프를 짓는다.
 func BiBook(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
-	if dir == "" {
-		dir = DataDirectory
-	}
 	b := newBuilder(true)
 	return b.bgraph(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)
 }

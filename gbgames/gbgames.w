@@ -97,8 +97,6 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataDirectory = "/usr/local/sgb/data"
-
 @<상수 정의@>
 @<자료 구조@>
 @<|Games| 함수@>
@@ -183,9 +181,7 @@ func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		firstDay:   firstDay,
 		lastDay:    lastDay,
 	}
-	if dir == "" {
-		dir = DataDirectory
-	}
+
 	b.fileName = filepath.Join(dir, "games.dat")
 	@<매개변수가 올바른지 확인한다@>
 	@<파일을 열어 그래프를 짓는다@>

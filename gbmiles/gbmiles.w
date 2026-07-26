@@ -80,8 +80,6 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataDirectory = "/usr/local/sgb/data"
-
 @<상수와 자료 구조@>
 @<도시 자료를 읽는 함수@>
 @<그래프를 짓는 |MilesRNG|@>
@@ -161,9 +159,6 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 표식 문자열은 이렇게 다듬은 뒤의 |n|과 |maxDegree|를 담는다.
 
 @<매개변수가 올바른지 확인한다@>=
-if dir == "" {
-	dir = DataDirectory
-}
 if n == 0 || n > maxN {
 	n = maxN
 }

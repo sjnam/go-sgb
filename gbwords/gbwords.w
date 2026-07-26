@@ -148,8 +148,6 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-const DataDirectory = "/usr/local/sgb/data"
-
 @<상수, 표, 자료 구조@>
 @<보조 함수@>
 @<입력을 읽는 함수@>
@@ -170,9 +168,6 @@ const DataDirectory = "/usr/local/sgb/data"
 func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (
 	*gbgraph.Graph, error,
 ) {
-	if dir == "" {
-		dir = DataDirectory
-	}
 	rng := gbflip.New(seed)
 	usedDefault := wtVector == nil
 	@<가중치 벡터가 올바른지 검증한다@>

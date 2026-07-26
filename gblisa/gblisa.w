@@ -117,8 +117,6 @@ const (
 	maxD = 255 // 입력 자료의 최대 픽셀 값
 )
 
-const DataDirectory = "/usr/local/sgb/data"
-
 @<타입 정의@>
 @<서브루틴@>
 
@@ -162,9 +160,6 @@ $2^{62}$ 안쪽이라, 곱하고 나누기만 하면 그만이다. 그래서 그
 
 @<서브루틴@>=
 func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
-	if dir == "" {
-		dir = DataDirectory
-	}
 	@<매개변수를 검사하고 기본값을 채운다@>
 	matx := make([]int64, m*n)
 	@<\.{lisa.dat}을 읽어 원하는 출력 꼴로 옮긴다@>

@@ -1,6 +1,5 @@
 % go-sgb의 여러 .w가 공유하는 gweave 서식 힌트.
 % 각 모듈 .w의 첫 줄에서 @i ../gbtypes.w 로 끌어온다.
-@d DataDirectory
 @d CantOpenFile	CantCloseFile	BadFirstLine BadSecondLine
 @d BadThirdLine	BadFourthLine	FileEndedPrematurely
 @d MissingNewline	WrongNumberOfLines WrongChecksum

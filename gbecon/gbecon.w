@@ -158,8 +158,6 @@ const (
 	adjSec = 80 // \.{Adjustments} 부문의 부호 번호 (|maxN-1|)
 )
 
-const DataDirectory = "/usr/local/sgb/data"
-
 @<타입 정의@>
 @<Econ 서브루틴@>
 @<자료를 읽는다@>
@@ -213,9 +211,6 @@ func (b *builder) left(p *node) *node {
 
 @<Econ 서브루틴@>=
 func Econ(n, omit, threshold, seed int64, dir string) (*gbgraph.Graph, error) {
-	if dir == "" {
-		dir = DataDirectory
-	}
 	b := &builder{rng: gbflip.New(seed)}
 	@<매개변수를 검사하고 기본값을 채운다@>
 	b.n, b.omit, b.thresh = n, omit, threshold
