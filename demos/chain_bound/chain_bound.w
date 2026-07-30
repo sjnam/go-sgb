@@ -2,6 +2,7 @@
 % The Stanford GraphBase, written as a GWEB literate program in Go.
 @i ../../gbtypes.w
 
+\input pic
 \def\verbatim{\begingroup
   \def\do##1{\catcode`##1=12 } \dospecials
   \parskip 0pt \parindent 2em \let\!=!
@@ -9,6 +10,22 @@
   \tt \catcode`\!=0 \verbatimdefs \verbatimgobble}
 {\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
   \gdef\verbatimgobble#1^^M{}}
+\def\FrameBG{\vbox to 0pt{\vskip-.72in
+  \moveleft.63in\hbox{\pic width 7.55in height 11.05in{frame.pdf}}\vss}%
+  \nointerlineskip}
+\def\plainoutput{\shipout\vbox{\FrameBG\makeheadline\pagebody\makefootline}%
+  \advancepageno \ifnum\outputpenalty>-20000 \else\dosupereject\fi}
+\def\coloutput{%
+  \if L\lr
+    \global\setbox\lbox=\box255 \gdef\lr{R}%
+  \else
+    \shipout\vbox{\FrameBG\runheadline
+      \vbox to\pageheight{\boxmaxdepth=\maxdimen
+        \box\sbox\vss
+        \hbox to\pagewidth{\box\lbox\hfil\box255}}}%
+    \global\advance\pageno by1
+    \global\setbox\sbox=\vbox{}\global\vsize=\pageheight \gdef\lr{L}%
+  \fi}
 
 \def\title{CHAIN\_BOUND}
 \def\bs{\char`\\} % a literal backslash, as printed in team names
