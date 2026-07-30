@@ -17,3 +17,7 @@ perec_ko
 # MetaPost 중간 산출물 (그림 원본 *.mp는 커밋한다)
 *.mpx
 *.[0-9]*
+
+demos/knight3
+demos/frames
+demos/ktf
