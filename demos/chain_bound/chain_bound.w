@@ -11,7 +11,7 @@
 {\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
   \gdef\verbatimgobble#1^^M{}}
 \def\FrameBG{\vbox to 0pt{\vskip-.72in
-  \moveleft.63in\hbox{\pic width 7.55in height 11.05in{frame.pdf}}\vss}%
+  \moveleft.63in\hbox{\pic width 7.55in height 11.05in{decoframe.pdf}}\vss}%
   \nointerlineskip}
 \def\plainoutput{\shipout\vbox{\FrameBG\makeheadline\pagebody\makefootline}%
   \advancepageno \ifnum\outputpenalty>-20000 \else\dosupereject\fi}
