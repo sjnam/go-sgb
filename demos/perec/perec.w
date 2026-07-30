@@ -11,6 +11,23 @@
 {\catcode`\^^M=13{\catcode`\ =13\gdef\verbatimdefs{\def^^M{\ \par}\let =\ }} %
   \gdef\verbatimgobble#1^^M{}}
 
+\def\FrameBG{\vbox to 0pt{\vskip-.72in
+  \moveleft.55in\hbox{\pic width 7.55in height 10.65in{frame.pdf}}\vss}%
+  \nointerlineskip}
+\def\plainoutput{\shipout\vbox{\FrameBG\makeheadline\pagebody\makefootline}%
+  \advancepageno \ifnum\outputpenalty>-20000 \else\dosupereject\fi}
+\def\coloutput{%
+  \if L\lr
+    \global\setbox\lbox=\box255 \gdef\lr{R}%
+  \else
+    \shipout\vbox{\FrameBG\runheadline
+      \vbox to\pageheight{\boxmaxdepth=\maxdimen
+        \box\sbox\vss
+        \hbox to\pagewidth{\box\lbox\hfil\box255}}}%
+    \global\advance\pageno by1
+    \global\setbox\sbox=\vbox{}\global\vsize=\pageheight \gdef\lr{L}%
+  \fi}
+
 @** The knight's tour. Georges Perec's novel ``{\sl Life A User's Manual\/}
 ({\it La Vie mode d'emploi\/}, 1978)'' is set in an apartment building at 11 rue
 Simon-Crubellier in Paris. Perec cut the building's facade away like a doll's
