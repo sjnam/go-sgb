@@ -55,9 +55,9 @@ consecutive chapters are joined by a line. The first chapter is the ringed |1|
 at the center, and the bottom-left corner---the unvisited clinamen---is left
 empty with a cross. The dashed line from $65$ to $66$ is that one illegal,
 non-knight move.
-\medskip
+\bigskip
 \centerline{\pic{perec-1.pdf}}
-\medskip\noindent
+\bigskip\noindent
 Perec had a second constraint. He gathered 42 lists of ten items into
 twenty-one pairs and, by an order-10 Graeco-Latin square, assigned to each
 chapter a combination of items. If the knight's tour decides {\it where to
@@ -407,7 +407,7 @@ hundred cells are joined in the order Warnsdorff's rule visited them; the start
 |(6,6)|, Perec's central landing, is ringed with a solid circle, and the finish
 |(6,5)| with a dashed one. Every link is a true knight's move, and no cell is
 left out---the flawless tour of which Perec's is the deliberate scarring.
-\medskip
+\bigskip
 \centerline{\pic{perec-3.pdf}}
 
 @** A Graeco-Latin square. If the knight's tour decides {\it where to write},
@@ -473,7 +473,7 @@ component and the lower by the second. Because each component is Latin, the ten
 colours each appear once in every row and column; because the two are
 orthogonal, no upper-lower pair of colours repeats across the hundred cells.
 That is the visible proof that this picture is a genuine Graeco-Latin square.
-\medskip
+\bigskip
 \centerline{\pic width 10cm{perec-2.pdf}}
 
 @ We do not take on trust that the square we set down is really Graeco-Latin; we
