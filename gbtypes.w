@@ -5,6 +5,8 @@
 @d MissingNewline	WrongNumberOfLines WrongChecksum
 @d NoFileOpen	BadLastLine            
 
+@s extern int
+@s char int
 @s unsigned int
 @s long int
 

@@ -371,14 +371,18 @@ $k>0$일 때 $[k-1,l]$과 이웃인 평면 그래프에서 출발한다고 하�
 
 @ 정점의 유틸리티 필드에는 원래 픽셀 값과, 그 영역의 맨 위·왼쪽 자리 및
 맨 아래·오른쪽 자리를 $k*n+l$ 꼴의 수로 담는다:
-$$\vbox{\halign{\hfil#\hfil&\quad#\hfil&\quad#\hfil\cr
+$$\vbox{\offinterlineskip
+\def\rs{\vrule height 13pt depth 6pt width 0pt}%
+\halign{\vrule\enspace\hfil\rs#\hfil\enspace&\vrule\enspace#\hfil\enspace&\vrule\enspace#\hfil\enspace\vrule\cr
+\noalign{\hrule}
 원본&\GO/&뜻\cr
-\noalign{\smallskip\hrule\smallskip}
+\noalign{\hrule}
 |pixel_value|&|X.I|&(정점) 이 영역의 픽셀 값\cr
 |first_pixel|&|Y.I|&(정점) 맨 위·왼쪽 자리 $k*n+l$\cr
 |last_pixel|&|Z.I|&(정점) 맨 아래·오른쪽 자리\cr
 |matrix_rows|&|UU.I|&(그래프) |m|\cr
-|matrix_cols|&|VV.I|&(그래프) |n|\cr}}$$
+|matrix_cols|&|VV.I|&(그래프) |n|\cr
+\noalign{\hrule}}}$$
 |first_pixel|과 |last_pixel|을 낱낱의 좌표로 되풀려면 |n|을 알아야 하는데,
 바로 그 값이 |g.VV.I|에 들어 있다. 그래서 그래프만 받아 든 쪽에서도
 $k=|Y.I|/|g.VV.I|$, $l=|Y.I|\bmod|g.VV.I|$로 자리를 복원할 수 있다.

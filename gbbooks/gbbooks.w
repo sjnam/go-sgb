@@ -291,14 +291,18 @@ f.NextLine() // 인물 자료를 끝맺는 빈 줄을 건너뛴다
 내어 준다. |in|과 |out| 통계도 |in_count|와 |out_count|라는 유틸리티 필드로
 내어 주고, 코드 값은 |short_code| 필드에 둔다. 원본이 매크로로 붙인 이 이름들이
 \GO/에서는 이렇게 대응한다:
-$$\vbox{\halign{\hfil#\hfil&\quad#\hfil&\quad#\hfil\cr
+$$\vbox{\offinterlineskip
+\def\rs{\vrule height 13pt depth 6pt width 0pt}%
+\halign{\vrule\enspace\hfil\rs#\hfil\enspace&\vrule\enspace#\hfil\enspace&\vrule\enspace#\hfil\enspace\vrule\cr
+\noalign{\hrule}
 원본&\GO/&뜻\cr
-\noalign{\smallskip\hrule\smallskip}
+\noalign{\hrule}
 |desc|&|Z.S|&\<description> 문자열\cr
 |in_count|&|Y.I|&고른 장에서의 등장 장 수\cr
 |out_count|&|X.I|&그 밖의 장에서의 등장 장 수\cr
 |short_code|&|U.I|&36진법 코드\cr
-|chap_no|&|A.I|&(호) 그 간선을 낳은 장 번호\cr}}$$
+|chap_no|&|A.I|&(호) 그 간선을 낳은 장 번호\cr
+\noalign{\hrule}}}$$
 이 배치가 곧 |UtilTypes| 문자열 |"IZZIISIZZZZZZZ"|가 뜻하는 바다.
 
 @ 두 번째 읽기(꼼꼼한 읽기)다. 파일을 다시 열어, 고른 인물의 이름과 설명을

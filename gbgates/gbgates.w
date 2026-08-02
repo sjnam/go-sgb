@@ -63,13 +63,17 @@ RISC 기계에서는 래치가 곧 레지스터에 대응한다. 반면 |Prod| �
 출력을 건너뛰려면), 공개 술어 |IsBoolean|을 내어 준다.
 
 @ 유틸리티 필드를 정리하면 이렇다:
-$$\vbox{\halign{\hfil#\hfil&\quad#\hfil&\quad#\hfil\cr
+$$\vbox{\offinterlineskip
+\def\rs{\vrule height 13pt depth 6pt width 0pt}%
+\halign{\vrule\enspace\hfil\rs#\hfil\enspace&\vrule\enspace#\hfil\enspace&\vrule\enspace#\hfil\enspace\vrule\cr
+\noalign{\hrule}
 원본&\GO/&뜻\cr
-\noalign{\smallskip\hrule\smallskip}
+\noalign{\hrule}
 |val|&|X.I|&(정점) 불리언 값\cr
 |typ|&|Y.I|&(정점) 게이트의 종류\cr
 |alt|&|Z.V|&(정점) 래치가 값을 받아 오는 뒤 게이트\cr
-|outs|&|ZZ.A|&(그래프) 출력 |Arc| 목록\cr}}$$
+|outs|&|ZZ.A|&(그래프) 출력 |Arc| 목록\cr
+\noalign{\hrule}}}$$
 @d AND OR NOT XOR DELAY
 @c
 package gbgates

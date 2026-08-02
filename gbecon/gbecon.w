@@ -128,12 +128,16 @@ SIC) 부호라 부른다. |Econ|이 만든 그래프의 정점 |v|가 나타내�
 
 @ 각 부문의 총산출(총투입과 같다)은 해당 정점의 |Y.I| 필드에 담는다. 유틸리티
 필드를 정리하면 이렇다:
-$$\vbox{\halign{\hfil#\hfil&\quad#\hfil&\quad#\hfil\cr
+$$\vbox{\offinterlineskip
+\def\rs{\vrule height 13pt depth 6pt width 0pt}%
+\halign{\vrule\enspace\hfil\rs#\hfil\enspace&\vrule\enspace#\hfil\enspace&\vrule\enspace#\hfil\enspace\vrule\cr
+\noalign{\hrule}
 원본&\GO/&뜻\cr
-\noalign{\smallskip\hrule\smallskip}
+\noalign{\hrule}
 |flow|&|A.I|&(호) 이 호를 타고 흐른 금액\cr
 |sector_total|&|Y.I|&(정점) 총투입 $=$ 총산출\cr
-|SIC_codes|&|Z.A|&(정점) SIC 부호 목록의 첫 |Arc|\cr}}$$
+|SIC_codes|&|Z.A|&(정점) SIC 부호 목록의 첫 |Arc|\cr
+\noalign{\hrule}}}$$
 이 배치가 곧 |UtilTypes| 문자열 |"ZZZZIAIZZZZZZZ"|가 뜻하는 바다.
 
 문제가 생기면 |Econ|은 |nil|과 함께 |error|(곧 |gbgraph.PanicCode|)를

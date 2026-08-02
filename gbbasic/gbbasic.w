@@ -14,7 +14,7 @@ GraphBase에서 가장 다재다능한 연장통이다---체스판 위의 말 �
 
 여섯 생성기는 |Board|, |Simplex|, |Subsets|, |Perms|, |Parts|, |Binary|이고,
 여섯 변환기는 |Complement|, |Gunion|, |Intersection|, |Lines|, |Product|,
-|Induced|이다. 여기에 |Induced|의 손쉬운 응용 둘---|BiComplete|와 |Wheel|---
+|Induced|이다. 여기에 |Induced|의 손쉬운 응용 둘---|BiComplete|와 |Wheel|---%
 과, 자주 쓰이는 특수한 경우를 위한 짧은 별명들을 곁들인다.
 
 @ 프로그램의 뼈대다. 생성기들이 쓰는 임시 작업 배열(\CEE/ 원본의 정적
