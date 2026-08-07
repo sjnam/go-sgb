@@ -226,7 +226,7 @@ if b := math.Abs(float64(wtVector[1])); flacc < b {
 for j := 0; j < 7; j++ {
 	flacc += float64(maxC[j]) * math.Abs(float64(wtVector[2+j]))
 }
-if flacc >= float64(0x60000000) {
+if flacc >= float64(0x60000000) { // 이 상수는 $6\times2^{28}=2^{30}+2^{29}$ 이다
 	return nil, gbgraph.VeryBadSpecs // 무게 벡터가 한참 벗어났다
 }
 
