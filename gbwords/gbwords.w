@@ -27,7 +27,7 @@ $$\vbox{\halign{\indent#\hfil\cr
 `\.{wordy}' 따위로 한 걸음씩 옮겨 갈 수 있다. 우리가 지금 짓는 그래프는 바로 이
 ``한 글자만 다른'' 관계를 간선으로 삼는다.
 
-@ |Words(n, wtVector, wtThreshold, seed, dir)|은 |dir|
+@ 함수 |Words(n, wtVector, wtThreshold, seed, dir)|은 |dir|
 디렉터리의 \.{words.dat}에 담긴 다섯 글자 낱말들로 그래프를 짓는다. 그래프의
 정점 하나가 낱말 하나에 대응하며, 두 낱말이 정확히 한 글자 자리에서만 다르면
 그래프에서 서로 이웃한다.
@@ -96,11 +96,11 @@ $c_1=\cdots=c_7=0$이라서, 무게 벡터가 무엇이든 무게가 늘 0이다
 컴퓨터에서나 같다. 씨앗은 $0\le s<2^{31}$ 범위의 아무 정수나 된다.
 
 @ 이번에는 |wtVector|를 직접 주는 보기들이다. |w|를
-$$|w := []int64{1}| \hbox{\rm (나머지는 0)}$$
+$$|w := []int64{1}|$$
 로 두고 |Words(0,w,1,0,dir)|을 부른다고 하자. 이는 $a=1$이고
 $b=w_1=\cdots=w_7=0$이라는 뜻이므로, `흔함'으로 분류된 3300개 낱말만 담은 그래프를
 얻는다. 마찬가지로 무게 벡터를
-$$|w := []int64{1, 1}| \hbox{\rm (나머지는 0)}$$
+$$|w := []int64{1, 1}|$$
 로 주면 $a=b=1$이고 $w_1=\cdots=w_7=0$이 되어, `드묾'이 아닌
 $3300+1194=4494$개 낱말을 얻는다. 이 두 보기에서는 자격을 갖춘 낱말의 무게가 모두
 1이므로, 그래프의 정점들이 유사난수 차례로 나타난다.
@@ -129,12 +129,23 @@ const (
 
 var maxC = [7]int64{15194, 3560, 4467, 460, 6976, 756, 362} // 최대 빈도수 $C_j$
 
-var defaultWtVector = []int64{100, 10, 4, 2, 2, 1, 1, 1, 1} // |wtVector|가 |nil|일 때
+var defaultWtVector = []int64{100, 10, 4, 2, 2, 1, 1, 1, 1} // |wtVector == nil|일 때
 
 @ 프로그램의 뼈대는 다음과 같다. 커널 네 패키지를 모두 끌어와, 상수와 자료
 구조를 두고, 보조 함수들을 정의한 뒤, 바깥에 내놓을 두 서브루틴 |Words|와
 |FindWord|를 짓는다.
-@c
+
+|Words|는 씨앗으로 난수 스트림을 하나 열고, 무게 벡터가
+올바른지 확인한 다음, 자격을 갖춘 낱말들을 연결 리스트로 읽어들이고, 끝으로
+그것들을 정렬해 그래프로 뽑아낸다. \CEE/ 원본은 오류가 나면 \.{NULL}을
+돌려주며 전역 |panic_code|에 코드를 남겼지만, 우리는 그 코드를 |gbgraph|의
+|PanicCode| 오류값으로 그대로 돌려준다.
+
+|usedDefault|는 나중에 표식 문자열을 지을 때 쓰려고, |wtVector|를 기본값으로
+바꾸기 전에 미리 기억해 둔다. \CEE/는 포인터가 |default_wt_vector|와 같은지
+견주었지만, 여기서는 |nil| 여부를 한 번 적어 두는 편이 깔끔하다.
+
+@p
 package gbwords
 
 import (
@@ -148,26 +159,15 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
+type (
+	Graph = gbgraph.Graph
+	Vertex = gbgraph.Vertex
+)
+
 @<상수, 표, 자료 구조@>
 @<보조 함수@>
-@<입력을 읽는 함수@>
-@<그래프를 짓는 |Words|@>
-@<낱말을 찾는 |FindWord|@>
 
-@ 이제 본론이다. |Words|는 씨앗으로 난수 스트림을 하나 열고, 무게 벡터가
-올바른지 확인한 다음, 자격을 갖춘 낱말들을 연결 리스트로 읽어들이고, 끝으로
-그것들을 정렬해 그래프로 뽑아낸다. \CEE/ 원본은 오류가 나면 \.{NULL}을
-돌려주며 전역 |panic_code|에 코드를 남겼지만, 우리는 그 코드를 |gbgraph|의
-|PanicCode| 오류값으로 그대로 돌려준다.
-
-|usedDefault|는 나중에 표식 문자열을 지을 때 쓰려고, |wtVector|를 기본값으로
-바꾸기 전에 미리 기억해 둔다. \CEE/는 포인터가 |default_wt_vector|와 같은지
-견주었지만, 여기서는 |nil| 여부를 한 번 적어 두는 편이 깔끔하다.
-
-@<그래프를 짓는 |Words|@>=
-func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (
-	*gbgraph.Graph, error,
-) {
+func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Graph, error) {
 	rng := gbflip.New(seed)
 	usedDefault := wtVector == nil
 	@<가중치 벡터가 올바른지 검증한다@>
@@ -288,7 +288,7 @@ if err != nil {
 각 줄은 다섯 글자 낱말로 시작한다. \.{words.dat}의 낱말 |"aargh"|처럼 뒤에
 아무 표식 없이 줄이 끝나기도 하는데, 그럴 때 |Char|는 |'\n'|을 준다.
 
-@<입력을 읽는 함수@>=
+@<보조 함수@>=
 func readWords(f *gbio.File, wtVector []int64, wtThreshold int64) (
 stack *gbsort.Node[string], nn int64, err error,
 ) {
@@ -405,7 +405,7 @@ g.UtilTypes = "IZZZZZIZZZZZZZ"
 v := &g.Vertices[added]
 v.Name = p.Data
 v.U.I = p.Key - weightBias
-ht.insert(v, func(k int, r *gbgraph.Vertex) {
+ht.insert(v, func(k int, r *Vertex) {
 	g.NewEdge(v, r, 1)
 	v.Arcs.A.I = int64(k)
 	v.Arcs.Partner.A.I = int64(k)
@@ -418,7 +418,7 @@ ht.insert(v, func(k int, r *gbgraph.Vertex) {
 똑같으므로, 그 무늬의 표에서 서로를 만난다.
 
 @<상수, 표, 자료 구조@>=
-type wordHash [5][]*gbgraph.Vertex
+type wordHash [5][]*Vertex
 
 @ 다섯 글자 낱말 |q|의 다섯 글자를 5비트씩 쌓아 만든 원시 해시가 |rawHash|다.
 |blanked|는 거기서 |k|번째 글자의 몫을 빼, 그 자리를 지운 네 글자 무늬의
@@ -470,12 +470,12 @@ func matchExcept(q, r string, k int) bool {
 func makeWordHash() wordHash {
 	var ht wordHash
 	for i := range ht {
-		ht[i] = make([]*gbgraph.Vertex, hashPrime)
+		ht[i] = make([]*Vertex, hashPrime)
 	}
 	return ht
 }
 
-func (ht wordHash) insert(v *gbgraph.Vertex, near func(k int, r *gbgraph.Vertex)) {
+func (ht wordHash) insert(v *Vertex, near func(k int, r *Vertex)) {
 	q := v.Name
 	rh := rawHash(q)
 	for k := 0; k < 5; k++ {
@@ -505,10 +505,7 @@ func (ht wordHash) insert(v *gbgraph.Vertex, near func(k int, r *gbgraph.Vertex)
 해시 표를 그때그때 다시 짓는다. 낱말 찾기는 자주 하는 일이 아니니(|LADDERS|는
 사람이 한 번 물어볼 때마다 한 번 찾는다) 이 다시 짓기의 값은 치를 만하다.
 
-@<낱말을 찾는 |FindWord|@>=
-// |FindWord|는 다섯 글자 낱말 |q|와 꼭 맞는 정점을 |g|에서 찾는다. 없으면
-// |nil|을 돌려주되, 그 전에 |q|와 한 자리만 다른 정점마다 |f|를 부른다.
-func FindWord(g *gbgraph.Graph, q string, f func(*gbgraph.Vertex)) *gbgraph.Vertex {
+@p func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {
 	if len(q) != 5 {
 		return nil
 	}
@@ -732,8 +729,8 @@ func TestFindWord(t *testing.T) {
 	if v := FindWord(g, "22222", nil); v != nil {
 		t.Errorf("FindWord(\"22222\") = %v, 원함 nil", v)
 	}
-	var neighbors []*gbgraph.Vertex
-	FindWord(g, top, func(v *gbgraph.Vertex) { neighbors = append(neighbors, v) })
+	var neighbors []*Vertex
+	FindWord(g, top, func(v *Vertex) { neighbors = append(neighbors, v) })
 	for _, v := range neighbors {
 		diff := 0
 		for p := 0; p < 5; p++ {
