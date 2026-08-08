@@ -37,6 +37,11 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
+type (
+	Graph = gbgraph.Graph
+	Vertex = gbgraph.Vertex
+)
+
 @<상수 정의@>
 @<빌더 자료구조@>
 @<공유 생성기 도우미@>
@@ -58,7 +63,7 @@ const (
 	maxNNN  = 1000000000 // 정점 수의 상한($10^9$)
 )
 
-@ |builder|는 짓고 있는 그래프와 작업 배열들을 한데 묶는다. 배열마다 맡은 일이
+@ 구조체 |builder|는 짓고 있는 그래프와 작업 배열들을 한데 묶는다. 배열마다 맡은 일이
 있다. 좌표 자리 $k$가 가질 수 있는 값의 개수가 |nn[k]|이고, 그 자리가 둘러
 감기는지 여부가 |wr[k]|다. 지금 살피고 있는 이동은 $(x_1,\ldots,x_d)$에서
 $(x_1+\delta_1,\ldots,x_d+\delta_d)$로 가는 것인데, 그 $\delta_k$가 |del[k]|에
@@ -73,7 +78,7 @@ $\delta$들을 거슬러 훑기 쉽게 해 준다. |xx|와 |yy|는 각각 이동
 
 @<빌더 자료구조@>=
 type builder struct {
-	g   *gbgraph.Graph // 짓고 있는 그래프
+	g   *Graph // 짓고 있는 그래프
 	nn  [maxD + 2]int64 // 각 좌표의 크기
 	wr  [maxD + 2]int64 // 이 좌표가 둘러 감기는가?
 	del [maxD + 2]int64 // 현재 이동의 변위
@@ -97,7 +102,7 @@ func dotJoin(vals []int64, sep byte) string {
 	return sb.String()
 }
 
-@*격자와 게임판. |Board(n1,n2,n3,n4,piece,wrap,directed)|은 일반화된
+@*격자와 게임판. 함수 |Board(n1,n2,n3,n4,piece,wrap,directed)|는 일반화된
 직사각형 판 위에서 움직이는 일반화된 체스말의 이동을 그래프로 짓는다. 각
 정점은 판 위의 한 자리에, 각 호는 한 자리에서 다른 자리로의 이동에 대응한다.
 
@@ -179,7 +184,7 @@ $$\vbox{\halign{#\hfil\qquad&#\hfil\cr
 무향 회로와 유향 순환을 만든다.
 
 @<기본 서브루틴@>=
-func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*gbgraph.Graph, error) {
+func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	var d, n, k int64
 	@<판 크기 매개변수를 정규화한다@>
@@ -452,19 +457,19 @@ if directed {
 
 @<기본 서브루틴@>=
 // |Complete|는 |n|개 정점의 완전 그래프다.
-func Complete(n int64) (*gbgraph.Graph, error) { return Board(n, 0, 0, 0, -1, 0, false) }
+func Complete(n int64) (*Graph, error) { return Board(n, 0, 0, 0, -1, 0, false) }
 
 // |Transitive|는 |n|개 정점의 추이 토너먼트다.
-func Transitive(n int64) (*gbgraph.Graph, error) { return Board(n, 0, 0, 0, -1, 0, true) }
+func Transitive(n int64) (*Graph, error) { return Board(n, 0, 0, 0, -1, 0, true) }
 
 // |Empty|는 |n|개 정점에 간선이 없는 그래프다.
-func Empty(n int64) (*gbgraph.Graph, error) { return Board(n, 0, 0, 0, 2, 0, false) }
+func Empty(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 2, 0, false) }
 
 // |Circuit|은 길이 |n|의 무향 회로다.
-func Circuit(n int64) (*gbgraph.Graph, error) { return Board(n, 0, 0, 0, 1, 1, false) }
+func Circuit(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 1, 1, false) }
 
 // |Cycle|은 길이 |n|의 유향 순환이다.
-func Cycle(n int64) (*gbgraph.Graph, error) { return Board(n, 0, 0, 0, 1, 1, true) }
+func Cycle(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 1, 1, true) }
 
 @*일반화된 삼각형 판. |Simplex(n,n0,n1,n2,n3,n4,directed)|은 일반화된
 삼각형이나 사면체 모양에 바탕한 그래프를 짓는다. 정신은 |Board|가 만드는 게임판과
@@ -522,7 +527,7 @@ $\{0,1,\ldots,d\}$의 모든 |n|원소 부분집합을 내는데, $x_k=1$이면 
 셈할 방법이 없으므로 이름을 해시표에 넣어(|"VVZIII"|) 이웃을 찾는다.
 
 @<기본 서브루틴@>=
-func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*gbgraph.Graph, error) {
+func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	@<simplex 매개변수를 정규화하고 그래프를 마련한다@>
 	@<점들에 이름을 붙이고 호나 간선을 만든다@>
@@ -732,7 +737,7 @@ func (b *builder) advancePartial(d int64) (int64, bool) {
 |X.I|, |Y.I|, |Z.I|에도 둔다.
 
 @<공유 생성기 도우미@>=
-func (b *builder) assignSimplexName(v *gbgraph.Vertex, d int64) {
+func (b *builder) assignSimplexName(v *Vertex, d int64) {
 	v.Name = dotJoin(b.xx[0:d+1], '.')
 	v.X.I, v.Y.I, v.Z.I = b.xx[0], b.xx[1], b.xx[2]
 }
@@ -802,7 +807,7 @@ $\{0,1,2,3,4\}$의 2원소 부분집합들을 서로소일 때 이은 것이다.
 |UtilTypes|가 |"ZZZIII"|이다.
 
 @<기본 서브루틴@>=
-func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*gbgraph.Graph, error) {
+func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Graph, error) {
 	b := &builder{}
 	d, np, err := b.normalizeSimplex(n, n0, n1, n2, n3, n4)
 	if err != nil {
@@ -888,12 +893,12 @@ for ui := int64(0); ui <= vi; ui++ {
 
 @<기본 서브루틴@>=
 // |DisjointSubsets|는 $n$원소 집합의 서로소인 $k$-부분집합들을 잇는다.
-func DisjointSubsets(n, k int64) (*gbgraph.Graph, error) {
+func DisjointSubsets(n, k int64) (*Graph, error) {
 	return Subsets(k, 1, 1-n, 0, 0, 0, 1, false)
 }
 
 // |Petersen|은 페테르센 그래프다.
-func Petersen() (*gbgraph.Graph, error) { return DisjointSubsets(5, 2) }
+func Petersen() (*Graph, error) { return DisjointSubsets(5, 2) }
 
 @*순열 그래프. |Perms(n0,n1,n2,n3,n4,maxInv,directed)|은 다중집합의 순열
 가운데 뒤바뀜(inversion)이 |maxInv|개 이하인 것들을 정점으로 삼는 그래프를
@@ -960,7 +965,7 @@ $z$-다항계수의 계수들을 합해 정점 수를 세고, 뒤바뀜표를 �
 낳는다.
 
 @<기본 서브루틴@>=
-func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*gbgraph.Graph, error) {
+func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	if n0 == 0 {
 		n0, n1 = 1, 0 // 빈 집합을 $\{0\}$으로
@@ -1145,7 +1150,7 @@ m++
 
 @ @<기본 서브루틴@>=
 // |AllPerms|는 $n$원소 집합의 $n!$개 순열을 다 낳는다.
-func AllPerms(n int64, directed bool) (*gbgraph.Graph, error) {
+func AllPerms(n int64, directed bool) (*Graph, error) {
 	return Perms(1-n, 0, 0, 0, 0, 0, directed)
 }
 
@@ -1160,7 +1165,7 @@ func AllPerms(n int64, directed bool) (*gbgraph.Graph, error) {
 $p=|maxSize|$).
 
 @<기본 서브루틴@>=
-func Parts(n, maxParts, maxSize int64, directed bool) (*gbgraph.Graph, error) {
+func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	if maxParts == 0 || maxParts > n {
 		maxParts = n
@@ -1303,7 +1308,7 @@ if directed {
 
 @ @<기본 서브루틴@>=
 // |AllParts|는 |n|의 분할 $p(n)$개를 다 낳는다.
-func AllParts(n int64, directed bool) (*gbgraph.Graph, error) {
+func AllParts(n int64, directed bool) (*Graph, error) {
 	return Parts(n, 0, 0, directed)
 }
 
@@ -1345,7 +1350,7 @@ Tamari가 {\sl Journal of Combinatorial Theory\/} {\bf A13}(1972), 7--13에 쓴
 그 덕에 \CEE/ 원본의 정적 배열이 안고 있던 잠재적 넘침 걱정도 사라진다.
 
 @<기본 서브루틴@>=
-func Binary(n, maxHeight int64, directed bool) (*gbgraph.Graph, error) {
+func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 	if 2*n+2 > bufSize {
 		return nil, gbgraph.BadSpecs // |n|이 우리에겐 너무 크다
 	}
@@ -1355,7 +1360,7 @@ func Binary(n, maxHeight int64, directed bool) (*gbgraph.Graph, error) {
 	if maxHeight > 30 {
 		return nil, gbgraph.VeryBadSpecs // 10억 정점이 넘는다
 	}
-	var g *gbgraph.Graph
+	var g *Graph
 	@<이진 트리 하나당 정점 하나인 그래프를 마련한다@>
 	@<트리에 이름을 붙이고 호나 간선을 만든다@>
 	return g, nil
@@ -1564,7 +1569,7 @@ xtab[k]++
 
 @ @<기본 서브루틴@>=
 // |AllTrees|는 |n|개 내부 노드의 이진 트리를 다 낳는다.
-func AllTrees(n int64, directed bool) (*gbgraph.Graph, error) {
+func AllTrees(n int64, directed bool) (*Graph, error) {
 	return Binary(n, 0, directed)
 }
 
@@ -1599,7 +1604,7 @@ func AllTrees(n int64, directed bool) (*gbgraph.Graph, error) {
 |tmp|)를 빌려 쓴다.
 
 @<기본 서브루틴@>=
-func Complement(g *gbgraph.Graph, cp, self, directed bool) (*gbgraph.Graph, error) {
+func Complement(g *Graph, cp, self, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand // |g|가 어디 있나?
 	}
@@ -1678,7 +1683,7 @@ $k_1+k_2$개, 교집합에 $\min(k_1,k_2)$개가 생기지만, 거짓이면 합�
 쌍으로 묶으려고, |vv<=u|일 때만 새 간선을 내고 같으면 |a|를 짝호로 건너뛴다.
 
 @<기본 서브루틴@>=
-func Gunion(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, error) {
+func Gunion(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	if g == nil || gg == nil {
 		return nil, gbgraph.MissingOperand
 	}
@@ -1742,13 +1747,13 @@ if directed {
 |Index|와 마찬가지로 |unsafe|에 기댄다.
 
 @<빌더 자료구조@>=
-func ptrGeq(a, b *gbgraph.Vertex) bool {
+func ptrGeq(a, b *Vertex) bool {
 	return uintptr(unsafe.Pointer(a)) >= uintptr(unsafe.Pointer(b))
 }
 
 // |newLikeG|는 |g|와 같은 정점(이름만 베낀)을 가진 빈 그래프를 만든다.
 // |Complement|, |Gunion|, |Intersection|이 함께 쓴다.
-func newLikeG(g *gbgraph.Graph) *gbgraph.Graph {
+func newLikeG(g *Graph) *Graph {
 	ng := gbgraph.NewGraph(g.N)
 	for i := int64(0); i < g.N; i++ {
 		ng.Vertices[i].Name = g.Vertices[i].Name
@@ -1756,18 +1761,18 @@ func newLikeG(g *gbgraph.Graph) *gbgraph.Graph {
 	return ng
 }
 
-func ptrLess(a, b *gbgraph.Vertex) bool {
+func ptrLess(a, b *Vertex) bool {
 	return uintptr(unsafe.Pointer(a)) < uintptr(unsafe.Pointer(b))
 }
 
 // |inArray|는 |v|가 |verts|가 뒷받침하는 배열 안의 정점인지 말한다.
-func inArray(v *gbgraph.Vertex, verts []gbgraph.Vertex) bool {
+func inArray(v *Vertex, verts []Vertex) bool {
 	if len(verts) == 0 {
 		return false
 	}
 	p := uintptr(unsafe.Pointer(v))
 	lo := uintptr(unsafe.Pointer(&verts[0]))
-	hi := lo + uintptr(len(verts))*unsafe.Sizeof(gbgraph.Vertex{})
+	hi := lo + uintptr(len(verts))*unsafe.Sizeof(Vertex{})
 	return p >= lo && p < hi
 }
 
@@ -1777,7 +1782,7 @@ func inArray(v *gbgraph.Vertex, verts []gbgraph.Vertex) bool {
 양쪽에 다 있는 것만 낸다.
 
 @<기본 서브루틴@>=
-func Intersection(g, gg *gbgraph.Graph, multi, directed bool) (*gbgraph.Graph, error) {
+func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	if g == nil || gg == nil {
 		return nil, gbgraph.MissingOperand
 	}
@@ -1895,7 +1900,7 @@ if l < bb.Len {
 쓰는 포인터 비교를 옮기느라 |ptrLess| 등 주소 비교 도우미를 쓴다.
 
 @<기본 서브루틴@>=
-func Lines(g *gbgraph.Graph, directed bool) (*gbgraph.Graph, error) {
+func Lines(g *Graph, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
 	}
@@ -1926,7 +1931,7 @@ func Lines(g *gbgraph.Graph, directed bool) (*gbgraph.Graph, error) {
 
 @<|g|를 되돌리는 |restore| 클로저를 마련한다@>=
 restore := func(cnt int64) {
-	var prev *gbgraph.Vertex
+	var prev *Vertex
 	for ui := int64(0); ui < cnt; ui++ {
 		u := &ng.Vertices[ui]
 		if u.U.V != prev {
@@ -2096,7 +2101,7 @@ const (
 	Strong    = 2
 )
 
-func Product(g, gg *gbgraph.Graph, typ int64, directed bool) (*gbgraph.Graph, error) {
+func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 	if g == nil || gg == nil {
 		return nil, gbgraph.MissingOperand
 	}
@@ -2277,7 +2282,7 @@ $\iota(4)=\iota(6)=\iota(8)=1$,\quad $\iota(7)=3$\cr}}$$
 정점에 $g'$을 대입한 결과에는 호가 $m'n+mn'^2$개 있다.
 
 @<기본 서브루틴@>=
-func Induced(g *gbgraph.Graph, description string, self, multi, directed bool) (*gbgraph.Graph, error) {
+func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
 	}
@@ -2537,7 +2542,7 @@ for i := int64(0); i < n; i++ {
 
 @<기본 서브루틴의 응용@>=
 // |BiComplete|는 크기 |n1|, |n2|의 완전 이분 그래프다.
-func BiComplete(n1, n2 int64, directed bool) (*gbgraph.Graph, error) {
+func BiComplete(n1, n2 int64, directed bool) (*Graph, error) {
 	ng, err := Board(2, 0, 0, 0, 1, 0, directed)
 	if err != nil {
 		return nil, err
@@ -2557,7 +2562,7 @@ func BiComplete(n1, n2 int64, directed bool) (*gbgraph.Graph, error) {
 
 @<기본 서브루틴의 응용@>=
 // |Wheel|은 |n1|개 중심점에 이어진 |n|개 정점의 바퀴다.
-func Wheel(n, n1 int64, directed bool) (*gbgraph.Graph, error) {
+func Wheel(n, n1 int64, directed bool) (*Graph, error) {
 	ng, err := Board(2, 0, 0, 0, 1, 0, directed)
 	if err != nil {
 		return nil, err
@@ -2590,8 +2595,6 @@ package gbbasic
 
 import (
 	"testing"
-
-	"github.com/sjnam/go-sgb/gbgraph"
 )
 
 @<board 시험@>
@@ -2617,7 +2620,7 @@ func TestComplete(t *testing.T) {
 	}
 }
 
-func degree(v *gbgraph.Vertex) (d int64) {
+func degree(v *Vertex) (d int64) {
 	for range v.AllArcs() {
 		d++
 	}
