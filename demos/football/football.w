@@ -54,7 +54,25 @@ $+2279$점이라는 더 큰 차를 세우는 사슬이 나온다. 이보다 더 
 @c
 package main
 
-@<내포하는 패키지들@>
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+	@#
+	"github.com/sjnam/go-sgb/gbflip"
+	"github.com/sjnam/go-sgb/gbgames"
+	"github.com/sjnam/go-sgb/gbgraph"
+)
+
+type (
+	Arc = gbgraph.Arc
+	Graph = gbgraph.Graph
+	Vertex = gbgraph.Vertex
+)
 
 @<자료 구조@>
 @<탐욕 알고리즘@>
@@ -69,21 +87,6 @@ func main() {
 		rng: rng, out: os.Stdout}
 	c.run()
 }
-
-@ @<내포하는 패키지들@>=
-import (
-	"bufio"
-	"fmt"
-	"io"
-	"log"
-	"os"
-	"strconv"
-	"strings"
-	@#
-	"github.com/sjnam/go-sgb/gbflip"
-	"github.com/sjnam/go-sgb/gbgames"
-	"github.com/sjnam/go-sgb/gbgraph"
-)
 
 @ 명령줄을 훑는다. 수 인자는 계층 너비, \.{-v}는 진행 표시, \.{-D}\<경로>는 자료
 디렉터리다. 음수 너비는 절댓값을 쓴다(하이픈을 쓴 사용자를 위해).
@@ -123,7 +126,7 @@ for _, arg := range os.Args[1:] {
 
 @<자료 구조@>=
 type node struct {
-	game    *gbgraph.Arc
+	game    *Arc
 	totLen  int64
 	prev    *node
 	next    *node
@@ -137,16 +140,16 @@ type node struct {
 
 @<자료 구조@>=
 type chainer struct {
-	g       *gbgraph.Graph
+	g       *Graph
 	width   int64
 	verbose bool
 	rng     *gbflip.RNG
 	out     io.Writer
 
-	activeStack  *gbgraph.Vertex // 활성 정점 스택의 꼭대기
-	settledStack *gbgraph.Vertex // 찾은 이중 성분들의 스택
+	activeStack  *Vertex // 활성 정점 스택의 꼭대기
+	settledStack *Vertex // 찾은 이중 성분들의 스택
 	nn           int64           // 지금까지 본 정점의 수
-	dummy        *gbgraph.Vertex // |goal|의 가상 부모
+	dummy        *Vertex // |goal|의 가상 부모
 
 	list []*node // 계층별 최선 노드 리스트
 	size []int64 // 각 리스트의 노드 수
@@ -202,7 +205,7 @@ for v := range g.AllVertices() {
 달리 Go 필드는 서로 독립이라 게임 그래프의 필드와 겹치지 않는다.
 
 @<탐욕 알고리즘@>=
-func (c *chainer) greedy(start, goal *gbgraph.Vertex) *node {
+func (c *chainer) greedy(start, goal *Vertex) *node {
 	for v := range c.g.AllVertices() {
 		v.U.I = 0   // |blocked|
 		v.V.V = nil // |valid|
@@ -223,7 +226,7 @@ func (c *chainer) greedy(start, goal *gbgraph.Vertex) *node {
 
 @<|v|에서 갈 수 있는 최선의 호를 골라 |curNode.game|으로 삼는다@>=
 d := int64(-10000)
-var bestArc, lastArc *gbgraph.Arc
+var bestArc, lastArc *Arc
 for a := range v.AllArcs() {
 	if a.A.I > d && a.Tip.V.V == v {
 		if a.Tip == goal {
@@ -258,7 +261,7 @@ func newNode(x *node, d int64) *node {
 정점까지 |v|를 건드리지 않고 닿을 수 있다는 뜻이다.
 
 @<탐욕 알고리즘@>=
-func (c *chainer) markReachable(v, goal *gbgraph.Vertex) {
+func (c *chainer) markReachable(v, goal *Vertex) {
 	u := goal
 	u.W.V = nil // |link|
 	u.V.V = v   // |valid|
@@ -305,7 +308,7 @@ $h(x)=-(x$로 이끄는 사슬의 길이$)$인 경우다. 이제 다듬을 알�
 계층에 넣는다.
 
 @<계층 탐욕 알고리즘@>=
-func (c *chainer) stratified(start, goal *gbgraph.Vertex) *node {
+func (c *chainer) stratified(start, goal *Vertex) *node {
 	c.list = make([]*node, c.g.N)
 	c.size = make([]int64, c.g.N)
 	var curNode *node // |nil|은 나무의 뿌리
@@ -448,7 +451,7 @@ $B_2,\ldots,B_k$는 그대로다. 아래 구현은 이 관찰을 온전히 활�
 낮이 뛸 수 있나).
 
 @<이중 성분 계산@>=
-func (c *chainer) placeChildren(curNode *node, start, goal *gbgraph.Vertex) {
+func (c *chainer) placeChildren(curNode *node, start, goal *Vertex) {
 	@<모든 정점을 안 봄으로, 모든 호를 태그 안 됨으로 둔다@>
 	c.bicomponentDFS(goal)
 	@<자식마다 새 노드를 만들어 알맞은 계층에 넣는다@>
@@ -493,7 +496,7 @@ for a := range base.AllArcs() {
 |goal|에서 시작해 |dummy|로 되짚어 올라올 때까지 한 걸음씩 나아간다.
 
 @<이중 성분 계산@>=
-func (c *chainer) bicomponentDFS(goal *gbgraph.Vertex) {
+func (c *chainer) bicomponentDFS(goal *Vertex) {
 	v := goal
 	v.U.V = c.dummy // |parent|
 	c.makeActive(v)
@@ -514,7 +517,7 @@ for c.settledStack != nil {
 부모로 둔다.
 
 @<이중 성분 계산@>=
-func (c *chainer) makeActive(v *gbgraph.Vertex) {
+func (c *chainer) makeActive(v *Vertex) {
 	c.nn++
 	v.Z.I = c.nn          // |rank|
 	v.W.V = c.activeStack // |link|
@@ -526,7 +529,7 @@ func (c *chainer) makeActive(v *gbgraph.Vertex) {
 가고, 없으면 |v|가 성숙해 부모로 되짚어 올라간다.
 
 @<이중 성분 계산@>=
-func (c *chainer) explore(v *gbgraph.Vertex) *gbgraph.Vertex {
+func (c *chainer) explore(v *Vertex) *Vertex {
 	a := v.X.A // 첫 태그 안 된 호
 	if a != nil {
 		@<호 |a|를 태그하고 따라간다@>
@@ -580,7 +583,7 @@ v = u
 끝에 나오기 때문이다.
 
 @<이중 성분 계산@>=
-func (c *chainer) reportBicomponent(v, u *gbgraph.Vertex) {
+func (c *chainer) reportBicomponent(v, u *Vertex) {
 	if u == c.dummy {
 		return // 자명한 뿌리 성분 (|goal|, |dummy|)
 	}
@@ -657,7 +660,7 @@ fmt.Fprintf(c.out, " %s %02d", mon, day)
 
 @<터미널 상호작용@>=
 func (c *chainer) run() {
-	c.dummy = new(gbgraph.Vertex)
+	c.dummy = new(Vertex)
 	sc := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Fprintln(c.out) // 눈에 띄게 빈 줄 하나
@@ -705,7 +708,7 @@ if c.width == 0 {
 준다. 이름을 못 찾으면 아는 팀 하나를 무작위로 귀띔한다.
 
 @<터미널 상호작용@>=
-func (c *chainer) promptForTeam(sc *bufio.Scanner, prompt string) *gbgraph.Vertex {
+func (c *chainer) promptForTeam(sc *bufio.Scanner, prompt string) *Vertex {
 	for {
 		fmt.Fprintf(c.out, "%s team: ", prompt)
 		if !sc.Scan() || sc.Text() == "" {

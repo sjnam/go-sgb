@@ -78,10 +78,8 @@ import (
 	"github.com/sjnam/go-sgb/gbwords"
 )
 
-@<거리 보조 함수@>
-@<빈도 비용 함수@>
 @<사다리 찾개 |ladders|@>
-@<끝말을 다섯 자로 받는다@>
+@<함수들@>
 
 func main() {
 	@<명령줄 옵션을 읽는다@>
@@ -228,7 +226,7 @@ if alph || freq || heur {
 보다 작다. 빈도가 0인 낱말은 값 16, 1인 낱말은 15, 2나 3인 낱말은 14, 이렇게
 빈도가 두 배가 될 때마다 값이 1씩 줄어 0에 이른다.
 
-@<빈도 비용 함수@>=
+@<함수들@>=
 func freqCost(v *gbgraph.Vertex) int64 {
 	acc := v.U.I // 빈도(오른쪽으로 밀어 갈 값)
 	k := int64(16)
@@ -396,7 +394,7 @@ for i := gg.N - 1; i >= l.g.N; i-- {
 @^Hamming, Richard Wesley, 거리@>
 이웃한 낱말이란 해밍 거리가 $1$인 두 낱말을 말한다.
 
-@<거리 보조 함수@>=
+@<함수들@>=
 func aDist(p, q string, k int) int64 {
 	if p[k] < q[k] {
 		return int64(q[k] - p[k])
@@ -448,7 +446,7 @@ for {
 |(낱말, true)|를, 빈 줄이나 파일 끝이면 |("", false)|를 돌려준다---부르는
 쪽이 그 |false|를 끝냄으로 볼지 다시 받기로 볼지 정한다.
 
-@<끝말을 다섯 자로 받는다@>=
+@<함수들@>=
 func promptForFive(in *bufio.Reader, out io.Writer, s string, echo bool) (string, bool) {
 	for {
 		fmt.Fprintf(out, "%s word: ", s)
@@ -488,4 +486,4 @@ for {
 	}
 }
 
-@* 찾아보기.
+@* 색인.
