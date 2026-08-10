@@ -3,7 +3,6 @@
 @i ../../gbtypes.w
 
 \input kotexgweb
-\def\title{MULTIPLY}
 \def\<#1>{$\langle${\rm#1}$\rangle$}
 
 @* 들어가며. 이 시연 프로그램은 {\sc GB\_\,GATES}의 |Prod| 프로시저가 지은
@@ -34,10 +33,17 @@ $2^{999}\approx5.4\times10^{300}$이므로, 피연산자는 십진 $301$자리�
 package main
 
 import (
-	@<필요한 패키지들@>
+	"bufio"
+	"fmt"
+	"math/big"
+	"os"
+	"strings"
+	@#
+	"github.com/sjnam/go-sgb/gbgates"
+	"github.com/sjnam/go-sgb/gbgraph"
 )
-@<깊이 재기 서브루틴@>
-@<입력받기 서브루틴@>
+
+@<함수들@>
 
 func main() {
 	@<명령줄에서 |m|, |n|, 씨앗을 얻는다@>
@@ -64,16 +70,6 @@ func main() {
 		@<곱 |z|를 찍는다@>
 	}
 }
-
-@ @<필요한 패키지들@>=
-	"bufio"
-	"fmt"
-	"math/big"
-	"os"
-	"strings"
-	@#
-	"github.com/sjnam/go-sgb/gbgates"
-	"github.com/sjnam/go-sgb/gbgraph"
 
 @ 인자는 셋이나 넷이어야 한다. |m|과 |n|은 \CEE/의 |sscanf("%ld")|처럼 앞쪽
 정수만 읽고, 음수 부호가 붙었으면 절댓값을 취한다. 씨앗은 넷째 인자가 정수일
@@ -229,14 +225,14 @@ fmt.Printf("%sx%s=%s%s.\n", x, y, sep, z)
 프롬프트를 찍고 한 줄을 읽어, 앞 0을 떼고 음 아닌 십진 숫자열만 받아들인다.
 빈 줄이거나 파일 끝이면 거짓을 돌려주어 실행을 끝내고, 숫자가 아니거나 너무
 길면 채근하고 다시 묻는다. \CEE/ 원본의 |goto|는 반복문으로 옮긴다.
-@<입력받기 서브루틴@>=
+@<함수들@>=
 func parseArg(s string) (int64, bool) {
 	var v int64
 	k, _ := fmt.Sscanf(s, "%d", &v)
 	return v, k == 1
 }
 
-@ @<입력받기 서브루틴@>=
+@ @<함수들@>=
 func getNumber(in *bufio.Reader, prompt string) (string, bool) {
 	for {
 		fmt.Print(prompt)
@@ -283,7 +279,7 @@ func getNumber(in *bufio.Reader, prompt string) (string, bool) {
 
 원본은 각 게이트의 깊이를 유틸리티 필드 |u.I|에 적어 두었다. 우리는 그래프를
 건드리지 않도록 지역 슬라이스 |dp|에 담는다.
-@<깊이 재기 서브루틴@>=
+@<함수들@>=
 func depth(g *gbgraph.Graph) int64 {
 	if g == nil {
 		return -1 // 그래프가 없다
