@@ -42,7 +42,6 @@ test:
 
 # luatex은 nonstopmode라야 오류가 나도 멈추지 않고 .log에 다 남긴다.
 doc:
-	cd demos/perec && mptopdf perec.mp   # \pic이 넣을 그림 perec-1.pdf
 	for p in $(PKGS) $(DEMOS); do \
 	  (cd $$p && $(GWEAVE) $$(basename $$p).w && \
 	   luatex --interaction=nonstopmode $$(basename $$p).tex); \
