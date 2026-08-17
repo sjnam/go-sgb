@@ -20,6 +20,7 @@
 @x 프로그램 이름을 바꾼다
 \def\title{QUEEN}
 @y
+\let\maybe=\iffalse % 변경된 절만 찍는다
 \def\title{QUEEN\_WRAP}
 \def\botofcontents{\vskip 0pt plus 1filll \parskip=0pt
   이 프로그램은 Stanford GraphBase의 {\sc QUEEN}을 변경 파일
