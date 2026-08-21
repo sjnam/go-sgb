@@ -14,7 +14,7 @@ GWEAVE  ?= gweave
 
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
 PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks gbgames gbrand gbroget gblisa gbecon gbplane gbgates gbraman
-DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains demos/chain_bound demos/roget_components demos/assign_lisa demos/econ_order demos/take_risc demos/multiply demos/girth
+DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chain_bound demos/roget_components demos/assign_lisa demos/econ_order demos/take_risc demos/multiply demos/girth
 # 설치 검증 프로그램은 데모가 아니라서 원본처럼 저장소 루트에 둔다.
 ROOTS := test_sample
 
