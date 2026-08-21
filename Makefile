@@ -1,19 +1,20 @@
 # go-sgb 빌드용 Makefile.
 #
 #   make            # tangle + go vet + go test
-#   make tangle     # 각 .w -> .go (패키지는 + _test.go; demos/는 시험 없음)
+#   make tangle     # 라이브러리 패키지의 .w -> .go (+ _test.go)
 #   make doc        # 각 .w의 .pdf 조판 (한글이라 luatex)
 #   make test       # go vet + go test
 #   make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
 #
-# 생성된 .go는 커밋하지 않는다 — 일차 산출물은 .w다.
+# 라이브러리 패키지의 .go는 go get이 되도록 커밋한다(일차 산출물은 .w). 데모와
+# 루트 설치 검증 프로그램의 .go는 커밋하지 않는다.
 
 GTANGLE ?= gtangle
 GWEAVE  ?= gweave
 
 # 포팅이 진행되면서 여기에 패키지가 하나씩 늘어난다.
 PKGS  := gbflip gbio gbgraph gbsort gbwords gbdijk gbmiles gbsave gbbasic gbbooks gbgames gbrand gbroget gblisa gbecon gbplane gbgates gbraman
-DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains demos/chain_bound demos/chain_bound_ko demos/sham demos/roget_components demos/assign_lisa demos/econ_order demos/take_risc demos/multiply demos/girth
+DEMOS := demos/word_components demos/ladders demos/miles_span demos/queen demos/book_components demos/football demos/chains demos/chain_bound demos/roget_components demos/assign_lisa demos/econ_order demos/take_risc demos/multiply demos/girth
 # 설치 검증 프로그램은 데모가 아니라서 원본처럼 저장소 루트에 둔다.
 ROOTS := test_sample
 

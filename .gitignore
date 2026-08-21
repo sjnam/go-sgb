@@ -13,7 +13,6 @@ test_sample.go
 *.dvi
 *.pdf
 !chain_bound.pdf
-chain_bound_ko
 
 # MetaPost 중간 산출물 (그림 원본 *.mp는 커밋한다)
 *.mpx
