@@ -13,7 +13,6 @@ test_sample.go
 *.dvi
 *.pdf
 !chain_bound.pdf
-!perec.pdf
 chain_bound_ko
 perec_ko
 
