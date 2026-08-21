@@ -20,9 +20,9 @@ ROOTS := test_sample
 .PHONY: all tangle doc test clean queen_wrap $(PKGS) $(DEMOS) $(ROOTS)
 .DEFAULT_GOAL := all
 
-all: tangle test
+all: tangle $(DEMOS) $(ROOTS) queen_wrap test
 
-tangle: $(PKGS) $(DEMOS) $(ROOTS) queen_wrap
+tangle: $(PKGS)
 
 $(PKGS) $(DEMOS):
 	cd $@ && $(GTANGLE) $(notdir $@).w
@@ -54,7 +54,7 @@ doc:
 	cd demos/queen_wrap && luatex --interaction=nonstopmode queen.tex
 
 clean:
-	rm -f */*.go */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf */*.dvi
+	rm -f */*.tex */*.idx */*.scn */*.toc */*.log */*.pdf */*.dvi
 	rm -f demos/*/*.go demos/*/*.tex demos/*/*.idx demos/*/*.scn demos/*/*.toc demos/*/*.log demos/*/*.dvi
 	# 커밋된 PDF(.gitignore에서 !로 예외 처리한 chain_bound.pdf, perec.pdf)는 남기고
 	# 재생성 가능한 나머지 데모 PDF만 지운다.
