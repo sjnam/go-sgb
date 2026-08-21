@@ -1,5 +1,8 @@
-# tangle 생성물 — .w가 일차 산출물이므로 .go는 커밋하지 않는다
-*.go
+# tangle 생성물 — .w가 일차 산출물이다. 다만 라이브러리 패키지(PKGS)의 .go는
+# `go get github.com/sjnam/go-sgb`가 되도록 커밋한다. 데모와 루트 설치 검증
+# 프로그램의 .go만 무시한다.
+demos/**/*.go
+test_sample.go
 
 # weave/조판 생성물
 *.tex
