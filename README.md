@@ -48,8 +48,28 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 `demos/`의 시연 프로그램에는 시험이 없다. 공유하는 **GWEB** 서식 힌트는
 루트 [gbtypes.w](gbtypes.w)에 모아 `@i`로 끌어와 쓴다.
 
-**tangle로 생성되는 `.go`·`.tex`·`.pdf`는 커밋하지 않는다** — `.gitignore`
-참고. 일차 산출물은 어디까지나 `.w`다.
+**라이브러리 패키지(위 표의 `gb…`)의 tangle 산출물 `.go`·`_test.go`는 `go get`이
+되도록 저장소에 함께 커밋한다.** 그 밖의 산출물 — 데모와 루트 검증 프로그램의
+`.go`, 그리고 모든 `.tex`·`.pdf` — 은 커밋하지 않는다(`.gitignore` 참고). 일차
+산출물은 어디까지나 `.w`이고, `gb…/*.go`는 언제든 그 `.w`에서 다시 뽑아낼 수 있다.
+
+## 설치와 사용
+
+라이브러리로 바로 가져다 쓸 수 있다. `gb…` 패키지의 `.go`가 저장소에 들어 있어,
+받는 쪽에서 **GWEB** 도구는 필요 없다. 쓸 패키지를 `go get`으로 받는다:
+
+```sh
+go get github.com/sjnam/go-sgb/gbgraph@latest
+```
+
+```go
+import (
+    "github.com/sjnam/go-sgb/gbgraph"
+    "github.com/sjnam/go-sgb/gbwords"
+)
+```
+
+모듈 전체를 의존성에 더하려면 `go get github.com/sjnam/go-sgb@latest`를 쓴다.
 
 ## 빌드
 
@@ -64,8 +84,8 @@ make doc        # 각 .w를 조판해 .pdf로
 make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
 ```
 
-표준 Go 도구도 그대로 쓸 수 있다(단, 먼저 `make tangle`로 `.go`를 생성해야
-한다):
+표준 Go 도구도 그대로 쓸 수 있다. 라이브러리 패키지의 `.go`는 이미 들어 있고,
+데모까지 빌드하려면 먼저 `make tangle`로 그 `.go`를 생성한다:
 
 ```sh
 go build ./...
