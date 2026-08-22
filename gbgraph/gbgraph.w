@@ -51,7 +51,7 @@ import (
 안에서 같은 종류의 오류가 여럿이면 정수를 더해 구별한다---|SyntaxError+1|과
 |SyntaxError+2|는 서로 다른 두 문법 오류다. 문제를 짚어 내는 데 도움이 되라고
 둔 장치이며, 타입이 정수이므로 이 가산 구별이 \GO/에서도 그대로 통한다.
-|EarlyDataFault|와 |LateDataFault|가 무슨 일인지는 {\sc GB\_\,IO}가 돌려주는
+오류값 |EarlyDataFault|와 |LateDataFault|가 무슨 일인지는 {\sc GB\_\,IO}가 돌려주는
 입출력 오류값이 더 자세히 일러 준다.
 @<패닉 부호@>=
 type PanicCode int64
@@ -96,8 +96,8 @@ type Util struct {
 	I int64   // 정수일 때
 }
 
-@ |Vertex|의 표준 필드는 둘이다: 호 연결 리스트의 헤더 |Arcs|와, 정점을 상징적으로
-식별하는 문자열 |Name|. |v.Arcs|가 |nil|이면 |v|에서 나가는 호가 없는
+@ 타입 |Vertex|의 표준 필드는 둘이다: 호 연결 리스트의 헤더 |Arcs|와, 정점을 상징적으로
+식별하는 문자열 |Name|. 필드 |v.Arcs|가 |nil|이면 |v|에서 나가는 호가 없는
 것이고, 아니면 그것은 |v|에서 나가는 한 호의 레코드를 가리키며 그 레코드의
 |Next| 필드가 같은 방식으로 나머지 호들을 이어 간다.
 
@@ -111,7 +111,7 @@ type Vertex struct {
 	U, V, W, X, Y, Z Util // 다목적 필드들
 }
 
-@ |Arc|의 표준 필드는 셋이다: 호가 가리키는 정점 |Tip|, 같은 정점에서
+@ 타입 |Arc|의 표준 필드는 셋이다: 호가 가리키는 정점 |Tip|, 같은 정점에서
 나가는 다음 호 |Next|, 그리고 길이 |Len|. 호 |a|가 정점 |v|의 리스트에
 있다면 그것은 |v|에서 |a.Tip|으로 가는 길이 |a.Len|의 호다. 유틸리티
 필드는 |A|와 |B| 둘이다.
@@ -184,7 +184,7 @@ type Graph struct {
 	arcs []*Arc // 할당 순서의 호 레코드; SGB 호환 저장을 위해서만 쓴다
 }
 
-@ |UtilTypes|는 언제나 길이 14의 문자열이다. 처음 여섯 자는 |Vertex|의
+@ 필드 |UtilTypes|는 언제나 길이 14의 문자열이다. 처음 여섯 자는 |Vertex|의
 |U|, |V|, |W|, |X|, |Y|, |Z|의 쓰임새를, 다음 두 자는 |Arc|의 |A|, |B|를,
 마지막 여섯 자는 |Graph|의 유틸리티 필드들을 말한다. 각 글자는 \.I(정수),
 \.S(문자열), \.V(정점 포인터), \.A(호 포인터), \.G(그래프 포인터), 또는
@@ -225,7 +225,7 @@ func (g *Graph) MarkBipartite(n1 int64) {
 @ 새 그래프는 |NewGraph(n)|으로 만든다. 정점이 |n|개이고 호는 없는
 그래프다. 실제로는 |n+extraN|개의 정점 자리를 마련하면서 |n|개라고만
 주장하는데, 그래프에 특별한 정점 한둘을 덧붙이고 싶어 하는 알고리즘이
-여럿 있기 때문이다. |extraN|은 4이고, 아마 언제까지나 4보다 작아질 일은
+여럿 있기 때문이다. 상수 |extraN|은 4이고, 아마 언제까지나 4보다 작아질 일은
 없을 것이다.
 
 \CEE/에서는 |calloc|이 실패하면 |nil|을 돌려주는 경로가 있었지만, \GO/의
@@ -244,10 +244,10 @@ func NewGraph(n int64) *Graph {
 	}
 }
 
-@ |AllocVertex|는 그래프의 정점 배열에 정점 하나를 이어 붙여 그 포인터를
+@ 함수 |AllocVertex|는 그래프의 정점 배열에 정점 하나를 이어 붙여 그 포인터를
 준다. \CEE/의 |gb_typed_alloc()|에 대응한다: 배열 뒤에
 자리 잡으므로 |Index|로 참조되고, {\sc GB\_\,SAVE}가 함께 저장한다.
-|NewGraph|가 마련한 여분 자리 안에서는 제자리로 늘어나 기존 정점·호
+함수 |NewGraph|가 마련한 여분 자리 안에서는 제자리로 늘어나 기존 정점·호
 포인터를 깨지 않는다.
 @<그래프 키우기@>=
 func (g *Graph) AllocVertex(name string) *Vertex {
@@ -271,7 +271,7 @@ func (g *Graph) MakeCompoundID(s1 string, gg *Graph, s2 string) {
 	}
 }
 
-@ |MakeDoubleCompoundID|는 |g|의 |ID|를 |s1+gg.ID+s2+ggg.ID+s3|으로 만든다.
+@ 함수 |MakeDoubleCompoundID|는 |g|의 |ID|를 |s1+gg.ID+s2+ggg.ID+s3|으로 만든다.
 @<그래프 키우기@>=
 func (g *Graph) MakeDoubleCompoundID(s1 string, gg *Graph, s2 string,
 	ggg *Graph, s3 string) {
@@ -294,7 +294,7 @@ func (g *Graph) MakeDoubleCompoundID(s1 string, gg *Graph, s2 string,
 블록 관리는 쓰레기 수거기에게 넘겼지만, 딱 한 가지 흔적은 남긴다: {\sc
 GB\_\,SAVE}가 SGB와 byte 단위로 같은 \.{.gb} 파일을 뽑으려면 호를 만들어진
 순서대로 번호 매겨야 하므로, 새로 만든 호를 |g.arcs|에 차례로 적어 둔다.
-|VirginArc|는 새 |Arc| 레코드 하나를 내주고, 할당 순서에 적어 둔다.
+함수 |VirginArc|는 새 |Arc| 레코드 하나를 내주고, 할당 순서에 적어 둔다.
 @<그래프 키우기@>=
 func (g *Graph) VirginArc() *Arc {
 	a := new(Arc)
@@ -302,11 +302,11 @@ func (g *Graph) VirginArc() *Arc {
 	return a
 }
 
-@ |g.NewArc(u,v,len)|은 정점 |u|에서 |v|로 가는 길이 |len|의 호를
+@ 호출 |g.NewArc(u,v,len)|은 정점 |u|에서 |v|로 가는 길이 |len|의 호를
 만든다. 새 호는 곧바로 |u.Arcs|가 가리킨다. \CEE/에서는 이 호가 ``가장
 최근에 만든 그래프'', 곧 전역 |cur_graph|에 속했지만, 우리는 그래프를
 수신자로 받으므로 그런 암묵은 없다.
-|NewArc|는 |u|에서 |v|로 가는 길이 |len|의 호를 |g|에 만든다.
+함수 |NewArc|는 |u|에서 |v|로 가는 길이 |len|의 호를 |g|에 만든다.
 @<그래프 키우기@>=
 func (g *Graph) NewArc(u, v *Vertex, len int64) {
 	a := g.VirginArc()
@@ -316,7 +316,7 @@ func (g *Graph) NewArc(u, v *Vertex, len int64) {
 }
 
 @ 무향 그래프에는 호 대신 ``간선(edge)''이 있다. 간선 하나는 양쪽으로
-가는 호 두 개로 표현한다. |NewEdge|가 간선을 만들고 나면, |u|와 |v|가 서로
+가는 호 두 개로 표현한다. 함수 |NewEdge|가 간선을 만들고 나면, |u|와 |v|가 서로
 다르다는 전제 아래 |u.Arcs|와 |v.Arcs|가 각각 새 호를 가리킨다.
 
 \CEE/에서 이 두 호는 메모리에서 나란히 놓였고, |gb_new_edge|는 |u<v|일 때
@@ -345,10 +345,10 @@ $a+1$번 레코드를 블록 경계 검사 없이 그대로 썼다. 블록 크�
 간선만으로 그래프를 지으면 짝이 블록을 가로지를 일이 없지만, 앞서 호를 홀수 번
 할당해 두었다면 $a+1$이 블록 밖을 가리켜 남의 메모리를 덮어쓰게 된다.
 
-|Partner|를 쓰는 우리에게 이 함정은 없다. 두 호를 각각 따로 만들어 서로를
+메서드 |Partner|를 쓰는 우리에게 이 함정은 없다. 두 호를 각각 따로 만들어 서로를
 가리키게 할 뿐이니 이웃해 있을 까닭이 없고, 따라서 |NewArc|와 |NewEdge|를
 아무 차례로나 섞어 써도 좋다.
-|NewEdge|는 |u|와 |v|를 잇는 간선, 곧 서로 짝이 되는 호 한 쌍을 |g|에 만든다.
+함수 |NewEdge|는 |u|와 |v|를 잇는 간선, 곧 서로 짝이 되는 호 한 쌍을 |g|에 만든다.
 @<그래프 키우기@>=
 func (g *Graph) NewEdge(u, v *Vertex, len int64) {
 	a, b := g.VirginArc(), g.VirginArc() // |a|가 앞 번호, |b|가 뒤 번호
@@ -377,7 +377,7 @@ func (g *Graph) NewEdge(u, v *Vertex, len int64) {
 필요하다. 이 패키지가 허용하는 유일한 더러운 재주이며, |v|가 정말
 |g.Vertices|의 원소일 때만 뜻이 있다---원본의 포인터 비교들이 ANSI
 표준의 눈총을 받으면서도 실용을 택했던 것과 같은 정신이라고 변명해 둔다.
-|Index|는 정점 |v|가 |g.Vertices|에서 차지하는 번호를 준다.
+함수 |Index|는 정점 |v|가 |g.Vertices|에서 차지하는 번호를 준다.
 @<그래프 키우기@>=
 func (g *Graph) Index(v *Vertex) int64 {
 	base := uintptr(unsafe.Pointer(&g.Vertices[0]))
@@ -387,9 +387,9 @@ func (g *Graph) Index(v *Vertex) int64 {
 
 @ {\sc GB\_\,SAVE}는 호를 할당 순서대로 번호 매겨 내보낸다. \CEE/는 호를
 |arcsPerBlock|(102)개들이 블록으로 떼어 주었고, 마지막 블록의 안 쓰인 자리는
-빈 레코드로 남아 파일에도 그대로 실렸다. |ArcRecords|는 그 모양을 재현한다:
+빈 레코드로 남아 파일에도 그대로 실렸다. 함수 |ArcRecords|는 그 모양을 재현한다:
 할당 순서의 호들에, 레코드 수가 102의 배수가 되도록 |nil| 자리를 덧붙여 준다.
-|ArcRecords|는 할당 순서의 모든 호 레코드를 준다(빈 자리는 |nil|).
+함수 |ArcRecords|는 할당 순서의 모든 호 레코드를 준다(빈 자리는 |nil|).
 @<그래프 키우기@>=
 const arcsPerBlock = 102 // \CEE/ |gb_virgin_arc|의 블록 크기
 
@@ -403,7 +403,7 @@ func (g *Graph) ArcRecords() []*Arc {
 	return records
 }
 
-@ |SetArcStore|는 되살린 그래프의 호 레코드를 파일 순서대로 등록해,
+@ 함수 |SetArcStore|는 되살린 그래프의 호 레코드를 파일 순서대로 등록해,
 {\sc GB\_\,SAVE}가 그 그래프를 똑같이 다시 저장할 수 있게 한다.
 @<그래프 키우기@>=
 func (g *Graph) SetArcStore(arcs []*Arc) {
@@ -451,7 +451,7 @@ func (g *Graph) AllVertices() iter.Seq[*Vertex] {
 쓰면 시스템이 무너질 수 있다. 해시 정보를 {\sc GB\_\,SAVE}로 저장할
 작정이면 |UtilTypes|의 처음 두 자가 \.{VV}라야 한다.
 
-경고: 이 해시 방식을 쓰는 동안 |g.N|을 보존해야 한다. |g.N|이 바뀌면
+경고: 이 해시 방식을 쓰는 동안 |g.N|을 보존해야 한다. 필드 |g.N|이 바뀌면
 해시표는 휴지 조각이다---|HashSetup|으로 전부 다시 해싱하기 전에는.
 @<정점 찾기@>=
 const (
@@ -479,7 +479,7 @@ $\pi$의 앞자리 314159이고 소수가 $e$의 앞자리 27182818번째라는 
 개수는 $(e^2+7)/8\approx1.80$보다 적고, 실패할 때는
 $(e^2+1)/4\approx2.10$보다 적다({\sl Sorting and Searching\/} 6.4절의
 식 (15)와 (16)).
-|hashVertex|는 이름 |t|의 해시 부호가 가리키는 자리의 정점을 준다.
+함수 |hashVertex|는 이름 |t|의 해시 부호가 가리키는 자리의 정점을 준다.
 @<정점 찾기@>=
 func (g *Graph) hashVertex(t string) *Vertex {
 	var h int64
@@ -492,7 +492,7 @@ func (g *Graph) hashVertex(t string) *Vertex {
 	return &g.Vertices[h%g.N]
 }
 
-@ |HashIn|은 정점 |v|의 이름을 |g|의 해시표에 넣는다.
+@ 함수 |HashIn|은 정점 |v|의 이름을 |g|의 해시표에 넣는다.
 @<정점 찾기@>=
 func (g *Graph) HashIn(v *Vertex) {
 	u := g.hashVertex(v.Name)
@@ -503,7 +503,7 @@ func (g *Graph) HashIn(v *Vertex) {
 @ 해시 함수가 정말 무작위라면 문자열 비교 횟수의 평균은, 성공하는
 검색에서 $(e^2+7)/8\approx1.80$, 실패하는 검색에서 $(e^2+1)/4\approx2.10$
 미만이다[{\sl Sorting and Searching}, 6.4절, 식 (15)와 (16)].
-|HashLookup|은 이름이 |s|인 정점을 |g|에서 찾는다(없으면 |nil|).
+함수 |HashLookup|은 이름이 |s|인 정점을 |g|에서 찾는다(없으면 |nil|).
 @<정점 찾기@>=
 func (g *Graph) HashLookup(s string) *Vertex {
 	if g == nil || g.N <= 0 {
@@ -517,7 +517,7 @@ func (g *Graph) HashLookup(s string) *Vertex {
 	return nil
 }
 
-@ |HashSetup|은 |g|의 모든 정점으로 해시표를 새로 짓는다.
+@ 함수 |HashSetup|은 |g|의 모든 정점으로 해시표를 새로 짓는다.
 @<정점 찾기@>=
 func (g *Graph) HashSetup() {
 	if g == nil || g.N <= 0 {
@@ -657,7 +657,7 @@ func TestHashAndIndex(t *testing.T) {
 	}
 }
 
-@ 끝으로 두 반복자를 시험한다. |AllVertices|는 |g.N|개의 정점을 번호
+@ 끝으로 두 반복자를 시험한다. 함수 |AllVertices|는 |g.N|개의 정점을 번호
 순서대로 내주어야 하고, |AllArcs|는 정점의 호를 빠짐없이 내주되 |break|로
 일찍 멈추면 그 자리에서 멎어야 한다.
 @(gbgraph_test.go@>=
