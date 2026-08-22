@@ -10,7 +10,7 @@
 서브루틴과, 그와 짝을 이루는 이분 그래프를 짓는 |BiBook| 서브루틴을 담는다.
 쓰임새는 {\sc BOOK\_COMPONENTS} 데모에서 볼 수 있다.
 
-|Book(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)|은
+함수 |Book(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)|은
 \<title>\/\.{.dat}의 정보로 그래프를 짓는다. \<title>\/은 |"anna"|({\sl Anna
 Karenina\/}), |"david"|({\sl David Copperfield\/}), |"jean"|({\sl Les
 Mis\'erables\/}), |"huck"|({\sl Huckleberry Finn\/}), |"homer"|({\sl The
@@ -18,11 +18,11 @@ Iliad\/}) 가운데 하나다. 각 정점은 그 책의 한 등장인물이고, 
 간선은 그 인물들의 마주침(encounter)을 뜻한다. 간선 길이는 모두 1이다.
 
 @ 간선 자료를 |firstChapter|부터 |lastChapter|까지의 장(chapter)으로 한정해
-책의 일부만 잘라 쓸 수 있다. |firstChapter|가 0이면 1을 준 것과 같고,
+책의 일부만 잘라 쓸 수 있다. 인자 |firstChapter|가 0이면 1을 준 것과 같고,
 |lastChapter|가 0이거나 그 책의 전체 장 수를 넘으면 마지막 장을 준 것과 같다.
 
 그래프는 $\min(n,N)-x$개의 정점을 갖는데, $N$은 그 책의 전체 인물 수다.
-|n|이 0이면 자동으로 최댓값 $N$이 된다. |n|이 $N$보다 작으면, 인물마다 무게를
+인자 |n|이 0이면 자동으로 최댓값 $N$이 된다. 인자 |n|이 $N$보다 작으면, 인물마다 무게를
 매겨 가장 무거운 |n|명을 고른 뒤 그중 가장 무거운 |x|명을 다시 빼서 |n-x|명을
 얻는다. 무게가 같아 순위를 가릴 수 없을 때는 난수로 정한다. 무게는
 $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
@@ -30,23 +30,23 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 장에서 나오는 장 수, \\{chaptersOut}은 그 밖의 장에서 나오는 장 수다. 두 무게
 계수는 절댓값이 1,000,000 이하여야 한다.
 
-그래프의 정점은 무게가 줄어드는 차례로 놓인다. |seed| 매개변수는 무게가 같은
+그래프의 정점은 무게가 줄어드는 차례로 놓인다. 인자 |seed|는 무게가 같은
 정점 사이에서 ``무작위'' 선택을 해야 할 때 쓰는 유사난수를 정한다. GraphBase의
 다른 루틴들처럼, |seed|를 달리하면 대체로 다른 선택이 나오되 그 방식은
 기계에 무관하다 --- 같은 매개변수를 주면 어떤 컴퓨터에서도 똑같은 결과가
-나온다. |seed|는 0 이상 $2^{31}-1$ 이하면 무엇이든 좋다.
+나온다. 인자 |seed|는 0 이상 $2^{31}-1$ 이하면 무엇이든 좋다.
 
-@ 보기를 들어 보자. |Book("anna",0,0,0,0,0,0,0,"")|은 \.{anna.dat}에 적힌
+@ 보기를 들어 보자. 호출 |Book("anna",0,0,0,0,0,0,0,"")|은 \.{anna.dat}에 적힌
 톨스토이 {\sl Anna Karenina\/}의 138개 인물 모두를 정점으로 하는 그래프를
 짓는다. 두 정점은 그 인물들이 책 어디에서든 마주치면 인접하다.
 
-|Book("anna",50,0,0,0,1,1,0,"")|도 비슷하되, 가장 자주---즉 가장 많은 장에---
-나오는 인물 50명으로 한정한다. |Book("anna",50,0,10,120,1,1,0,"")|은 정점은
+호출 |Book("anna",50,0,0,0,1,1,0,"")|도 비슷하되, 가장 자주---즉 가장 많은 장에---
+나오는 인물 50명으로 한정한다. 호출 |Book("anna",50,0,10,120,1,1,0,"")|은 정점은
 그대로이고 간선만 10장부터 120장 사이의 마주침으로 제한한다.
 
-|Book("anna",50,0,10,120,1,0,0,"")|은 또 비슷하되, 정점이 ``10장부터 120장에
+호출 |Book("anna",50,0,10,120,1,0,0,"")|은 또 비슷하되, 정점이 ``10장부터 120장에
 가장 자주 나오는 50명''이다---나머지 장에 얼마나 나오든 아랑곳하지 않는다.
-|Book("anna",50,0,10,120,0,0,0,"")|도 비슷한데, 두 무게 계수가 모두 0이라
+호출 |Book("anna",50,0,10,120,0,0,0,"")|도 비슷한데, 두 무게 계수가 모두 0이라
 무게가 전부 같아지므로 인물 50명을 완전히 무작위로 고른다(고른 장에 아예
 나오지 않는 인물이 뽑힐 수도 있다).
 
@@ -59,7 +59,7 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 87명인데, |Book("david",0,1,0,0,1,1,0,"")|은 David Copperfield 자신만 빼고
 86개 정점을 가진 그래프를 낳는다.
 
-@ |BiBook|은 |Book|과 같은 매개변수를 받아, 첫 갈래의 정점이 |Book|이 낳는
+@ 함수 |BiBook|은 |Book|과 같은 매개변수를 받아, 첫 갈래의 정점이 |Book|이 낳는
 그래프의 정점과 똑같고 둘째 갈래의 정점은 고른 장들인 이분 그래프를 낳는다.
 예컨대 |BiBook("anna",50,0,10,120,1,1,0,"")|은 $50+111$개 정점의 이분
 그래프를 만든다. 각 인물과 그 인물이 나오는 장 사이에 간선이 하나씩 생긴다.
@@ -72,7 +72,7 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 장이 1.1.1(1부 1권 1장)부터 5.9.6(5부 9권 6장)까지 뻗는다.
 
 \CEE/ 원본은 그래프를 다 짓고 나면 외부 변수 |chapters|에 전체 장 수를,
-배열 |chap_name|에 그 구조적 장 번호 문자열들을 남겼다. |book("jean",\ldots)|
+배열 |chap_name|에 그 구조적 장 번호 문자열들을 남겼다. 호출 |book("jean",\ldots)|
 뒤에는 |chapters=356|, |chap_name[1]="1.1.1"|, \dots, |chap_name[356]="5.9.6"|
 이 되는 식이었다. 우리는 패키지 수준 가변 상태를 두지 않으므로 이 둘을 밖에
 내놓지 않고 |bookBuilder| 안에 감춘다. 다만 장 이름이 정말 필요한 쓰임새---
@@ -86,7 +86,7 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 
 @ 프로그램의 뼈대다. \CEE/ 원본은 정적 전역 |node_block|·|xnode|·|chap_name|과
 외부 변수 |chapters|를 두지만, 우리는 패키지 수준 가변 상태를 피해 이들을
-|bookBuilder| 구조체에 담는다. |Book|과 |BiBook|은 안쪽 |bgraph|를 부르는데,
+|bookBuilder| 구조체에 담는다. 함수 |Book|과 |BiBook|은 안쪽 |bgraph|를 부르는데,
 |bgraph|가 두 루틴의 일을 겸한다.
 @c
 package gbbooks
@@ -107,7 +107,7 @@ import (
 @<|Book|과 |BiBook|@>
 @<|bgraph|와 그 도우미@>
 
-@ 어떤 책도 이만큼 많지는 않을 상한들이다. |weightBias|가 왜 $2^{30}$인지는
+@ 어떤 책도 이만큼 많지는 않을 상한들이다. 상수 |weightBias|가 왜 $2^{30}$인지는
 뒤에 무게를 셈할 때 설명한다.
 
 @<상수 정의@>=
@@ -120,7 +120,7 @@ const (
 	maxWeight  = 1000000    // 무게 계수의 절댓값 상한
 )
 
-@ |bookBuilder|는 짓고 있는 그래프와 작업 상태를 한데 묶는다. |nodes|는 용량을
+@ 타입 |bookBuilder|는 짓고 있는 그래프와 작업 상태를 한데 묶는다. 필드 |nodes|는 용량을
 |maxChars|로 미리 잡아, 뒤에 원소를 더해도 재할당되지 않게 한다---그래야
 |xnode|가 담은 포인터가 그대로 유효하다. \CEE/ 원본이 |node_block|을 고정 크기
 배열로 잡아 두고 그 안을 포인터로 걸어 다닌 것과 같은 사정이다.
@@ -141,7 +141,7 @@ type bookBuilder struct {
 	n, x, firstChapter, lastChapter, inWeight, outWeight int64
 }
 
-@ |Book|과 |BiBook|은 그저 |bgraph|를 |bipartite| 깃발만 달리해 부른다.
+@ 함수 |Book|과 |BiBook|은 그저 |bgraph|를 |bipartite| 깃발만 달리해 부른다.
 
 @<|Book|과 |BiBook|@>=
 // |Book|은 책의 인물 마주침을 무향 그래프로 짓는다.
@@ -168,7 +168,7 @@ func newBuilder(bipartite bool) *bookBuilder {
 	}
 }
 
-@ |bgraph|는 씨앗으로 난수 스트림을 열고, 매개변수를 다듬고, 자료 파일을 두 번
+@ 함수 |bgraph|는 씨앗으로 난수 스트림을 열고, 매개변수를 다듬고, 자료 파일을 두 번
 읽는다: 한 번은 빠르게(통계 수집), 한 번은 꼼꼼히(정점 이름과 간선).
 
 @<|bgraph|와 그 도우미@>=
@@ -190,7 +190,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	return b.g, nil
 }
 
-@ |n==0|은 최대치로, |firstChapter==0|은 1로, |lastChapter==0|은 최대치로 바꾼다.
+@ 조건 |n==0|은 최대치로, |firstChapter==0|은 1로, |lastChapter==0|은 최대치로 바꾼다.
 파일 이름은 제목의 앞 여섯 글자에 \.{.dat}을 붙인 것이다---원본의
 |sprintf(file_name,"%.6s.dat",title)|이 하던 일이다.
 
@@ -234,7 +234,7 @@ $10\times36+10$이고 \.{ZZ}는 $35\times36+35$다. {\sc GB\_\,IO}의 |Number|
 그러면 {\sc GB\_\,SORT}의 |LinkSort|가 원하는 순위 매김을 해 준다. 이 노드는
 |bgraph|가 하는 모든 자료 처리에 두루 쓰기에도 편하다.
 
-|code|는 36진법 두 자리 코드, |in|·|out|은 선택 구간 안팎의 등장 장 수,
+필드 |code|는 36진법 두 자리 코드, |in|·|out|은 선택 구간 안팎의 등장 장 수,
 |chap|은 가장 최근에 본 장(한 장에서 두 번 세지 않으려는 것), |vert|는 이
 인물에 배정된 정점이다.
 
@@ -288,7 +288,7 @@ f.NextLine() // 인물 자료를 끝맺는 빈 줄을 건너뛴다
 
 @ 뒤에 이 부분을 다시 읽으면서, 쓸모가 있다면 더 많은 정보를 뽑아낸다.
 \<description>\/ 문자열은 혹시 들여다볼 사람이 있을까 하여 |desc| 필드로
-내어 준다. |in|과 |out| 통계도 |in_count|와 |out_count|라는 유틸리티 필드로
+내어 준다. 통계 |in|과 |out|도 |in_count|와 |out_count|라는 유틸리티 필드로
 내어 주고, 코드 값은 |short_code| 필드에 둔다. 원본이 매크로로 붙인 이 이름들이
 \GO/에서는 이렇게 대응한다:
 $$\vbox{\offinterlineskip
@@ -418,7 +418,7 @@ for f.Char() != '\n' {
 	}
 }
 
-@ 장 이름의 |'\n'|을 떼어 저장하는 잔심부름이다. |'&'| 이어짐 줄이면 저장하지
+@ 장 이름의 |'\n'|을 떼어 저장하는 잔심부름이다. 문자 |'&'| 이어짐 줄이면 저장하지
 않는다---그 장의 이름은 앞줄에서 이미 적혔다.
 
 @<|bgraph|와 그 도우미@>=
@@ -491,11 +491,11 @@ func (b *bookBuilder) makeAdjacent(u, v *gbgraph.Vertex, k int64) {
 }
 
 @ 이분 그래프를 셈할 때의 두 번째 읽기는 첫 번째와 매우 비슷하다. 고른 장과
-그 장에 나오는 고른 인물 사이마다 간선을 하나 놓으면 된다. |chapBase|는
+그 장에 나오는 고른 인물 사이마다 간선을 하나 놓으면 된다. 값 |chapBase|는
 장 |k|의 정점이 |Vertices[chapBase+k]|가 되도록 잡은 치우침이다.
 
 장 정점의 |in_count|는 그 정점의 차수, 곧 그 장에 나오는 고른 인물의 수다.
-|out_count|는 그 장에 나오지만 그래프에서 빠진 인물의 수다. 그러니 장의
+필드 |out_count|는 그 장에 나오지만 그래프에서 빠진 인물의 수다. 그러니 장의
 |in_count|·|out_count|는 인물의 그것과 서로 닮은꼴이다.
 
 @<장 정보를 다시 읽어 이분 간선을 만든다@>=
@@ -603,7 +603,7 @@ buckets := gbsort.LinkSort(&b.nodes[b.characters-1], b.rng)
 @<정렬된 노드에서 정점을 골라 배정한다@>
 
 @ 무게가 큰 차례로 |n|개의 노드를 훑되, 앞 |x|개는 건너뛰고 나머지에 정점을
-차례로 배정한다. |LinkSort|가 무게가 같은 노드를 무작위 순서로 놓아 주므로,
+차례로 배정한다. 함수 |LinkSort|가 무게가 같은 노드를 무작위 순서로 놓아 주므로,
 동점을 가르는 일은 저절로 된다.
 
 @<정렬된 노드에서 정점을 골라 배정한다@>=
@@ -626,7 +626,7 @@ for j := 127; j >= 0; j-- {
 	}
 }
 
-@ 표식에 쓰는 제목은 파일 이름에서 되찾는다. |bgraph|가 이미 |title|을 갖고
+@ 표식에 쓰는 제목은 파일 이름에서 되찾는다. 함수 |bgraph|가 이미 |title|을 갖고
 있지 않으므로, 파일 이름의 바탕(basename)에서 확장자를 떼어 쓴다.
 
 @<|bgraph|와 그 도우미@>=
@@ -654,7 +654,7 @@ const dataDir = "../data"
 @<책마다 장 수를 확인하는 시험@>
 @<이분 그래프 시험@>
 
-@ |Book("anna",0,0,0,0,0,0,0)|은 정점 138개짜리 그래프를 짓는다. 표식과
+@ 호출 |Book("anna",0,0,0,0,0,0,0)|은 정점 138개짜리 그래프를 짓는다. 표식과
 정점 수, 그리고 한 인물의 코드·이름을 확인한다.
 
 @<기본 anna 그래프 시험@>=
@@ -718,7 +718,7 @@ func TestAnnaKareninEntry(t *testing.T) {
 	t.Fatal("코드 AL인 인물을 찾지 못했다")
 }
 
-@ |Book("anna",50,0,0,0,1,1,0)|은 가장 자주 나오는 50명으로 한정한다.
+@ 호출 |Book("anna",50,0,0,0,1,1,0)|은 가장 자주 나오는 50명으로 한정한다.
 장 구간을 좁히면(|10..120|) 정점은 그대로되 간선이 줄어든다.
 
 @<가중 선택과 장 한정 시험@>=
@@ -742,7 +742,7 @@ func TestAnnaSelect(t *testing.T) {
 	}
 }
 
-@ |x=1|은 무게가 가장 큰 인물 하나를 뺀다. {\sl David Copperfield\/}는 인물이
+@ 인자 |x=1|은 무게가 가장 큰 인물 하나를 뺀다. {\sl David Copperfield\/}는 인물이
 87명이라, |x=1|이면 정점이 86개가 된다.
 
 @<가중 선택과 장 한정 시험@>=
@@ -793,7 +793,7 @@ if g.ID != want {
 	t.Errorf("%s: ID = %q, 원함 %q", c.title, g.ID, want)
 }
 
-@ |BiBook("anna",50,0,10,120,1,1,0)|은 $50+111$개 정점의 이분 그래프를 짓는다.
+@ 호출 |BiBook("anna",50,0,10,120,1,1,0)|은 $50+111$개 정점의 이분 그래프를 짓는다.
 첫 갈래는 인물 50명, 둘째 갈래는 10장부터 120장까지의 111개 장이다.
 
 @<이분 그래프 시험@>=
