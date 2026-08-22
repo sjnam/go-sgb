@@ -1,4 +1,4 @@
-//line gbwords.w:551
+//line gbwords.w:549
 package gbwords
 
 import (
@@ -9,7 +9,7 @@ import (
 
 const dataDir = "../data"
 
-//line gbwords.w:572
+//line gbwords.w:570
 func TestWordCounts(t *testing.T) {
 	cases := []struct {
 		name      string
@@ -32,7 +32,7 @@ func TestWordCounts(t *testing.T) {
 	}
 }
 
-//line gbwords.w:669
+//line gbwords.w:667
 func TestDocumentedExamples(t *testing.T) {
 	cases := []struct {
 		name string
@@ -55,7 +55,7 @@ func TestDocumentedExamples(t *testing.T) {
 	}
 }
 
-//line gbwords.w:695
+//line gbwords.w:693
 func TestLeastCommon(t *testing.T) {
 	neg := []int64{-1, -1, -1, -1, -1, -1, -1, -1, -1}
 	rare, err := Words(10, neg, -0x7fffffff, 0, dataDir)
@@ -76,7 +76,7 @@ func TestLeastCommon(t *testing.T) {
 	}
 }
 
-//line gbwords.w:599
+//line gbwords.w:597
 func TestWordStructure(t *testing.T) {
 	g, err := Words(2000, nil, 0, 0, dataDir)
 	if err != nil {
@@ -98,7 +98,7 @@ func TestWordStructure(t *testing.T) {
 		}
 	}
 
-//line gbwords.w:623
+//line gbwords.w:621
 	for v := range g.AllVertices() {
 		for a := range v.AllArcs() {
 			if a.Len != 1 {
@@ -121,10 +121,10 @@ func TestWordStructure(t *testing.T) {
 		}
 	}
 
-//line gbwords.w:620
+//line gbwords.w:618
 }
 
-//line gbwords.w:649
+//line gbwords.w:647
 func TestWordDeterminism(t *testing.T) {
 	g1, err := Words(500, nil, 0, 7, dataDir)
 	if err != nil {
@@ -141,7 +141,7 @@ func TestWordDeterminism(t *testing.T) {
 	}
 }
 
-//line gbwords.w:720
+//line gbwords.w:718
 func TestFindWord(t *testing.T) {
 	g, err := Words(2000, nil, 0, 0, dataDir)
 	if err != nil {
@@ -169,7 +169,7 @@ func TestFindWord(t *testing.T) {
 	}
 }
 
-//line gbwords.w:751
+//line gbwords.w:749
 func TestWordBadSpecs(t *testing.T) {
 	if _, err := Words(10, []int64{0, 0, 100000, 0, 0, 0, 0, 0, 0}, 0, 0, dataDir); err != gbgraph.BadSpecs {
 		t.Errorf("err = %v, 원함 BadSpecs", err)
