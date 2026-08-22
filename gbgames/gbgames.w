@@ -8,21 +8,21 @@
 @* 들어가며. 이 모듈은 미국 대학 미식축구 점수에 바탕한 무향 그래프 집안을 짓는
 |Games| 서브루틴을 담는다. 쓰임새는 {\sc FOOTBALL} 데모에서 볼 수 있다.
 
-|Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, seed, dir)|은
+함수 |Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay, seed, dir)|은
 \.{games.dat}의 정보로 그래프를 짓는다. 각 정점은 미국 대학의 미식축구 팀
 120개(\\{I-A} 106팀에 아이비리그와 패트리엇리그의 \\{I-AA} 14팀을 더한 것)
 가운데 하나이고, 각 간선은 1990년 시즌에 그 팀들이 치른 638경기 가운데 하나다.
 
-|u|에서 |v|로 가는 호에는 |u|가 |v|와 겨뤄 낸 점수가 길이로 매겨진다. 그래서
+정점 |u|에서 |v|로 가는 호에는 |u|가 |v|와 겨뤄 낸 점수가 길이로 매겨진다. 그래서
 이 그래프는 사실 완전한 ``무향''은 아니지만, 호는 짝을 이룬다(|u|가 |v|와 겨뤘다면
 |v|도 |u|와 겨뤘다). {\sc GB\_BASIC}의 |Complement|를 쓰면 같은 정점·간선의 참된
 무향 그래프를 얻는다.
 
-그래프는 $\min(n,120)$개의 정점을 갖는다. |n|이 120보다 작으면 각 팀에 무게를
+그래프는 $\min(n,120)$개의 정점을 갖는다. 인자 |n|이 120보다 작으면 각 팀에 무게를
 매겨 가장 무거운 |n|개를 고르고, 무게가 같으면 난수로 가른다. 무게는
 $$|ap0Weight|\cdot|ap0|+|upi0Weight|\cdot|upi0|
    +|ap1Weight|\cdot|ap1|+|upi1Weight|\cdot|upi1|$$
-로 셈한다. |ap0|·|upi0|은 시즌 초 \\{AP}(Associated Press)와 \\{UPI}(United
+로 셈한다. 점수 |ap0|·|upi0|은 시즌 초 \\{AP}(Associated Press)와 \\{UPI}(United
 Press International) 여론조사 점수이고, |ap1|·|upi1|은 시즌 끝 점수다. 네 무게
 계수는 절댓값이 $2^{17}=131072$ 이하여야 한다.
 
@@ -30,16 +30,16 @@ Press International) 여론조사 점수이고, |ap1|·|upi1|은 시즌 끝 점�
 점수는 기자 60명에게 상위 25팀을 골라 순위를 매기게 해서, 1위 팀에 25점을
 주고 25위 팀에 1점을 주는 식으로 얻었다. 그래서 모든 팀의 \\{AP} 점수를 합하면
 19500이 된다. \\{UPI} 점수는 감독들에게 상위 15팀을 고르게 해서 1위에 15점,
-15위에 1점을 주어 얻었다. |upi0|은 감독 48명이 투표해 모두 5760점이고,
+15위에 1점을 주어 얻었다. 점수 |upi0|은 감독 48명이 투표해 모두 5760점이고,
 |upi1|은 59명이 투표해 모두 7080점이다. 감독들은 \\{NCAA} 규정을 어겨
 보호관찰 중인 팀에는 투표하지 않기로 약속했지만, 기자들에게는 그런 방침이
 없었다.
 
-|firstDay|과 |lastDay| 사이(양끝 포함)에 치른 경기만 간선으로 넣어 간선 수를
+인자 |firstDay|과 |lastDay| 사이(양끝 포함)에 치른 경기만 간선으로 넣어 간선 수를
 조절할 수 있다. 0일은 1990년 8월 26일로, 콜로라도와 테네시가 디즈니랜드
 피그스킨 클래식에서 맞붙은 날이다. 128일은 1991년 1월 1일로, 시즌을 닫는
 마지막 보울 경기들이 열린 날이다. 각 팀이 치른 경기의 절반쯤은 0일과 50일
-사이에 놓인다. |lastDay|가 0이면 128로 올린다.
+사이에 놓인다. 인자 |lastDay|가 0이면 128로 올린다.
 
 여느 GraphBase 루틴처럼 $n=0$은 최대치 120을 뜻해서, |Games(0,0,0,0,0,0,0,0)|과
 |Games(120,0,0,0,0,0,0,0)|은 똑같이 전체 그래프를 낸다. ``가장 좋은'' 30팀을
@@ -47,8 +47,8 @@ Press International) 여론조사 점수이고, |ap1|·|upi1|은 시즌 끝 점�
 얹은 것이다(감독의 1위표는 30점어치, 기자의 1위표는 25점어치인 셈이다). 네
 여론조사 어디에서도 표를 못 받은 팀이 67개이므로, |Games(53,1,1,1,1,0,0,0)|은
 한 번이라도 뽑힌 53팀을, |Games(67,-1,-1,-1,-1,0,0,0)|은 한 번도 못 뽑힌 67팀을
-고른다. |Games(60,0,0,0,0,0,0,s)|는 60팀을 무작위로 고르는데, 씨앗 |s|를 달리하면
-시스템에 상관없이 다른 선택을 얻는다($0\le s<2^{31}$). |n|이 120이면 씨앗이
+고른다. 호출 |Games(60,0,0,0,0,0,0,s)|는 60팀을 무작위로 고르는데, 씨앗 |s|를 달리하면
+시스템에 상관없이 다른 선택을 얻는다($0\le s<2^{31}$). 인자 |n|이 120이면 씨앗이
 무엇이든 늘 전체 그래프가 나오지만, 정점이 놓이는 차례가 씨앗에 따라 달라진다.
 
 @ 팀은 대개 ``컨퍼런스''에 속하고, 같은 컨퍼런스의 거의 모든 팀과 한 번씩
@@ -70,7 +70,7 @@ Press International) 여론조사 점수이고, |ap1|·|upi1|은 시즌 끝 점�
 팀 이름을 줄여 쓴 약칭은 |X.S|에 담는다. 자료 파일의 둘째 부분이 이 약칭으로
 경기를 적으므로, 약칭은 자료를 읽는 동안 팀을 찾는 열쇠 노릇도 한다.
 
-@ |u|에서 |v|로 가는 호 |a|의 |a.A.I|에는 |u|가 홈팀이면 3(|away|), |v|가 홈팀이면
+@ 정점 |u|에서 |v|로 가는 호 |a|의 |a.A.I|에는 |u|가 홈팀이면 3(|away|), |v|가 홈팀이면
 1(|home|), 두 팀이 중립 경기장에서 겨뤘으면 2(|neutral|)를 둔다. 그 경기가 열린
 날은 1990년 8월 26일로부터 며칠째인지를 세어 |a.B.I|에 둔다.
 
@@ -100,7 +100,7 @@ import (
 @<|Games| 함수@>
 @<그래프를 짓는 도우미들@>
 
-@ 자료에서 관찰된 상한들이다. |ma0|·|mu0|·|ma1|·|mu1|은 각 여론조사 점수의
+@ 자료에서 관찰된 상한들이다. 상수 |ma0|·|mu0|·|ma1|·|mu1|은 각 여론조사 점수의
 최댓값으로, 자료가 망가졌는지 살피는 데 쓴다. 호의 |venue|(|A.I|)는 |home|이면
 |v|가 홈팀, |away|이면 |u|가 홈팀, |neutral|이면 중립 경기장이다.
 @d maxN maxDay maxWeight
@@ -120,7 +120,7 @@ const (
 )
 
 @ 팀 하나를 |teamInfo|로 나타낸다. 이것을 |gbsort.Node|의 딸림 데이터로 실어
-무게순 정렬에 부친다. |a0|·|u0|·|a1|·|u1|은 여론조사 점수, |conf|는 소속
+무게순 정렬에 부친다. 필드 |a0|·|u0|·|a1|·|u1|은 여론조사 점수, |conf|는 소속
 컨퍼런스 이름(독립이면 빈 문자열), |vert|는 이 팀에 배정된 정점이다.
 @<자료 구조@>=
 type teamInfo struct {
@@ -130,9 +130,9 @@ type teamInfo struct {
 	vert            *gbgraph.Vertex
 }
 
-@ |gamesBuilder|는 짓고 있는 그래프와 작업 상태를 한데 묶는다. |nodes|는 용량을
+@ 타입 |gamesBuilder|는 짓고 있는 그래프와 작업 상태를 한데 묶는다. 필드 |nodes|는 용량을
 |maxN+2|로 미리 잡아, 뒤에 원소를 더해도 재할당되지 않게 한다---그래야
-|lookup|이 담은 포인터가 그대로 유효하다. |lookup|은 약칭(\.{ABBR}) 코드로 노드를
+|lookup|이 담은 포인터가 그대로 유효하다. 필드 |lookup|은 약칭(\.{ABBR}) 코드로 노드를
 찾는 map이다.
 @<자료 구조@>=
 type gamesBuilder struct {
@@ -154,7 +154,7 @@ type gamesBuilder struct {
 {\sc FOOTBALL} 같은 프로그램이 그 뒤에 |gb_unif_rand|를 부르면 |games|가 쓰다 만
 스트림을 {\sl 이어서\/} 쓴다. 우리가 |Games| 안에서 새 |RNG|를 열어 버리면 그
 호출자가 깨진다. 그래서 |RNG|를 직접 받는 변형 |GamesRNG|를 함께 내놓는다.
-|Games|는 그 위에 씌운 얇은 껍데기다.
+함수 |Games|는 그 위에 씌운 얇은 껍데기다.
 @<|Games|...@>=
 func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, dir string) (*gbgraph.Graph, error) {
@@ -162,7 +162,7 @@ func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		firstDay, lastDay, seed, gbflip.New(seed), dir)
 }
 
-@ |GamesRNG|는 |Games|와 같되 난수 생성기 |rng|를 직접 받는다.
+@ 함수 |GamesRNG|는 |Games|와 같되 난수 생성기 |rng|를 직접 받는다.
 @<|Games|...@>=
 func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, rng *gbflip.RNG, dir string) (*gbgraph.Graph, error) {
@@ -186,7 +186,7 @@ func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	return b.g, nil
 }
 
-@ |n==0|이거나 120을 넘으면 120으로, |firstDay<0|이면 0으로, |lastDay==0|이거나
+@ 조건 |n==0|이거나 120을 넘으면 120으로, |firstDay<0|이면 0으로, |lastDay==0|이거나
 128을 넘으면 128로 바로잡는다. 무게 계수가 너무 크면 물러난다.
 @<매개변수가 올바른지 확인한다@>=
 if b.n == 0 || b.n > maxN {
@@ -225,7 +225,7 @@ if f.Close() != nil {
 @* 정점. 자료를 읽으며 팀마다 노드를 만든다. 각 노드는 팀 이름·별명·컨퍼런스와
 무게를 담는다. 무게순으로 정렬한 뒤 위 |n|개가 새 그래프의 정점이 된다.
 
-|readTeams|는 앞 120줄을 읽어 노드를 만들고, 무게(정렬 키)를 셈해 리스트로 엮는다.
+함수 |readTeams|는 앞 120줄을 읽어 노드를 만들고, 무게(정렬 키)를 셈해 리스트로 엮는다.
 정렬 리스트는 \CEE/처럼 마지막 노드가 머리이고 |Link|가 앞 노드를 가리키게 한다.
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readTeams(f *gbio.File) error {
@@ -308,7 +308,7 @@ if i > 0 {
 b.lookup[t.abb] = &b.nodes[i]
 
 @ 그래프를 마련할 차례다. 정점 수 |n|의 빈 그래프를 짓고, 표식과 |UtilTypes|를
-못박는다. |"IIZSSSIIZZZZZZ"|는 정점의 |U.I|에 |ap|($($|a0|$\ll16)+$|a1|$)$,
+못박는다. 문자열 |"IIZSSSIIZZZZZZ"|는 정점의 |U.I|에 |ap|($($|a0|$\ll16)+$|a1|$)$,
 |V.I|에 |upi|, |X.S|에 |abbr|, |Y.S|에 |nickname|, |Z.S|에 |conference|를,
 호의 |A.I|에 |venue|, |B.I|에 |date|를 둔다는 뜻이다.
 @<빈 그래프를 마련하고 팀을 고른다@>=
@@ -319,7 +319,7 @@ b.g.ID = fmt.Sprintf("games(%d,%d,%d,%d,%d,%d,%d,%d)",
 	b.firstDay, b.lastDay, b.seed)
 @<무게순으로 정렬해 위 |n|개 팀에 정점을 배정한다@>
 
-@ |gbsort.LinkSort|로 128개 통에 정렬한 뒤, 무게가 큰 차례로 훑어 앞 |n|개 팀에
+@ 함수 |gbsort.LinkSort|로 128개 통에 정렬한 뒤, 무게가 큰 차례로 훑어 앞 |n|개 팀에
 정점을 배정한다. 무게가 같으면 난수가 차례를 가른다. 고르지 못한 팀은 |vert|가
 |nil|로 남아, 아래에서 간선을 만들 때 걸러진다---\CEE/ 원본은 같은 일을 하려고
 고르지 못한 팀의 약칭을 빈 문자열로 지워 해시 탐색에서 걸리지 않게 했다.
@@ -369,7 +369,7 @@ SJSU48,CMICH24\cr}}$$
 중립 경기장에서 겨뤄 48 대 24로 이겼음을 읽어 낼 수 있다(캘리포니아 레이즌
 보울은 빅웨스트와 미드아메리칸 컨퍼런스의 우승 팀이 겨루는 것이 관례다).
 
-@ |readGames|는 파일이 끝날 때까지 경기 줄을 읽는다. |'>'|로 시작하는 줄은 현재
+@ 함수 |readGames|는 파일이 끝날 때까지 경기 줄을 읽는다. 문자 |'>'|로 시작하는 줄은 현재
 날짜를 바꾼다.
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) readGames(f *gbio.File) error {
@@ -462,8 +462,8 @@ func (b *gamesBuilder) teamLookup(f *gbio.File) *gbgraph.Vertex {
 	return nil
 }
 
-@ 간선을 이루는 두 호를 만든다. |u|에서 |v|로 가는 호의 길이는 |su|, 그 짝의 길이는
-|sv|다. |venue|와 |date|를 두 호에 적는다. \CEE/ 원본은 |edge_trick|을 위해 |u<v|가
+@ 간선을 이루는 두 호를 만든다. 정점 |u|에서 |v|로 가는 호의 길이는 |su|, 그 짝의 길이는
+|sv|다. 필드 |venue|와 |date|를 두 호에 적는다. \CEE/ 원본은 |edge_trick|을 위해 |u<v|가
 되도록 두 팀을 맞바꾸지만, 우리는 |Partner| 필드로 짝을 밝히므로 맞바꿀 필요가 없다.
 @<그래프를 짓는 도우미들@>=
 func (b *gamesBuilder) newGame(u, v *gbgraph.Vertex, su, sv, venue, today int64) {
@@ -489,8 +489,8 @@ const dataDir = "../data"
 @<팀 선택 시험@>
 @<호 필드 시험@>
 
-@ |Games(0,0,0,0,0,0,0,0)|은 정점 120개, 간선 638개짜리 그래프를 짓는다. 표식과
-정점·간선 수를 확인한다. |lastDay|는 0에서 128로 올라가야 한다.
+@ 호출 |Games(0,0,0,0,0,0,0,0)|은 정점 120개, 간선 638개짜리 그래프를 짓는다. 표식과
+정점·간선 수를 확인한다. 인자 |lastDay|는 0에서 128로 올라가야 한다.
 
 @<전체 그래프 시험@>=
 func TestFullGraph(t *testing.T) {
@@ -509,7 +509,7 @@ func TestFullGraph(t *testing.T) {
 	}
 }
 
-@ |firstDay=50|으로 시즌 후반만 담으면 간선이 줄어든다.
+@ 인자 |firstDay=50|으로 시즌 후반만 담으면 간선이 줄어든다.
 
 @<전체 그래프 시험@>=
 func TestLatterHalf(t *testing.T) {
@@ -529,7 +529,7 @@ func TestLatterHalf(t *testing.T) {
 	}
 }
 
-@ 무게를 주면 여론조사에 뽑힌 팀만 고를 수 있다. |Games(53,1,1,1,1,0,0,0)|은
+@ 무게를 주면 여론조사에 뽑힌 팀만 고를 수 있다. 호출 |Games(53,1,1,1,1,0,0,0)|은
 한 번은 뽑힌 53팀을, |Games(67,-1,-1,-1,-1,0,0,0)|은 안 뽑힌 67팀을 낸다.
 
 @<팀 선택 시험@>=
@@ -636,7 +636,7 @@ func TestArcsInReverseDateOrder(t *testing.T) {
 }
 
 @ 각 호의 |venue|는 |home|·|neutral|·|away| 가운데 하나여야 하고, 짝의 |venue|는
-|home+away|에서 뺀 값이어야 한다. |date|는 두 짝이 같아야 한다.
+|home+away|에서 뺀 값이어야 한다. 필드 |date|는 두 짝이 같아야 한다.
 
 @<호 필드 시험@>=
 func TestArcFields(t *testing.T) {
