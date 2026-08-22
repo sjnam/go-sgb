@@ -9,7 +9,7 @@
 고속도로 거리 자료를 바탕으로 무향 그래프의 한 갈래를 짓는다. 쓰임새는
 {\sc MILES\_SPAN}과 {\sc GB\_PLANE} 데모에서 볼 수 있다.
 
-|Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed, dir)|은
+함수 |Miles(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed, dir)|은
 \.{miles.dat}의 정보로 그래프를 짓는다. 각 정점은 1949년판 Rand McNally사의
 {\sl Standard Highway Mileage Guide\/}에서 이름이 `Ravenna, Ohio' 이상인 128개
 도시 가운데 하나에 대응한다. 간선의 길이는 두 도시 사이의 거리(마일)다.
@@ -20,7 +20,7 @@
 |Miles|가 짓는 그래프에서는 |u|에서 |v|까지의 거리에 |v|에서 |w|까지의 거리를
 더하면 언제나 |u|에서 |w|까지의 거리 이상이 된다.
 
-@ 그래프는 $\min(n,128)$개의 정점을 가지며, |n=0|이면 기본값 128을 쓴다. |n|이
+@ 그래프는 $\min(n,128)$개의 정점을 가지며, |n=0|이면 기본값 128을 쓴다. 인자 |n|이
 128보다 작으면, 각 도시에 무게를 매겨 가장 무거운 |n|개를 고른다(같은 무게는
 난수로 가른다). 무게는
 $$|northWeight|\cdot|lat|+|westWeight|\cdot|lon|+|popWeight|\cdot|pop|$$
@@ -32,16 +32,16 @@ $37.78^\circ$, 서경 $122.42^\circ$에 자리했고 1980년 인구조사에서 
 살았다는 뜻이다. 무게 계수는 $\vert|northWeight|\vert\le100000$,
 $\vert|westWeight|\vert\le100000$, $\vert|popWeight|\vert\le100$을 지켜야 한다.
 
-|maxDistance|나 |maxDegree|에 특별한 값을 주지 않으면 그래프는
-``완전''(complete)하다---모든 도시 쌍 사이에 간선이 있다. |maxDistance|가
+인자 |maxDistance|나 |maxDegree|에 특별한 값을 주지 않으면 그래프는
+``완전''(complete)하다---모든 도시 쌍 사이에 간선이 있다. 인자 |maxDistance|가
 0이 아니면 그보다 먼 간선은 나타나지 않고, |maxDegree|가 0이 아니면 각 정점은
 자기의 가장 짧은 간선 |maxDegree|개까지만 갖는다.
 
-그래프의 정점들은 무게가 큰 차례로 놓인다. |seed| 인자는 무게가 같은 정점
+그래프의 정점들은 무게가 큰 차례로 놓인다. 인자 |seed|는 무게가 같은 정점
 사이나 길이가 같은 간선 사이에서 ``무작위'' 선택을 해야 할 때 쓰이는 유사난수를
 정한다.
 
-@ 보기를 들자. |Miles(100,0,0,1,0,0,0,dir)|은 자료에서 인구가 가장 많은 100개
+@ 보기를 들자. 호출 |Miles(100,0,0,1,0,0,0,dir)|은 자료에서 인구가 가장 많은 100개
 도시로 완전 그래프를 짓는다. 이 기준의 승자는 인구 875,538의 San Diego이고,
 San Antonio(786,023), San Francisco(678,974), Washington D.C.(638,432)가
 뒤를 잇는다.
@@ -52,7 +52,7 @@ $$\vbox{\halign{$#$\hfil\qquad&#\hfil\cr
 |Miles|(n,1,-1,0,\ldots)&북동부의 도시 |n|개\cr
 |Miles|(50,-500,0,1,\ldots)&북쪽의 큰 도시 몇을 뺀 대체로 남부 도시들\cr}}$$
 
-|Miles(n,a,b,c,0,1,0,dir)|처럼 |maxDegree=1|을 청하면, 고른 |n|개 도시 가운데
+호출 |Miles(n,a,b,c,0,1,0,dir)|처럼 |maxDegree=1|을 청하면, 고른 |n|개 도시 가운데
 두 도시가 서로에게 가장 가까운 이웃일 때에만 그 둘 사이에 간선이 생긴다.
 (그래프는 언제나 무향이다: |u|에서 |v|로 가는 호가 있으면 |v|에서 |u|로 가는
 같은 길이의 호도 반드시 있다.)
@@ -60,13 +60,13 @@ $$\vbox{\halign{$#$\hfil\qquad&#\hfil\cr
 도시를 무작위로 고르려면 |Miles(n,0,0,0,m,d,s,dir)|을 부르면 된다. 씨앗 |s|를
 달리하면 다른 선택을 얻되, 그 방식은 시스템에 무관하다. 곧 같은 매개변수를
 주면 어느 컴퓨터에서나 같은 결과가 나오므로, 세계 어디에 있는 연구자든 그래프
-알고리즘에 대해 동등한 실험을 해 볼 수 있다. |s|는 $0\le s<2^{31}$의 아무
+알고리즘에 대해 동등한 실험을 해 볼 수 있다. 씨앗 |s|는 $0\le s<2^{31}$의 아무
 값이나 좋다.
 
 @ 프로그램의 뼈대다. \CEE/ 원본의 전역 |gb_flip| 스트림 대신, |Miles|는
 씨앗으로 스트림을 하나 열어 쓴다. 다만 {\sc GB\_PLANE}의 |plane_miles|처럼
 스트림을 이어 쓰려는 호출자를 위해, 난수 생성기를 직접 받는 |MilesRNG| 변형도
-함께 내놓는다. |Miles|는 그저 |MilesRNG|를 |New(seed)|로 감싼 것이다.
+함께 내놓는다. 함수 |Miles|는 그저 |MilesRNG|를 |New(seed)|로 감싼 것이다.
 @c
 package gbmiles
 
@@ -94,7 +94,7 @@ func Miles(n, northWeight, westWeight, popWeight,
 @ 도시 하나의 자료를 담는 것이 |cityInfo|다. 이것을 |gbsort.Node|의 딸림
 데이터로 실어, 무게순 정렬에 부친다. 상수들은 \.{miles.dat}의 실제 자료에서
 뽑은 것으로, 이 루틴은 완전히 일반적일 필요가 없어 이렇게 못 박아 둔다.
-|maxN|은 도시의 최대·기본 수다.
+상수 |maxN|은 도시의 최대·기본 수다.
 
 @<상수와 자료 구조@>=
 const maxN = 128 // 도시의 최대이자 기본 수
@@ -129,7 +129,7 @@ func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, see
 	return g, err
 }
 
-@ |MilesRNGDist|는 |MilesRNG|와 같되, 가지치기로 부호가 바뀌기 전의 원래 (양수)
+@ 함수 |MilesRNGDist|는 |MilesRNG|와 같되, 가지치기로 부호가 바뀌기 전의 원래 (양수)
 거리 행렬도 함께 돌려준다. {\sc GB\_PLANE}의 |PlaneMiles|가 델로네 간선의 길이를
 알아내는 데 쓴다. 행렬은 |MaxN|$\times$|MaxN| 평탄 배열이고, 도시 번호(정점의
 |Z.I|) $i$, $j$의 거리는 |dist[MaxN*i+j]|다.
@@ -154,7 +154,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 	return g, origDist, nil
 }
 
-@ 매개변수 다듬기와 검증이다. |n|은 1과 128 사이로, |maxDegree|는 0이거나
+@ 매개변수 다듬기와 검증이다. 인자 |n|은 1과 128 사이로, |maxDegree|는 0이거나
 |n| 이상이면 |n-1|로 맞춘다. 무게 계수의 크기가 한도를 넘으면 |BadSpecs|다.
 표식 문자열은 이렇게 다듬은 뒤의 |n|과 |maxDegree|를 담는다.
 
@@ -213,7 +213,7 @@ if err != nil {
 	return nil, nil, err
 }
 
-@ |readCities|는 도시들을 |k=127|부터 0까지 역순으로 읽는다(파일 차례가 그렇다).
+@ 함수 |readCities|는 도시들을 |k=127|부터 0까지 역순으로 읽는다(파일 차례가 그렇다).
 도시 |k|를 |nodes[k]|에 담고, |nodes[k].Link|을 |nodes[k-1]|로 이어 정렬용
 리스트를 엮는다. 조기 반환은 구문 오류를 위로 알리려는 것이라 함수로 둔다.
 
@@ -290,8 +290,8 @@ for j := 127; j >= 0; j-- {
 }
 
 @ 정점의 |x|·|y| 좌표는 위도·경도를 소박하게 선형 변환한 것으로, 기하 계산에
-쓸 수 있다($0\le x\le5132$, $0\le y\le3555$). |x|는 경도의 여값,
-|y|는 위도의 1.5배다. |z|에는 도시 번호를, |w|에는 인구를 둔다.
+쓸 수 있다($0\le x\le5132$, $0\le y\le3555$). 좌표 |x|는 경도의 여값,
+|y|는 위도의 1.5배다. 필드 |z|에는 도시 번호를, |w|에는 인구를 둔다.
 
 @<도시 |p|를 그래프에 더한다@>=
 v := &g.Vertices[filled]
@@ -303,11 +303,11 @@ v.W.I = p.Data.pop
 v.Name = p.Data.name
 
 @* 간선. 넣지 않을 간선은 거리 행렬 항목의 부호를 음으로 바꿔 쳐낸다.
-|maxDistance|나 |maxDegree|가 특별한 값일 때만 쳐낼 일이 생긴다. 그런 다음
+인자 |maxDistance|나 |maxDegree|가 특별한 값일 때만 쳐낼 일이 생긴다. 그런 다음
 모든 도시 쌍을 훑어, 양방향 거리가 모두 양수인 쌍에만 간선을 놓는다.
 
 양방향을 다 보아야 하는 까닭이 있다. 쳐내기는 도시마다 따로 이뤄지므로
-행렬이 비대칭이 될 수 있다. |maxDegree| 제약이 |u|에서는 어떤 거리를 눌렀는데
+행렬이 비대칭이 될 수 있다. 인자 |maxDegree|의 제약이 |u|에서는 어떤 거리를 눌렀는데
 |v|에서는 누르지 않았다면, |u|에서 |v|로 가는 항목은 음수인데 |v|에서 |u|로
 가는 항목은 양수인 일이 생긴다. 그럴 때 간선을 놓지 않기로 하는 것이 곧
 ``각 정점이 자기의 가장 짧은 간선 |maxDegree|개까지만 갖는다''는 약속을
@@ -357,7 +357,7 @@ for i := int64(0); i < maxN; i++ {
 
 @ 여기서 노드의 키 필드를 되쓴다---무게 대신 여거리(|pruneDist|에서 거리를
 뺀 값)를 넣고, 정렬 루틴이 이음 필드를 바꾸게 둔다. 인구 등 다른 필드는
-그대로다. 저자도 이게 좀 얍삽한 줄 알지만, 안 될 게 뭐람? |pruneDist|보다 먼
+그대로다. 저자도 이게 좀 얍삽한 줄 알지만, 안 될 게 뭐람? 거리 |pruneDist|보다 먼
 간선은 곧장 부호를 바꾸고, 나머지는 리스트로 엮어 정렬한다. 정렬 뒤 |sorted[0]|
 에는 살아남은 간선이 가까운 차례로 놓이니, |pruneDeg|번째를 넘는 것들의 부호를
 바꾼다.
@@ -409,7 +409,7 @@ const dataDir = "../data"
 @<최근접 이웃 시험@>
 @<무게 검증 오류 시험@>
 
-@ |Miles(100,0,0,1,0,0,0)|은 인구가 많은 100개 도시의 완전 그래프다. 무게를
+@ 호출 |Miles(100,0,0,1,0,0,0)|은 인구가 많은 100개 도시의 완전 그래프다. 무게를
 인구로만 매기므로 정점은 인구 내림차순이다. 표식 문자열의 |maxDegree|는
 0에서 |n-1=99|로 다듬어진 값이라야 한다.
 
@@ -442,7 +442,7 @@ func TestPopulationOrder(t *testing.T) {
 	}
 }
 
-@ |maxDistance=maxDegree=0|이면 그래프는 완전하다. 128개 도시면 간선이
+@ 조건 |maxDistance=maxDegree=0|이면 그래프는 완전하다. 128개 도시면 간선이
 ${128 \choose 2}=8128$개다. 모든 간선의 길이는 양수이고, 짝 호는 길이가 같다.
 
 @<완전 그래프 시험@>=
@@ -503,7 +503,7 @@ func TestKnownDistance(t *testing.T) {
 	t.Error("Worcester-Youngstown 간선이 없다")
 }
 
-@ |maxDegree=1|이면 각 도시는 가장 가까운 이웃 하나만 향한다. 간선은 두 도시가
+@ 조건 |maxDegree=1|이면 각 도시는 가장 가까운 이웃 하나만 향한다. 간선은 두 도시가
 서로에게 가장 가까울 때에만 생기므로, 그래프는 성기다---완전 그래프보다
 간선이 훨씬 적어야 한다.
 
