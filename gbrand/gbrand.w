@@ -10,14 +10,14 @@
 담는다. 이런 무작위 그래프에서 알고리즘이 어떻게 움직이는지는, 다른 GraphBase
 생성기가 낳는 (무작위가 아닌) 그래프에서의 움직임과 견줘 볼 만하다.
 
-|RandomGraph(n, m, multi, self, directed, distFrom, distTo, minLen, maxLen, seed)|는
-정점 |n|개와 호(또는 간선) |m|개의 그래프를 짓는다. |multi|가 양수면 중복 호를
+함수 |RandomGraph(n, m, multi, self, directed, distFrom, distTo, minLen, maxLen, seed)|는
+정점 |n|개와 호(또는 간선) |m|개의 그래프를 짓는다. 인자 |multi|가 양수면 중복 호를
 허용하고, 0이면 금지하고, 음수면---특별한 경우로---중복을 물리적으로 두 번
-두는 대신 길이가 더 짧은 쪽 하나로 합친다. |self|가 참이면 자기 고리를 허용한다.
-|directed|가 참이면 방향 그래프, 아니면 각 호가 무향 간선이 된다. |distFrom|과
+두는 대신 길이가 더 짧은 쪽 하나로 합친다. 인자 |self|가 참이면 자기 고리를 허용한다.
+인자 |directed|가 참이면 방향 그래프, 아니면 각 호가 무향 간선이 된다. 인자 |distFrom|과
 |distTo|는 호의 출발점·도착점에 걸 확률 분포다---|nil|이면 정점에 고르게
 분포하고, 아니면 $2^{30}$으로 합해지는 음이 아닌 정수 |n|개짜리 배열이라야 한다.
-|minLen|과 |maxLen|은 호 길이의 범위로, 그 사이에 고르게 분포한다. 정점의 이름은
+인자 |minLen|과 |maxLen|은 호 길이의 범위로, 그 사이에 고르게 분포한다. 정점의 이름은
 그냥 |"0"|, |"1"|, \dots 이다.
 
 @ 씨앗 |seed|가 같으면 어디서 돌리든 똑같은 그래프가 나온다. 이를테면
@@ -55,11 +55,11 @@ $$\vbox{\halign{#\hfil\cr
 않은 편이 좋다. 알고리즘이 서로 다른 호를 |m|개 찾을 때까지 멈추지 않는데,
 어떤 호는 정말이지 드물어서 몇백 세기가 흐르도록 찾지 못할 성싶기 때문이다.
 
-@ 의미론 하나를 밝혀 둔다. |multi|와 |directed|가 모두 0이고 |self|가 참이면,
+@ 의미론 하나를 밝혀 둔다. 인자 |multi|와 |directed|가 모두 0이고 |self|가 참이면,
 중복 간선은 없되 자기 고리는 허용하는 무향 그래프가 된다. 이때 자기 고리
 하나는 |multi=0|임에도 불구하고 똑같은 자기 호 {\it 둘\/}로 이루어진다.
 
-@ |RandomGraph|가 문제를 만나면 |nil|과 함께 |gbgraph.PanicCode| 오류를 준다.
+@ 함수 |RandomGraph|가 문제를 만나면 |nil|과 함께 |gbgraph.PanicCode| 오류를 준다.
 아니면 새 그래프를 준다.
 
 @c
@@ -77,8 +77,8 @@ import (
 @<Walker의 별칭법@>
 @<랜덤 함수들@>
 
-@ $2^{30}$은 확률 분포의 단위다(모든 확률을 여기에 맞춰 정수로 나타낸다).
-|maxSpan|은 |maxLen-minLen|이 넘으면 안 되는 상한이다.
+@ 값 $2^{30}$은 확률 분포의 단위다(모든 확률을 여기에 맞춰 정수로 나타낸다).
+상수 |maxSpan|은 |maxLen-minLen|이 넘으면 안 되는 상한이다.
 
 @<상수와 잔심부름@>=
 const (
@@ -86,10 +86,10 @@ const (
 	maxSpan  = 1 << 31 // |maxLen-minLen|의 상한, $2^{31}$
 )
 
-@ |distCode|는 표식에 쓸 문자열이다---분포가 있으면 그 값이 아니라 그냥
+@ 함수 |distCode|는 표식에 쓸 문자열이다---분포가 있으면 그 값이 아니라 그냥
 |"dist"|라는 이름표를, 없으면 |"0"|을 남긴다(\CEE/ 원본의 |dist_code| 매크로와
-같다). |boolInt|는 \CEE/의 0/1 플래그를 표식 문자열에 그대로 남기려고 쓴다.
-|normMulti|는 |multi|의 부호만 $-1$, 0, 1로 다듬는다(|RandomGraph|와
+같다). 함수 |boolInt|는 \CEE/의 0/1 플래그를 표식 문자열에 그대로 남기려고 쓴다.
+함수 |normMulti|는 |multi|의 부호만 $-1$, 0, 1로 다듬는다(|RandomGraph|와
 |RandomBigraph|가 둘 다 표식에 쓰므로 도우미로 뺀다).
 
 @<상수와 잔심부름@>=
@@ -118,8 +118,8 @@ func normMulti(multi int64) int64 {
 	}
 }
 
-@ |checkDist|는 확률 분포 |dist|가 올바른지---음수가 없고, 누적 합이 $2^{30}$을
-넘지 않고, 끝내 정확히 $2^{30}$이 되는지---살핀다. |dist|가 |nil|이면(고른
+@ 함수 |checkDist|는 확률 분포 |dist|가 올바른지---음수가 없고, 누적 합이 $2^{30}$을
+넘지 않고, 끝내 정확히 $2^{30}$이 되는지---살핀다. 인자 |dist|가 |nil|이면(고른
 분포를 쓰겠다는 뜻이니) 그냥 넘어간다. 어긋난 자리에 따라 |base|·|base+1|·
 |base+2|를 준다.
 
@@ -144,7 +144,7 @@ func checkDist(dist []int64, base gbgraph.PanicCode) error {
 	return nil
 }
 
-@* Walker의 별칭법. |distFrom|·|distTo|처럼 고르지 않은 분포로 정점을 뽑으려면,
+@* Walker의 별칭법. 인자 |distFrom|·|distTo|처럼 고르지 않은 분포로 정점을 뽑으려면,
 Walker의 별칭법[{\sl Seminumerical Algorithms}, 2판, 연습문제 3.4.1--7]을 쓴다.
 길이 |nn|(|n| 이상인 가장 작은 $2$의 거듭제곱)짜리 ``마법'' 표를 만들어 두면,
 난수 하나로 뽑기 한 번을 $O(1)$에 해낼 수 있다.
@@ -159,7 +159,7 @@ type magicEntry struct {
 	inx  int64
 }
 
-@ 표를 만드는 동안 두 뭉치(|hi|·|lo|)에 나눠 담아 둔다. |hi|는 평균
+@ 표를 만드는 동안 두 뭉치(|hi|·|lo|)에 나눠 담아 둔다. 뭉치 |hi|는 평균
 $t=2^{30}/|nn|$보다 확률이 큰 자리들, |lo|는 그 나머지다. \CEE/ 원본은 이를
 링크드 리스트로 엮지만, Go의 슬라이스를 스택으로 쓰면 같은 차례로 밀고
 당길 수 있다---뒤에서 밀고 뒤에서 당기면(LIFO), \CEE/이 앞에서 밀고
@@ -171,7 +171,7 @@ type walkerNode struct {
 	j   int64 // 뽑힐 정점 번호
 }
 
-@ |walker|는 길이 |n|짜리 분포 |dist|로, 길이 |nn|짜리 마법 표를 짓는다. 표를
+@ 함수 |walker|는 길이 |n|짜리 분포 |dist|로, 길이 |nn|짜리 마법 표를 짓는다. 표를
 채우는 순서는 뒤에 쓰일 |RandomGraph|·|RandomLengths|의 재현성과는 무관하다
 ---표 자체가 정점 뽑기의 확률을 결정하므로, \CEE/ 원본과 자리 하나 어긋나지
 않아야 훗날 {\sc TEST\_SAMPLE}에서 같은 그래프가 나온다.
@@ -186,7 +186,7 @@ func walker(n, nn int64, dist []int64) []magicEntry {
 	return table
 }
 
-@ |nn|이 |n|보다 크면(즉 |n|이 2의 거듭제곱이 아니면), 남는 자리는 확률
+@ 크기 |nn|이 |n|보다 크면(즉 |n|이 2의 거듭제곱이 아니면), 남는 자리는 확률
 0으로 |lo|에 채운다. 그런 다음 실제 분포 |dist|를 큰 번호부터 훑어 |hi|나
 |lo|에 나눠 담는다---\CEE/이 앞으로 밀어 넣는 차례를, 나중에 뒤에서 당길
 Go 슬라이스에서는 그대로 뒤로 밀어 넣는 차례로 옮긴 것이다.
@@ -205,7 +205,7 @@ for j := n - 1; j >= 0; j-- {
 	}
 }
 
-@ |hi|에서 자리 |p|를, |lo|에서 자리 |q|를 하나씩 꺼낸다. |q|가 뽑힐 확률은
+@ 뭉치 |hi|에서 자리 |p|를, |lo|에서 자리 |q|를 하나씩 꺼낸다. 자리 |q|가 뽑힐 확률은
 그대로 표에 담고, 그 나머지(|t-q.key|)는 |p|가 차지한다---그래서 |p|의
 남은 확률을 그만큼 덜어낸 뒤, 아직 평균보다 크면 |hi|로, 아니면 |lo|로
 되돌린다. 스케일을 $2^{30}$에서 $2^{31}$로 바꾸는 과정에서 넘침이 없도록
@@ -230,7 +230,7 @@ if p.key > t {
 	lo = append(lo, p)
 }
 
-@ |hi|가 다 떨어지면, 남은 |lo| 자리들은 이미 확률이 정확히 |t|다---더 나눠
+@ 뭉치 |hi|가 다 떨어지면, 남은 |lo| 자리들은 이미 확률이 정확히 |t|다---더 나눠
 줄 여윳돈도, 받을 빚도 없다는 뜻이다. 그래서 |inx|는 결코 쓰이지 않는다.
 
 @<|lo|에 남은, 확률이 |t|인 자리들을 채운다@>=
@@ -263,7 +263,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 	return g, nil
 }
 
-@ |n|은 0일 수 없고, 길이 범위는 거꾸로거나 너무 넓으면 안 된다. 두 분포도
+@ 인자 |n|은 0일 수 없고, 길이 범위는 거꾸로거나 너무 넓으면 안 된다. 두 분포도
 올바라야 한다.
 @<|RandomGraph|의 매개변수를 확인한다@>=
 if n == 0 {
@@ -282,7 +282,7 @@ if err := checkDist(distTo, gbgraph.InvalidOperand+5); err != nil {
 	return nil, err
 }
 
-@ |kk|는 $31-\lceil\lg n\rceil$이다: 31비트 균등 난수의 위쪽 비트들을 오른쪽으로
+@ 값 |kk|는 $31-\lceil\lg n\rceil$이다: 31비트 균등 난수의 위쪽 비트들을 오른쪽으로
 |kk|만큼 밀면, |nn|(|n| 이상인 가장 작은 2의 거듭제곱) 미만의 균등한 색인을
 얻는다. 두 분포가 있어도 |n|이 같으므로 표 하나의 |nn|·|kk|를 함께 쓴다.
 
@@ -301,7 +301,7 @@ if distTo != nil {
 }
 
 @ 매 걸음, |distFrom|·|distTo|가 있으면 별칭 표로, 없으면 고르게 정점 |u|·|v|를
-뽑는다. |u==v|인데 자기 고리를 허용하지 않으면 다시 뽑는다. |multi<=0|이면 이미
+뽑는다. 조건 |u==v|인데 자기 고리를 허용하지 않으면 다시 뽑는다. 조건 |multi<=0|이면 이미
 있는 호를 찾아본다---|multi==0|이면 다시 뽑고, |multi<0|이면 둘 중 짧은 길이로
 합친다. 그도 아니면 새 호(또는 간선)를 보탠다.
 
@@ -311,7 +311,7 @@ for mm := m; mm > 0; mm-- {
 	@<무작위 정점 |u|·|v|를 뽑아 호나 간선 하나를 보탠다@>
 }
 
-@ |pick|은 별칭 표 하나로 정점을 뽑고, |randLen|은 |minLen|·|maxLen| 사이의
+@ 함수 |pick|은 별칭 표 하나로 정점을 뽑고, |randLen|은 |minLen|·|maxLen| 사이의
 길이를 뽑는다.
 
 @<정점 뽑기와 길이 뽑기 잔심부름을 마련한다@>=
@@ -385,10 +385,10 @@ if multi <= 0 {
 	}
 }
 
-@ |RandomBigraph|. |random_graph|의 특수한 경우로, 두 갈래 |n1|·|n2|개의
-정점 사이에 간선 |m|개를 무작위로 놓는다. |dist1|은 |distFrom|의 앞
+@ 함수 |RandomBigraph|. 함수 |random_graph|의 특수한 경우로, 두 갈래 |n1|·|n2|개의
+정점 사이에 간선 |m|개를 무작위로 놓는다. 분포 |dist1|은 |distFrom|의 앞
 |n1|자리로, |dist2|는 |distTo|의 뒤 |n2|자리로 옮기고, 나머지는 0으로 채운다.
-|dist1|(또는 |dist2|)이 |nil|이면, 그 갈래의 정점들에 고르게(반올림 오차를
+분포 |dist1|(또는 |dist2|)이 |nil|이면, 그 갈래의 정점들에 고르게(반올림 오차를
 $k$로 나눠 메워) 확률을 지어낸다.
 @<랜덤 함수들@>=
 // |RandomBigraph|는 두 갈래 |n1|·|n2|개 정점, 간선 |m|개짜리 무작위 이분
@@ -416,7 +416,7 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 	return g, nil
 }
 
-@ $\lfloor x/n\rfloor+\lfloor(x+1)/n\rfloor+\cdots+\lfloor(x+n-1)/n\rfloor=\lfloor x\rfloor$
+@ 항등식 $\lfloor x/n\rfloor+\lfloor(x+1)/n\rfloor+\cdots+\lfloor(x+n-1)/n\rfloor=\lfloor x\rfloor$
 라는 항등식 덕에, |(probUnit+k)/n1|(|k=0,\dots,n1-1|)을 더하면 정확히
 |probUnit|이 된다.
 
@@ -438,7 +438,7 @@ if dist2 != nil {
 	}
 }
 
-@ |RandomLengths|. 기존 그래프 |g|의 모든 호에 새 길이를 매긴다. |directed|가
+@ 함수 |RandomLengths|. 기존 그래프 |g|의 모든 호에 새 길이를 매긴다. 인자 |directed|가
 거짓이면, $u\to v$와 $v\to u$ 호 한 쌍을 간선 하나로 보아 같은 길이를 준다.
 @<랜덤 함수들@>=
 // |RandomLengths|는 그래프 |g|의 모든 호에 새 무작위 길이를 매긴다.
@@ -593,7 +593,7 @@ func TestDeterministic(t *testing.T) {
 	}
 }
 
-@ |directed|와 |self|를 함께 켜면 자기 고리가 나올 수 있다. |multi|를 켜면
+@ 인자 |directed|와 |self|를 함께 켜면 자기 고리가 나올 수 있다. 인자 |multi|를 켜면
 같은 방향 호가 두 번 이상 나올 수 있다---정점이 둘뿐이고 호가 많으면
 사실상 반드시 그렇게 된다.
 
@@ -627,7 +627,7 @@ func TestDirectedSelfMulti(t *testing.T) {
 	}
 }
 
-@ |multi=0|으로 중복을 금지하면, 두 정점 사이의 방향 호는 많아야 하나다.
+@ 조건 |multi=0|으로 중복을 금지하면, 두 정점 사이의 방향 호는 많아야 하나다.
 
 @<방향·자기고리·중복 시험@>=
 func TestNoDuplicates(t *testing.T) {
@@ -649,7 +649,7 @@ func TestNoDuplicates(t *testing.T) {
 
 @ \.{gb\_rand.w}의 예시를 본떠, 정점 |k|가 |k+1|보다 출발점으로는 두 배
 뽑히기 쉽게 만든다. 기하수열 $2^{29},2^{28},\dots,2^{23},2^{23}$(마지막 둘은
-같다)은 나머지 없이 정확히 |probUnit|으로 합해진다. |distTo|는 그 순서를
+같다)은 나머지 없이 정확히 |probUnit|으로 합해진다. 인자 |distTo|는 그 순서를
 뒤집어, 정점 |k|가 도착점으로는 절반만큼만 뽑히기 쉽게 한다. 그러면 |0|에서
 |n-1|로 가는 호가 |n-1|에서 |0|으로 가는 호보다 훨씬 흔해야 한다.
 
@@ -764,7 +764,7 @@ func TestWalkerTableRuns(t *testing.T) {
 	}
 }
 
-@ |RandomBigraph(50,30,200,...)|는 정점 $50+30$개짜리 이분 그래프를 짓는다.
+@ 호출 |RandomBigraph(50,30,200,...)|는 정점 $50+30$개짜리 이분 그래프를 짓는다.
 모든 간선이 두 갈래를 잇는지 확인한다.
 
 @<이분 그래프 시험@>=
