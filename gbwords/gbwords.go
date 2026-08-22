@@ -1,4 +1,4 @@
-//line gbwords.w:149
+//line gbwords.w:147
 package gbwords
 
 import (
@@ -16,10 +16,10 @@ type (
 	Graph  = gbgraph.Graph
 	Vertex = gbgraph.Vertex
 
-//line gbwords.w:165
+//line gbwords.w:163
 )
 
-//line gbwords.w:125
+//line gbwords.w:123
 const (
 	weightBias = 1 << 30 // 정렬 키는 가중치에 $2^{30}$을 더한 값
 	hashPrime  = 6997    // 낱말 총수보다 조금 큰 소수
@@ -29,10 +29,10 @@ var maxC = [7]int64{15194, 3560, 4467, 460, 6976, 756, 362} // 최대 빈도수 
 
 var defaultWtVector = []int64{100, 10, 4, 2, 2, 1, 1, 1, 1} // |wtVector == nil|일 때
 
-//line gbwords.w:421
+//line gbwords.w:419
 type wordHash [5][]*Vertex
 
-//line gbwords.w:253
+//line gbwords.w:251
 func iabs(x int64) int64 {
 	if x >= 0 {
 		return x
@@ -40,7 +40,7 @@ func iabs(x int64) int64 {
 	return -x
 }
 
-//line gbwords.w:292
+//line gbwords.w:290
 func readWords(f *gbio.File, wtVector []int64, wtThreshold int64) (
 	stack *gbsort.Node[string], nn int64, err error,
 ) {
@@ -51,7 +51,7 @@ func readWords(f *gbio.File, wtVector []int64, wtThreshold int64) (
 		}
 		var wt int64
 
-//line gbwords.w:324
+//line gbwords.w:322
 		switch f.Char() {
 		case '*':
 			wt = wtVector[0] // `흔함'
@@ -76,7 +76,7 @@ func readWords(f *gbio.File, wtVector []int64, wtThreshold int64) (
 			}
 		}
 
-//line gbwords.w:302
+//line gbwords.w:300
 		if wt >= wtThreshold { // 자격을 갖췄다
 			stack = &gbsort.Node[string]{Key: wt + weightBias, Data: string(word[:]), Link: stack}
 			nn++
@@ -89,7 +89,7 @@ func readWords(f *gbio.File, wtVector []int64, wtThreshold int64) (
 	return stack, nn, nil
 }
 
-//line gbwords.w:431
+//line gbwords.w:429
 func rawHash(q string) int64 {
 	var h int64
 	for i := 0; i < 5; i++ {
@@ -109,7 +109,7 @@ func down(idx int) int {
 	return idx - 1
 }
 
-//line gbwords.w:455
+//line gbwords.w:453
 func matchExcept(q, r string, k int) bool {
 	for i := 0; i < 5; i++ {
 		if i != k && q[i] != r[i] {
@@ -119,7 +119,7 @@ func matchExcept(q, r string, k int) bool {
 	return true
 }
 
-//line gbwords.w:470
+//line gbwords.w:468
 func makeWordHash() wordHash {
 	var ht wordHash
 	for i := range ht {
@@ -145,26 +145,26 @@ func (ht wordHash) insert(v *Vertex, near func(k int, r *Vertex)) {
 	}
 }
 
-//line gbwords.w:170
+//line gbwords.w:168
 func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Graph, error) {
 	rng := gbflip.New(seed)
 	usedDefault := wtVector == nil
 
-//line gbwords.w:194
+//line gbwords.w:192
 	if wtVector == nil {
 		wtVector = defaultWtVector
 	} else {
 
-//line gbwords.w:210
+//line gbwords.w:208
 		if len(wtVector) < 9 {
 			padded := make([]int64, 9)
 			copy(padded, wtVector)
 			wtVector = padded
 		}
 
-//line gbwords.w:198
+//line gbwords.w:196
 
-//line gbwords.w:222
+//line gbwords.w:220
 		flacc := math.Abs(float64(wtVector[0]))
 		if b := math.Abs(float64(wtVector[1])); flacc < b {
 			flacc = b // 이제 |flacc|는 $\max(\vert a\vert,\vert b\vert)$
@@ -176,9 +176,9 @@ func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Gra
 			return nil, gbgraph.VeryBadSpecs // 무게 벡터가 한참 벗어났다
 		}
 
-//line gbwords.w:199
+//line gbwords.w:197
 
-//line gbwords.w:238
+//line gbwords.w:236
 		acc := iabs(wtVector[0])
 		if b := iabs(wtVector[1]); acc < b {
 			acc = b // 이제 |acc|는 $\max(\vert a\vert,\vert b\vert)$
@@ -190,12 +190,12 @@ func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Gra
 			return nil, gbgraph.BadSpecs // 무게 벡터가 조금 크다
 		}
 
-//line gbwords.w:200
+//line gbwords.w:198
 	}
 
-//line gbwords.w:174
+//line gbwords.w:172
 
-//line gbwords.w:271
+//line gbwords.w:269
 	f, err := gbio.Open(filepath.Join(dir, "words.dat"))
 	if err != nil {
 		return nil, gbgraph.EarlyDataFault
@@ -208,12 +208,12 @@ func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Gra
 		return nil, err
 	}
 
-//line gbwords.w:175
+//line gbwords.w:173
 
-//line gbwords.w:357
+//line gbwords.w:355
 	sorted := gbsort.LinkSort(stack, rng)
 
-//line gbwords.w:380
+//line gbwords.w:378
 	if n == 0 || nn < n {
 		n = nn
 	}
@@ -227,14 +227,14 @@ func Words(n int64, wtVector []int64, wtThreshold, seed int64, dir string) (*Gra
 	}
 	g.UtilTypes = "IZZZZZIZZZZZZZ"
 
-//line gbwords.w:359
+//line gbwords.w:357
 	ht := makeWordHash()
 	var added int64
 Outer:
 	for j := 127; j >= 0; j-- {
 		for p := sorted[j]; p != nil; p = p.Link {
 
-//line gbwords.w:405
+//line gbwords.w:403
 			v := &g.Vertices[added]
 			v.Name = p.Data
 			v.U.I = p.Key - weightBias
@@ -244,7 +244,7 @@ Outer:
 				v.Arcs.Partner.A.I = int64(k)
 			})
 
-//line gbwords.w:365
+//line gbwords.w:363
 			added++
 			if added == n {
 				break Outer
@@ -252,11 +252,11 @@ Outer:
 		}
 	}
 
-//line gbwords.w:176
+//line gbwords.w:174
 	return g, nil
 }
 
-//line gbwords.w:508
+//line gbwords.w:506
 func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {
 	if len(q) != 5 {
 		return nil
@@ -266,7 +266,7 @@ func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {
 		ht.insert(v, nil)
 	}
 
-//line gbwords.w:525
+//line gbwords.w:523
 	rh := rawHash(q)
 	for idx := int(blanked(rh, q, 0) % hashPrime); ht[0][idx] != nil; idx = down(idx) {
 		if r := ht[0][idx]; q[0] == r.Name[0] && matchExcept(q, r.Name, 0) {
@@ -274,9 +274,9 @@ func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {
 		}
 	}
 
-//line gbwords.w:517
+//line gbwords.w:515
 
-//line gbwords.w:536
+//line gbwords.w:534
 	if f != nil {
 		for k := 0; k < 5; k++ {
 			for idx := int(blanked(rh, q, k) % hashPrime); ht[k][idx] != nil; idx = down(idx) {
@@ -287,6 +287,6 @@ func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {
 		}
 	}
 
-//line gbwords.w:518
+//line gbwords.w:516
 	return nil
 }
