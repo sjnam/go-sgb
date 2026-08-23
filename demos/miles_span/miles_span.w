@@ -527,9 +527,9 @@ type pqueue interface {
 @ 정점은 처음엔 ``못 봄''(unseen)이다. 큐에 들면 ``봄''(seen)이 되고, 큐를
 떠나 조각에 들면 ``앎''(known)이 된다. 아는 정점의 |backlink|에는 특별한 표식
 |known|을 둔다. 필드 |backlink|가 |nil|이면 못 본 것이다. \CEE/는 포인터 대소로
-세 상태를 갈랐지만(|NULL|<|KNOWN|<진짜 정점), \GO/에서는 포인터를 견줄 수
+세 상태를 갈랐지만($|NULL|<|KNOWN|<진짜 정점$), \GO/에서는 포인터를 견줄 수
 없으니 표식과 |nil|을 또렷이 비교한다.
-
+@d KNOWN
 @<Jarn\'\i k/Prim 알고리즘@>=
 var known = new(gbgraph.Vertex) // 아는 정점의 |backlink| 표식
 

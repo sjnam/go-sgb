@@ -4,6 +4,7 @@
 @d BadThirdLine	BadFourthLine	FileEndedPrematurely
 @d MissingNewline	WrongNumberOfLines WrongChecksum
 @d NoFileOpen	BadLastLine            
+@d NULL
 
 @s extern int
 @s char int
