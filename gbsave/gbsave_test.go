@@ -1,4 +1,4 @@
-//line gbsave.w:740
+//line gbsave.w:806
 package gbsave
 
 import (
@@ -26,7 +26,7 @@ func TestRoundTrip(t *testing.T) {
 		t.Fatalf("RestoreGraph: %v", err)
 	}
 
-//line gbsave.w:770
+//line gbsave.w:836
 	if g2.N != g.N || g2.M != g.M {
 		t.Fatalf("N/M = %d/%d, 원함 %d/%d", g2.N, g2.M, g.N, g.M)
 	}
@@ -43,7 +43,7 @@ func TestRoundTrip(t *testing.T) {
 			t.Fatalf("정점 %d 불일치: %q %v vs %q %v", i, v.Name, v, v2.Name, v2)
 		}
 
-//line gbsave.w:792
+//line gbsave.w:858
 		a, a2 := v.Arcs, v2.Arcs
 		for a != nil && a2 != nil {
 			if g.Index(a.Tip) != g2.Index(a2.Tip) || a.Len != a2.Len {
@@ -58,13 +58,13 @@ func TestRoundTrip(t *testing.T) {
 			t.Fatalf("정점 %d 인접 리스트 길이 불일치", i)
 		}
 
-//line gbsave.w:786
+//line gbsave.w:852
 	}
 
-//line gbsave.w:767
+//line gbsave.w:833
 }
 
-//line gbsave.w:811
+//line gbsave.w:877
 func TestFileFormat(t *testing.T) {
 	g, err := gbmiles.Miles(20, 0, 0, 0, 0, 5, 0, "../data")
 	if err != nil {
@@ -76,7 +76,7 @@ func TestFileFormat(t *testing.T) {
 	}
 	lines := readLines(t, path)
 
-//line gbsave.w:830
+//line gbsave.w:896
 	const pre = "* GraphBase graph (util_types "
 	body, ok := strings.CutPrefix(lines[0], pre)
 	if !ok {
@@ -110,10 +110,10 @@ func TestFileFormat(t *testing.T) {
 		t.Errorf("마지막 줄 = %q, 검사합 줄이라야 한다", lines[len(lines)-1])
 	}
 
-//line gbsave.w:822
+//line gbsave.w:888
 }
 
-//line gbsave.w:868
+//line gbsave.w:934
 func TestChecksumConventions(t *testing.T) {
 	g, err := gbmiles.Miles(20, 0, 0, 0, 0, 5, 0, "../data")
 	if err != nil {
@@ -126,7 +126,7 @@ func TestChecksumConventions(t *testing.T) {
 	}
 	orig := readLines(t, base)
 
-//line gbsave.w:883
+//line gbsave.w:949
 	neg := append([]string(nil), orig...)
 	neg[len(neg)-1] = "* Checksum -1"
 	if _, err := restoreLines(t, dir, "neg.gb", neg); err != nil {
@@ -142,10 +142,52 @@ func TestChecksumConventions(t *testing.T) {
 		t.Error("자료를 망가뜨렸는데 검사합이 통과했다")
 	}
 
-//line gbsave.w:880
+//line gbsave.w:946
 }
 
-//line gbsave.w:902
+//line gbsave.w:971
+func TestAnomalies(t *testing.T) {
+	g := gbgraph.NewGraph(2)
+	g.ID = strings.Repeat("abcdefghij", 20)
+	g.Vertices[0].Name = `say "hi" \ bye`
+	g.Vertices[1].Name = "ok"
+	g.NewEdge(&g.Vertices[0], &g.Vertices[1], 5)
+	g.UtilTypes = "G" + g.UtilTypes[1:]
+	g.Vertices[0].U.I = 7
+	path := filepath.Join(t.TempDir(), "anom.gb")
+	if err := SaveGraph(g, path); err != nil {
+		t.Fatal(err)
+	}
+
+//line gbsave.w:987
+	lines := readLines(t, path)
+	want := []string{
+		"> WARNING: I had trouble making this file from the given graph!",
+		">> The original util_types had to be corrected.",
+		">> Some data suppressed by Z format was actually nonzero.",
+		">> At least one long string had to be truncated.",
+		">> At least one string character had to be changed to '?'.",
+		"> You should be able to read this file with restore_graph,",
+		"> but the graph you get won't be exactly like the original.",
+	}
+	if got := lines[len(lines)-len(want):]; strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("경고 줄 =\n%s\n원함\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+	g2, err := RestoreGraph(path)
+	if err != nil {
+		t.Fatalf("RestoreGraph: %v", err)
+	}
+	if g2.ID != g.ID[:maxSvID] {
+		t.Errorf("ID = %q, 원함 %q", g2.ID, g.ID[:maxSvID])
+	}
+	if g2.Vertices[0].Name != "say ?hi? ? bye" {
+		t.Errorf("이름 = %q", g2.Vertices[0].Name)
+	}
+
+//line gbsave.w:984
+}
+
+//line gbsave.w:1015
 func mustCount(t *testing.T, s, suffix string) int64 {
 	t.Helper()
 	body, ok := strings.CutSuffix(s, suffix)

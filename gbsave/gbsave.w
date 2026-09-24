@@ -113,8 +113,16 @@ import (
 )
 
 const (
-	maxSvID        = 154 // |ID|의 최대 길이
-	unexpectedChar = 127 // |imap|에 없는 문자
+	maxSvString    = 4095 // 문자열의 최대 길이
+	maxSvID        = 154  // |ID|의 최대 길이
+	unexpectedChar = 127  // |imap|에 없는 문자
+)
+
+const (
+	badTypeCode    = 0x1  // 쓸 수 없는 타입 문자, |'Z'|로 바꾼다
+	stringTooLong  = 0x2  // 너무 긴 문자열, 잘라 낸다
+	badStringChar  = 0x10 // 쓸 수 없는 문자열 문자, |'?'|로 바꾼다
+	ignoredData    = 0x20 // |'Z'| 형식인데 값이 0이 아니다, 내보내지 않는다
 )
 
 @<유틸리티 필드 도우미@>
@@ -503,8 +511,14 @@ $$\vbox{\halign{\hfil#\hfil&\quad#\hfil\cr
 |0x10|&쓸 수 없는 문자열 문자 --- |'?'|로 바꾼다\cr
 |0x20|&|'Z'| 형식인데 값이 0이 아니다 --- 내보내지 않는다\cr}}$$
 이 가운데 |0x4|와 |0x8|은 \GO/에서는 일어날 수 없다. 주소를 손수 분류할 일이
-없기 때문이다. 그래프 |g|가 |nil|이면 $-1$, 파일을 열 수 없으면 $-2$를 돌려주던 규약도
-\GO/에서는 |error| 값으로 바뀐다.
+없기 때문이다. 나머지 넷은 원본처럼 |anomalies|에 비트로 모아 두었다가, 검사합 줄
+뒤에 원본과 똑같은 경고 줄로 적는다. 검사합 줄 뒤는 되살릴 때 무시되므로 경고가
+있어도 파일은 읽힌다.
+
+그래프 |g|가 |nil|이면 $-1$, 파일을 열 수 없으면 $-2$를 돌려주던 규약은 \GO/에서
+|error| 값으로 바뀐다. 원본은 고친 것이 있으면 그 비트들을 돌려주었지만, 우리
+|SaveGraph|는 파일을 끝까지 썼으면 |nil|을 돌려준다. 고친 것은 파일 끝의 경고로
+알 수 있다.
 
 @ 원본에는 파일을 {\it 이진 모드\/}로 여는 대목에 다음과 같은 주석이 붙어
 있었다. 유닉스 계열에서는 차이가 없지만, 윈도우 계열에서 내부의 |'\n'| 한
@@ -525,6 +539,7 @@ type writer struct {
 	buf           []byte
 	magic         int64
 	commaExpected bool
+	anomalies     int // 고쳐야 했던 것들의 비트 모음
 }
 
 func (w *writer) flushLine() {
@@ -613,6 +628,7 @@ w.out.WriteString("A)\n")
 w.out.WriteString("* Checksum ")
 w.out.WriteString(strconv.FormatInt(w.magic, 10))
 w.out.WriteString("\n")
+@<고친 것이 있으면 파일 끝에 적는다@>
 
 @ 함수 |field|는 한 필드를 기호 형식으로 내보낸다. 첫 필드가 아니면 앞에 쉼표를 둔다.
 타입 |Z|는 아무것도 내보내지 않는다.
@@ -629,59 +645,87 @@ func (w *writer) field(item string, t byte) {
 	w.moveItem(item)
 }
 
-@ 정점·호·그래프 유틸리티 필드를 그 타입에 따라 문자열로 바꾸는 |encode|다.
-정점 포인터는 |V|〈번호〉, 호 포인터는 |A|〈번호〉, |nil|은 |0|이다.
+@ 정점·호·그래프의 유틸리티 필드는 함수 |util|이 그 타입에 따라 내보낸다. 정점
+포인터는 |V|〈번호〉, 호 포인터는 |A|〈번호〉, |nil|은 |0|이다.
+
+타입이 |Z|이면 아무것도 내보내지 않는다. 그런데 그 필드에 값이 들어 있으면 그 값을
+잃는 셈이니 |ignoredData|로 적어 둔다. 쓸 수 없는 타입 문자는 원본처럼 |Z|로 여긴다.
+첫 줄의 |util_types|에는 이미 |Z|로 적었고, 여기서 |badTypeCode|로 적어 둔다.
+원본은 이런 필드에서도 쉼표를 내보냈다가 도로 지운다. 우리는 아예 내보내지 않는다.
 
 @<그래프를 저장하는 |SaveGraph|@>=
-func encodeUtil(u *gbgraph.Util, t byte, g *gbgraph.Graph, arcIndex map[*gbgraph.Arc]int64) string {
+func (w *writer) util(u *gbgraph.Util, t byte, g *gbgraph.Graph, arcIndex map[*gbgraph.Arc]int64) {
 	switch t {
 	case 'I':
-		return strconv.FormatInt(u.I, 10)
+		w.field(strconv.FormatInt(u.I, 10), t)
 	case 'S':
-		return quote(u.S)
+		w.field(w.quote(u.S), t)
 	case 'V':
-		if u.V != nil {
-			return "V" + strconv.FormatInt(g.Index(u.V), 10)
+		switch {
+		case u.V != nil:
+			w.field("V"+strconv.FormatInt(g.Index(u.V), 10), t)
+		case u.I == 1:
+			w.field("1", t)
+		default:
+			w.field("0", t)
 		}
-		if u.I == 1 {
-			return "1"
-		}
-		return "0"
 	case 'A':
 		if u.A != nil {
-			return "A" + strconv.FormatInt(arcIndex[u.A], 10)
+			w.field("A"+strconv.FormatInt(arcIndex[u.A], 10), t)
+		} else {
+			w.field("0", t)
 		}
-		return "0"
+	default:
+		w.anomalies |= badTypeCode
+		fallthrough
+	case 'Z':
+		if *u != (gbgraph.Util{}) {
+			w.anomalies |= ignoredData
+		}
 	}
-	return ""
 }
 
 @ 함수 |quote|는 문자열을 따옴표로 감싸며, 따옴표·역슬래시·줄바꿈·인쇄 불가 문자를
-\.? 로 바꾼다.
+\.? 로 바꾼다. 문자열은 |maxSvString|자까지만 옮기고 나머지는 잘라 낸다. 둘 다
+|anomalies|에 적어 둔다.
 
 @<그래프를 저장하는 |SaveGraph|@>=
-func quote(s string) string {
+func (w *writer) quote(s string) string {
 	var sb strings.Builder
 	sb.WriteByte('"')
-	for i := 0; i < len(s); i++ {
+	i := 0
+	for ; i < len(s) && i < maxSvString; i++ {
 		c := s[i]
 		if c == '"' || c == '\n' || c == '\\' || gbio.ImapOrd(c) == unexpectedChar {
+			w.anomalies |= badStringChar
 			sb.WriteByte('?')
 		} else {
 			sb.WriteByte(c)
 		}
 	}
+	if i < len(s) {
+		w.anomalies |= stringTooLong
+	}
 	sb.WriteByte('"')
 	return sb.String()
 }
 
-@ @<그래프 레코드를 옮긴다@>=
+@ 표식 |g.ID|는 다른 문자열보다 짧은 |maxSvID|자까지만 적는다. 원본의 |MAX_SV_ID|를
+따른 것으로, \CEE/의 |id| 배열(161바이트)보다 조금 작게 잡혀 있다. 더 길면 앞의
+|maxSvID|자만 남긴다.
+
+@<그래프 레코드를 옮긴다@>=
 w.commaExpected = false
-w.field(quote(g.ID), 'S')
+id := w.quote(g.ID)
+if len(g.ID) > maxSvID {
+	id = id[:maxSvID+1] + `"`
+	w.anomalies |= stringTooLong
+}
+w.field(id, 'S')
 w.field(strconv.FormatInt(g.N, 10), 'I')
 w.field(strconv.FormatInt(g.M, 10), 'I')
 for pos := 8; pos <= 13; pos++ {
-	w.field(encodeUtil(graphUtil(g, pos), g.UtilTypes[pos], g, arcIndex), g.UtilTypes[pos])
+	w.util(graphUtil(g, pos), g.UtilTypes[pos], g, arcIndex)
 }
 w.flushLine()
 
@@ -693,14 +737,14 @@ w.out.WriteString("* Vertices\n")
 for i := range g.Vertices {
 	v := &g.Vertices[i]
 	w.commaExpected = false
-	w.field(quote(v.Name), 'S')
+	w.field(w.quote(v.Name), 'S')
 	if v.Arcs != nil {
 		w.field("A"+strconv.FormatInt(arcIndex[v.Arcs], 10), 'A')
 	} else {
 		w.field("0", 'A')
 	}
 	for pos := 0; pos <= 5; pos++ {
-		w.field(encodeUtil(vertUtil(v, pos), g.UtilTypes[pos], g, arcIndex), g.UtilTypes[pos])
+		w.util(vertUtil(v, pos), g.UtilTypes[pos], g, arcIndex)
 	}
 	w.flushLine()
 }
@@ -727,9 +771,31 @@ for _, a := range arcRecords {
 	}
 	w.field(strconv.FormatInt(a.Len, 10), 'I')
 	for pos := 6; pos <= 7; pos++ {
-		w.field(encodeUtil(arcUtil(a, pos), g.UtilTypes[pos], g, arcIndex), g.UtilTypes[pos])
+		w.util(arcUtil(a, pos), g.UtilTypes[pos], g, arcIndex)
 	}
 	w.flushLine()
+}
+
+@ 고친 것이 있었으면 검사합 줄 뒤에 그 사실을 적는다. 문구는 원본 그대로다. 원본에
+있는 두 주소 경고는 \GO/에서 일어날 수 없으므로 뺐다.
+
+@<고친 것이 있으면 파일 끝에 적는다@>=
+if w.anomalies != 0 {
+	w.out.WriteString("> WARNING: I had trouble making this file from the given graph!\n")
+	if w.anomalies&badTypeCode != 0 {
+		w.out.WriteString(">> The original util_types had to be corrected.\n")
+	}
+	if w.anomalies&ignoredData != 0 {
+		w.out.WriteString(">> Some data suppressed by Z format was actually nonzero.\n")
+	}
+	if w.anomalies&stringTooLong != 0 {
+		w.out.WriteString(">> At least one long string had to be truncated.\n")
+	}
+	if w.anomalies&badStringChar != 0 {
+		w.out.WriteString(">> At least one string character had to be changed to '?'.\n")
+	}
+	w.out.WriteString("> You should be able to read this file with restore_graph,\n")
+	w.out.WriteString("> but the graph you get won't be exactly like the original.\n")
 }
 
 @* 시험. 패키지 |gbmiles|로 지은 그래프를 저장했다 되살려, 원본과 동등한지 본다.
@@ -893,6 +959,53 @@ bad := append([]string(nil), orig...)
 bad[len(bad)-2] = strings.Replace(bad[len(bad)-2], "0", "9", 1)
 if _, err := restoreLines(t, dir, "bad.gb", bad); err == nil {
 	t.Error("자료를 망가뜨렸는데 검사합이 통과했다")
+}
+
+@ 고칠 거리가 있는 그래프도 저장해 본다. 표식은 $200$자, 한 정점의 이름에는 따옴표와
+역슬래시가 있고, 정점 필드 |U|의 타입 문자는 쓸 수 없는 \.G이며 값도 들어 있다.
+원본의 |save_graph|는 이런 그래프를 자르고 바꾸어 저장한 다음 검사합 줄 뒤에 경고를
+다섯 줄 적는다. 우리도 같은 줄을 적어야 하고, 그 파일은 되살려져야 한다. 되살린
+표식은 앞의 $154$자이고 이름의 나쁜 문자는 \.?로 바뀌어 있어야 한다.
+
+@(gbsave_test.go@>=
+func TestAnomalies(t *testing.T) {
+	g := gbgraph.NewGraph(2)
+	g.ID = strings.Repeat("abcdefghij", 20)
+	g.Vertices[0].Name = `say "hi" \ bye`
+	g.Vertices[1].Name = "ok"
+	g.NewEdge(&g.Vertices[0], &g.Vertices[1], 5)
+	g.UtilTypes = "G" + g.UtilTypes[1:]
+	g.Vertices[0].U.I = 7
+	path := filepath.Join(t.TempDir(), "anom.gb")
+	if err := SaveGraph(g, path); err != nil {
+		t.Fatal(err)
+	}
+	@<경고 줄들과 되살린 결과를 확인한다@>
+}
+
+@ @<경고 줄들과 되살린 결과를...@>=
+lines := readLines(t, path)
+want := []string{
+	"> WARNING: I had trouble making this file from the given graph!",
+	">> The original util_types had to be corrected.",
+	">> Some data suppressed by Z format was actually nonzero.",
+	">> At least one long string had to be truncated.",
+	">> At least one string character had to be changed to '?'.",
+	"> You should be able to read this file with restore_graph,",
+	"> but the graph you get won't be exactly like the original.",
+}
+if got := lines[len(lines)-len(want):]; strings.Join(got, "\n") != strings.Join(want, "\n") {
+	t.Errorf("경고 줄 =\n%s\n원함\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+}
+g2, err := RestoreGraph(path)
+if err != nil {
+	t.Fatalf("RestoreGraph: %v", err)
+}
+if g2.ID != g.ID[:maxSvID] {
+	t.Errorf("ID = %q, 원함 %q", g2.ID, g.ID[:maxSvID])
+}
+if g2.Vertices[0].Name != "say ?hi? ? bye" {
+	t.Errorf("이름 = %q", g2.Vertices[0].Name)
 }
 
 @ 잔심부름 셋: |"24V"| 꼴에서 수를 떼어 내는 것, 파일을 줄 단위로 읽는 것,
