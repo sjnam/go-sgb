@@ -28,3 +28,4 @@
 @s PanicCode int
 @s Node int
 @s PriorityQueue int
+@s gblisa.Region int

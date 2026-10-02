@@ -198,7 +198,7 @@ default:
 
 @ \.{-s}(미소)와 \.{-e}(두 눈)는 |m0,m1,n0,n1|과 |d1|을 함께 정한다. 원본은
 |smile|·|eyes| 매크로로 네 값을 한꺼번에 대입했는데, \GO/에는 매크로가 없으니
-{\sc GB\_\,LISA}가 내놓는 |Region| 값을 그대로 가져다 쓴다.
+{\sc GB\_\,LISA}가 내놓는 |gblisa.Region| 값을 그대로 가져다 쓴다.
 
 @<깃발 |arg|를 처리한다@>=
 switch arg {
