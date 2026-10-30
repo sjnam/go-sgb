@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 miles_span.w를 Go로 이식한다.
 @i ../../gbtypes.w
 
@@ -296,7 +296,7 @@ $T$보다 크지 않은 신장 트리 $T'$이 나온다. 그러므로 $T'$은 $F
 
 \GO/에는 매크로가 없으니, 그 자리에 |s.mems|를 직접 늘린다---|o|는 |s.mems++|,
 |oo|는 |s.mems += 2|, 이런 식이다. 그래서 이 프로그램은 원본과 같은 자리에 같은
-수의 mem을 물려, Knuth가 발표한 mem 수를 그대로 낸다.
+수의 mem을 물려, 커누스가 발표한 mem 수를 그대로 낸다.
 
 @ 이런 mem 세기 관례의 보기가 아래 프로그램 곳곳에 나온다. 자동으로 mem을 세는
 멋진 시스템을 만들 수도 있을 텐데 왜 손으로 매크로를 끼우라고 권하느냐고 묻는
@@ -418,7 +418,7 @@ for l := 63; l >= 0; l-- {
 
 @ 함수 |krusk|가 할 나머지 일은 ``동치 알고리즘'' 또는 ``합집합/찾기(union/find)''
 자료 구조의 응용임을 쉽게 알아볼 수 있다. 우리는 무작위 그래프에서 평균 실행
-시간이 선형임을 Knuth와 Sch\"onhage가 보인 단순한 방식을 쓴다[{\sl Theoretical
+시간이 선형임을 커누스와 Sch\"onhage가 보인 단순한 방식을 쓴다[{\sl Theoretical
 @^Knuth, Donald Ervin@>
 @^Sch\"onhage, Arnold@>
 Computer Science\/ \bf 6\/} (1978), 281--315].
@@ -1934,6 +1934,6 @@ Cheriton/Tarjan/Karp&8881&6964&6909&175519\cr}}$$
 잰 것이라 오늘날의 기계에는 그대로 들어맞지 않는다. 그러나 {\sl mem 수는
 그렇지 않다.\/} mem은 기계와도 컴파일러와도 무관하게 정의되므로, 우리 \GO/ 판이
 같은 자리에 같은 수의 mem을 물리는 한 위 네 mem 열은 지금도 그대로 재현된다.
-바로 그것이 Knuth가 mem을 세자고 한 까닭이다.
+바로 그것이 커누스가 mem을 세자고 한 까닭이다.
 
 @* 찾아보기.

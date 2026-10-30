@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 %
 % 이것은 시연용 "변경 파일"이다. queen이라는 시연 프로그램을 queen_wrap이라는
 % 비슷한 시연 프로그램으로 바꾼다.

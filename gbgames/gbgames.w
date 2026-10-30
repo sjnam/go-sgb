@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 gb_games.w를 Go로 이식한다.
 @i ../gbtypes.w
 
@@ -475,7 +475,7 @@ func (b *gamesBuilder) newGame(u, v *gbgraph.Vertex, su, sv, venue, today int64)
 	a.B.I, a.Partner.B.I = today, today // |date|
 }
 
-@* 시험. 기본 |Games(0,0,0,0,0,0,0,0)|은 120팀 638경기를 모두 담는다. Knuth의
+@* 시험. 기본 |Games(0,0,0,0,0,0,0,0)|은 120팀 638경기를 모두 담는다. 커누스의
 발표값과 대조한다.
 
 @(gbgames_test.go@>=

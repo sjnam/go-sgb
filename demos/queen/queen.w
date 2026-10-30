@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 queen.w를 Go로 이식한다.
 @i ../../gbtypes.w
 
@@ -33,7 +33,7 @@
 여기서 이 시연의 요령이 나온다. 퀸을 뜻하는 |piece| 값은 없다. 하지만 퀸의
 행마는 룩과 비숍의 행마를 합친 것이므로, 룩 판과 비숍 판을 따로 짓고
 |gbbasic.Gunion|으로 합집합을 취하면 된다. (같은 요령으로 킹은 |piece|가 1인
-판과 2인 판의 합집합이다.) Knuth가 {\sc GB\_\,BASIC}에서 일러 준 이 수법을
+판과 2인 판의 합집합이다.) 커누스가 {\sc GB\_\,BASIC}에서 일러 준 이 수법을
 그대로 보여 주는 것이 {\sc QUEEN}의 본론이다.
 
 @ 호의 길이도 |piece|의 부호에 달렸다. 인자 |piece|가 양수면 모든 호의 길이가 1이고,

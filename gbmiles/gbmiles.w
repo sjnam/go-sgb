@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 gb_miles.w를 Go로 이식한다.
 @i ../gbtypes.w
 
@@ -388,7 +388,7 @@ for q := sorted[0]; q != nil; q = q.Link {
 	}
 }
 
-@* 시험. \.{miles.dat}이 |../data|에 있다고 보고 그래프를 지어 Knuth가 발표한
+@* 시험. \.{miles.dat}이 |../data|에 있다고 보고 그래프를 지어 커누스가 발표한
 값들과 대조한다. 인구로 무게를 매기면 San Diego가 으뜸이고, Worcester에서
 Youngstown까지는 604마일이다.
 

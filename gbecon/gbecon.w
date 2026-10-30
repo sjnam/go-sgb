@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 gb_econ.w를 Go로 이식한다.
 @i ../gbtypes.w
 
@@ -41,7 +41,7 @@
 3999362, 거의 4조 달러였다.
 
 @ 반면 모든 정점에서 나가는 호 흐름을 다 더하면 7198847\footnote*{\ninepoint
-Knuth는 이 값을 7198680이라 적었지만, \.{econ.dat}의 $81\times80$ 행렬을
+커누스는 이 값을 7198680이라 적었지만, \.{econ.dat}의 $81\times80$ 행렬을
 직접 더하면 7198847이 나온다---167만큼 차이가 난다. 우리 포팅이 만든
 그래프에서 세어도 같은 값이고, SGB 정오표에도 이 항목은 없다. 이 문서는
 자료에서 실제로 나오는 값을 적는다.}이 된다. 이 합은 경제
@@ -895,7 +895,7 @@ for _, c := range []struct {
 
 @ 음의 흐름을 가진 호는 정확히 열 개이고 모두 \.{Users}로 들어간다. 그중
 가장 큰 것이 석유·천연가스의 $-27032$다. 모든 호 흐름의 합은 7198847이다---
-Knuth가 책에 적은 7198680이 아니라(들어가며의 단서를 보라).
+커누스가 책에 적은 7198680이 아니라(들어가며의 단서를 보라).
 
 @(gbecon_test.go@>=
 func TestNegativeFlowsAndTotal(t *testing.T) {

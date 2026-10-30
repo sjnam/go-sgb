@@ -1,4 +1,4 @@
-% go-sgb: Knuth의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
+% go-sgb: 커누스의 Stanford GraphBase를 한글 GWEB로 옮긴 것.
 % 이 파일은 gb_books.w를 Go로 이식한다.
 @i ../gbtypes.w
 
@@ -635,7 +635,7 @@ func (b *bookBuilder) title() string {
 }
 
 @* 시험. 기본 |Book("anna",...)|은 톨스토이의 {\sl Anna Karenina\/} 138개
-인물을 모두 담는다. Knuth의 발표값과 대조한다.
+인물을 모두 담는다. 커누스의 발표값과 대조한다.
 
 @(gbbooks_test.go@>=
 package gbbooks

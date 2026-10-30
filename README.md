@@ -96,7 +96,7 @@ go vet ./...
 
 ## 검증
 
-데모 출력은 Knuth가 발표한 값과 `cweb-sgb/test.correct`,
+데모 출력은 커누스가 발표한 값과 `cweb-sgb/test.correct`,
 `cweb-sgb/sample.correct`에 대조해 확인한다. 루트의 `test_sample`은 거의 모든
 생성기를 불러 그 표준 출력이 `sample.correct`와 **바이트 단위로 일치**하고, 부차
 산출물 `test.gb`도 `test.correct`와 **바이트 단위로 일치**함을 확인했다(자료는
