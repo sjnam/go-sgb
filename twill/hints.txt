@@ -1,0 +1,433 @@
+# gtwill 힌트: 서술의 |...|에는 나오지만 웹의 코드가 정의하지 않는 이름들의 뜻.
+# make twill이 웹마다 twill/bux.py로 이 표에서 웹이름.bux를 만든다.
+#
+# "== 웹이름" 줄 아래에 한 줄에 하나씩:  이름  자리  뜻
+#
+# 자리
+#   §            이 웹에서 그 이름이 |...| 안에 처음 나오는 절. 절 번호는 조판할
+#                때마다 찾으니, 절을 보태거나 빼도 어긋나지 않는다.
+#   §12          이 웹의 12절. 이름이 그 절의 |...|에 정말 나오는지 검사한다.
+#   gbwords§     다른 웹의 절(§12도 된다).
+#   "gb_graph.w" 문자열. 커누스의 C 원본 파일이면 그 원본에 있던 이름이고, "C"면
+#                C 언어나 표준 라이브러리의 이름, "io"·"flag"·"math/big"이면 Go
+#                패키지다. TeX 특수 문자는 gtwill이 막아 준다.
+#   -            뜻이 aux:일 때 자리는 그 .aux가 정한다.
+#
+# 뜻
+#   =EXPR        `= EXPR'로 적힌다. EXPR은 Go 원문이고 gweave로 조판한다. C 이름이면
+#                이 포팅에서 그것을 대신하는 Go 쪽 이름이나 식이다.
+#   :EXPR        `: EXPR'로 적힌다(형, package 따위).
+#   -            자리만 적힌다(\zip).
+#   aux:gbwords  그 웹의 .aux에 있는 이 이름의 첫 정의를 그대로 쓴다. 가져오지 않는
+#                패키지의 이름이나, 내보내지 않는 매개변수 이름에 쓴다.
+#
+# 다른 go-sgb 패키지에서 가져온 이름은 bux.py가 system.bux로 모으므로 여기 없다.
+
+== gbflip
+gb_fptr "gb_flip.w" =fptr
+gb_next_rand "gb_flip.w" =Next
+long "C" =int64
+
+== gbio
+fgets "C" -
+gb_r_open "gb_io.w" =RawOpen
+gb_raw_open "gb_io.w" =RawOpen
+gb_string "gb_io.w" =String
+io_errors "gb_io.w" =errors
+long "C" =int64
+p "gb_io.w" -
+str_buf "gb_io.w" -
+unsigned "C" -
+
+== gbgraph
+aux_data "gb_graph.w" -
+calloc "C" -
+cur_graph "gb_graph.w" -
+data "gb_graph.w" -
+dummy_arc "gb_graph.w" -
+edge_trick "gb_graph.w" =Partner
+free "C" -
+gb_alloc "gb_graph.w" -
+gb_free "gb_graph.w" -
+gb_new_arc "gb_graph.w" =NewArc
+gb_new_edge "gb_graph.w" =NewEdge
+gb_recycle "gb_graph.w" -
+data "gb_graph.w" -
+gb_save_string "gb_graph.w" -
+gb_trouble_code "gb_graph.w" -
+gb_typed_alloc "gb_graph.w" =AllocVertex
+gb_virgin_arc "gb_graph.w" =VirginArc
+hash_in "gb_graph.w" =HashIn
+hash_lookup "gb_graph.w" =HashLookup
+hash_out "gb_graph.w" -
+hash_setup "gb_graph.w" =HashSetup
+io "io" :package
+next "gb_graph.w" =Next
+null_string "gb_graph.w" =""
+panic_code "gb_graph.w" =PanicCode
+switch_to_graph "gb_graph.w" -
+verbose "gb_graph.w" -
+vertices "gb_graph.w" =Vertices
+visit § -
+
+== gbsort
+Words - aux:gbwords
+alt_sorted "gb_sort.w" -
+char "C" -
+dir - aux:gbwords
+extern "C" -
+gb_linksort "gb_sort.w" =LinkSort
+gb_sorted "gb_sort.w" -
+key "gb_sort.w" =Key
+link "gb_sort.w" =Link
+long "C" =int64
+lookAt § -
+words "gb_words.w" =Words
+wtThreshold - aux:gbwords
+wtVector - aux:gbwords
+
+== gbwords
+default_wt_vector "gb_words.w" -
+edge_trick "gb_graph.w" =Partner
+find_word "gb_words.w" =FindWord
+id "gb_words.w" -
+long "C" =int64
+panic_code "gb_graph.w" =PanicCode
+s § -
+sprintf "C" =fmt.Sprintf
+words "gb_words.w" =Words
+
+== gbdijk
+alph - aux:ladders
+backlink § =v.Y.V
+c § -
+dist § =v.Z.I
+e § -
+freq - aux:ladders
+hh_val § =v.X.I
+k § -
+verbose "gb_graph.w" -
+
+== gbmiles
+PlaneMiles - aux:gbplane
+aux_data "gb_graph.w" -
+b § -
+c § -
+gb_flip "gb_flip.w" -
+m § -
+miles "gb_miles.w" =Miles
+miles_distance "gb_miles.w" -
+plane_miles "gb_plane.w" =PlaneMiles
+x "gb_graph.w" =X
+z "gb_graph.w" =Z
+
+== gbsave
+MAX_SV_ID "gb_save.w" =maxSvID
+aux_data "gb_graph.w" -
+data "gb_graph.w" -
+edge_trick "gb_graph.w" =Partner
+imap - aux:gbio
+save_graph "gb_save.w" =SaveGraph
+util_types "gb_graph.w" =UtilTypes
+
+== gbbasic
+arcs "gb_graph.w" =Arcs
+imap - aux:gbio
+minlen § =W.I
+mult § =V.I
+subst "gb_basic.w" -
+tlen § =Z.A
+tmp § =U.V
+vert_offset "gb_basic.w" -
+
+== gbbooks
+MAX_CODE "gb_books.w" -
+arcs "gb_graph.w" =Arcs
+bi_ "gb_books.w" -
+book "gb_books.w" =Book
+chap_name "gb_books.w" -
+chap_no § =A.I
+desc § =Z.S
+file_name "gb_books.w" -
+in_count § =Y.I
+node_block "gb_books.w" -
+out_count § =X.I
+panic_code "gb_graph.w" =PanicCode
+short_code § =U.I
+sprintf "C" =fmt.Sprintf
+
+== gbgames
+Complement - aux:gbbasic
+abbr § =X.S
+ap § =U.I
+ap0 § -
+ap1 § -
+conf_block "gb_games.w" -
+conference § =Z.S
+date § =B.I
+edge_trick "gb_graph.w" =Partner
+games "gb_games.w" =Games
+gb_unif_rand "gb_flip.w" =Unif
+hash_block "gb_games.w" -
+nickname § =Y.S
+node_block "gb_games.w" -
+s § -
+upi § =V.I
+upi0 § -
+upi1 § -
+
+== gbrand
+dist_code "gb_rand.w" -
+edge_trick "gb_graph.w" =Partner
+random_graph "gb_rand.w" =RandomGraph
+
+== gbroget
+Next - aux:gbflip
+alloc_fault "gb_graph.w" =AllocFault
+calloc "C" -
+cat_no § =U.I
+gb_string "gb_io.w" =String
+roget "gb_roget.w" =Roget
+u "gb_graph.w" =U
+
+== gblisa
+area "gb_lisa.w" -
+bi_lisa "gb_lisa.w" =BiLisa
+eyes "gb_lisa.w" =Eyes
+first_pixel § =Y.I
+icode - aux:gbio
+last_pixel § =Z.I
+lisa "gb_lisa.w" =Lisa
+lisa_id "gb_lisa.w" -
+long "C" =int64
+matrix_cols § =VV.I
+matrix_rows § =UU.I
+na_over_b "gb_lisa.w" -
+pixel_value § =X.I
+plane_lisa "gb_lisa.w" =PlaneLisa
+smile "gb_lisa.w" =Smile
+sscanf "C" =fmt.Sscanf
+unsigned "C" -
+
+== gbecon
+Next - aux:gbgraph
+SIC_codes § =Z.A
+calloc "C" -
+econ "gb_econ.w" =Econ
+node_index "gb_econ.w" -
+sector_total § =Y.I
+
+== gbplane
+extraN - aux:gbgraph
+ez "gb_plane.w" -
+gb_flip "gb_flip.w" -
+gb_next_rand "gb_flip.w" =Next
+insFinite § -
+long "C" =int64
+maxDistance - aux:gbmiles
+miles_distance "gb_miles.w" -
+node "gb_plane.w" -
+plane_miles "gb_plane.w" =PlaneMiles
+x_coord § =X.I
+y_coord § =Y.I
+z_coord § =Z.I
+
+== gbgates
+alt § =Z.V
+avail_arc "gb_gates.w" -
+bar § =W.V
+do2 "gb_gates.w" -
+do5 "gb_gates.w" -
+done "gb_gates.w" -
+foo § =X.V
+is_boolean "gb_gates.w" -
+lnk § =W.V
+long "C" =int64
+make_v_0 "gb_gates.w" -
+out_vec "gb_gates.w" -
+outs § =ZZ.A
+tip "gb_graph.w" =Tip
+typ § =Y.I
+unsigned "C" -
+val § =X.I
+
+== gbraman
+h § -
+panic_code "gb_graph.w" =PanicCode
+ref § =A.I
+sb "gb_raman.w" -
+
+== word_components
+arcs "gb_graph.w" =Arcs
+
+== ladders
+arcs "gb_graph.w" =Arcs
+edge_trick "gb_graph.w" =Partner
+gb_recycle "gb_graph.w" -
+data "gb_graph.w" -
+loc "ladders.w" -
+restart "ladders.w" -
+sscanf "C" =fmt.Sscanf
+weight "ladders.w" =U.I
+
+== miles_span
+F_heap "miles_span.w" -
+INF "miles_span.w" -
+KNOWN "miles_span.w" -
+NULL "C" =nil
+arcs "gb_graph.w" =Arcs
+b § -
+backlink § =Y.V
+child § =X.V
+clink § =Z.V
+comp § =Y.V
+csize § =X.I
+dist § =Z.I
+e § -
+fin "miles_span.w" -
+findex § =X.I
+flag "flag" :package
+from § =A.V
+heapElt § =gv[i].U.V
+heap_index "miles_span.w" =V.I
+klink § =B.A
+large_list "miles_span.w" =largeList
+lsib § =V.V
+maxDegree - aux:gbmiles
+miles "gb_miles.w" =Miles
+new_roots "miles_span.w" =newRoots
+new_size "miles_span.w" =newSize
+next "gb_graph.w" =Next
+northWeight - aux:gbmiles
+note_edge "miles_span.w" -
+o "miles_span.w" =mems++
+old_size "miles_span.w" =oldSize
+oo "miles_span.w" =mems+=2
+ooo "miles_span.w" =mems+=3
+oooo "miles_span.w" =mems+=4
+parent § =U.V
+popWeight - aux:gbmiles
+qchild § =A.A
+qcount § =A.I
+qsib § =B.A
+rank "miles_span.w" -
+rank_tag § =X.I
+rsib § =W.V
+tag "miles_span.w" -
+tip "gb_graph.w" =Tip
+tot_len "miles_span.w" =totLen
+vertices "gb_graph.w" =Vertices
+westWeight - aux:gbmiles
+z "gb_graph.w" =Z
+
+== queen
+panic_code "gb_graph.w" =PanicCode
+piece - aux:gbbasic
+wrap - aux:gbbasic
+util_types "gb_graph.w" =UtilTypes
+
+== book_components
+active_stack "book_components.w" -
+artic_pt "book_components.w" -
+f § -
+i § -
+l § -
+link § =W.V
+o § -
+parent § =Y.V
+rank § =Z.I
+short_code "gb_books.w" =U.I
+untagged § =X.A
+w § -
+
+== football
+blocked § =U.I
+cur_node "football.w" =curNode
+date § =B.I
+del § =A.I
+games "gb_games.w" =Games
+link § =W.V
+n "football.w" -
+next_node "football.w" -
+parent § =U.V
+rank § =Z.I
+settled_stack "football.w" -
+tot_len "football.w" -
+untagged § =X.A
+valid § =V.V
+venue "gb_games.w" =A.I
+
+== roget_components
+arcFrom § =X.V
+arc_from "roget_components.w" =X.V
+arcs "gb_graph.w" =Arcs
+cat_no "gb_roget.w" =U.I
+link § =W.V
+parent § =Y.V
+rank § =Z.I
+roget "gb_roget.w" =Roget
+untagged § =X.A
+
+== assign_lisa
+INF "assign_lisa.w" -
+aa "assign_lisa.w" =mtx[k*n+l]
+breakthru "assign_lisa.w" -
+c § -
+col_inc "assign_lisa.w" =colInc
+col_mate "assign_lisa.w" =colMate
+done "assign_lisa.w" -
+eyes "gb_lisa.w" =Eyes
+long "C" =int64
+o "assign_lisa.w" =mems++
+oo "assign_lisa.w" =mems+=2
+ooo "assign_lisa.w" =mems+=3
+parent_row "assign_lisa.w" =parentRow
+register "C" -
+row_dec "assign_lisa.w" =rowDec
+row_mate "assign_lisa.w" =rowMate
+slack_row "assign_lisa.w" =slackRow
+smile "gb_lisa.w" =Smile
+unchosen_row "assign_lisa.w" =unchosenRow
+
+== econ_order
+flow "gb_econ.w" =A.I
+u § -
+
+== take_risc
+l1 § -
+l2 § -
+l3 § -
+l4 § -
+l5 § -
+r0 § -
+r1 § -
+r2 § -
+r3 § -
+r4 § -
+r5 § -
+r6 § -
+r7 § -
+start § -
+tri § -
+
+== multiply
+BitLen "math/big" -
+sscanf "C" =fmt.Sscanf
+u "gb_graph.w" =U
+
+== girth
+U - aux:gbgraph
+V - aux:gbgraph
+W - aux:gbgraph
+v0 § -
+
+== test_sample
+char "C" -
+dir § :string
+gbio gbio§ :package
+panic_code "gb_graph.w" =PanicCode
+reduce - aux:gbgates
+risc "gb_gates.w" =Risc
+util_types "gb_graph.w" =UtilTypes
+vert_offset "gb_basic.w" -
+w § -

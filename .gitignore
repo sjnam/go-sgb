@@ -14,6 +14,12 @@ test_sample.go
 *.pdf
 !chain_bound.pdf
 
+# gtwill 생성물 (*.bux는 make twill이 twill/hints.txt에서 만든다)
+*.aux
+*.mref
+*.smref
+*.bux
+
 # MetaPost 중간 산출물 (그림 원본 *.mp는 커밋한다)
 *.mpx
 *.[0-9]*
