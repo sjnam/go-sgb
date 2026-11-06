@@ -984,7 +984,7 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 
 @ 함수 |Simplex|의 코드를 빌려 쓰려고 |normalizeSimplex|에 |bufSize|를 |n| 삼아
 넘겼으니, 이제 진짜 |n|(다중집합의 크기)과 가능한 뒤바뀜의 최댓값 |ss|를 다시
-셈한다. 값 |ss=\sum_{j<k}n_jn_k$다.
+셈한다. 값 $ss=\sum_{j<k}n_jn_k$다.
 
 @<|n|과 뒤바뀜 최댓값을 정한다@>=
 var n, ss, s int64

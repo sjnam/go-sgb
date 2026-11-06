@@ -500,7 +500,7 @@ func (ht wordHash) insert(v *Vertex, near func(k int, r *Vertex)) {
 \CEE/ 원본은 |words|가 마지막으로 만든 그래프의 해시 표를 정적 전역 변수에
 붙들어 두고 |find_word|가 그것을 훔쳐보았다. 그러나 우리 관례는 패키지 수준
 가변 상태를 금하므로, |FindWord|는 그래프 스스로가 기억하는 낱말들로부터 다섯
-해시 표를 그때그때 다시 짓는다. 낱말 찾기는 자주 하는 일이 아니니(|LADDERS|는
+해시 표를 그때그때 다시 짓는다. 낱말 찾기는 자주 하는 일이 아니니({\sc LADDERS}는
 사람이 한 번 물어볼 때마다 한 번 찾는다) 이 다시 짓기의 값은 치를 만하다.
 
 @p func FindWord(g *Graph, q string, f func(*Vertex)) *Vertex {

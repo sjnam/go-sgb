@@ -417,7 +417,7 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 }
 
 @ 항등식 $\lfloor x/n\rfloor+\lfloor(x+1)/n\rfloor+\cdots+\lfloor(x+n-1)/n\rfloor=\lfloor x\rfloor$
-라는 항등식 덕에, |(probUnit+k)/n1|(|k=0,\dots,n1-1|)을 더하면 정확히
+라는 항등식 덕에, |(probUnit+k)/n1|(|k=0|, \dots, |n1-1|)을 더하면 정확히
 |probUnit|이 된다.
 
 @<|dist1|·|dist2|를 |distFrom|·|distTo|로 옮기거나 지어낸다@>=

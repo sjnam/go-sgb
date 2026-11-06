@@ -72,7 +72,7 @@ $$|inWeight|\cdot\\{chaptersIn}+|outWeight|\cdot\\{chaptersOut}$$
 장이 1.1.1(1부 1권 1장)부터 5.9.6(5부 9권 6장)까지 뻗는다.
 
 \CEE/ 원본은 그래프를 다 짓고 나면 외부 변수 |chapters|에 전체 장 수를,
-배열 |chap_name|에 그 구조적 장 번호 문자열들을 남겼다. 호출 |book("jean",\ldots)|
+배열 |chap_name|에 그 구조적 장 번호 문자열들을 남겼다. 호출 |book("jean",|\dots|)|
 뒤에는 |chapters=356|, |chap_name[1]="1.1.1"|, \dots, |chap_name[356]="5.9.6"|
 이 되는 식이었다. 우리는 패키지 수준 가변 상태를 두지 않으므로 이 둘을 밖에
 내놓지 않고 |bookBuilder| 안에 감춘다. 다만 장 이름이 정말 필요한 쓰임새---

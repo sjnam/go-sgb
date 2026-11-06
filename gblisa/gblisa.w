@@ -600,8 +600,8 @@ for k := int64(0); k < m; k++ {
 	}
 }
 
-@* 시험. \.{lisa.dat}이 |../data|에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
-|sample.correct|와 대조한다. 여기서는 |PlaneLisa|가 |Lisa|의 픽셀 처리 전체를
+@* 시험. \.{lisa.dat}이 \.{../data}에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
+\.{sample.correct}와 대조한다. 여기서는 |PlaneLisa|가 |Lisa|의 픽셀 처리 전체를
 end-to-end로 거치므로 가장 든든한 검사다.
 
 @(gblisa_test.go@>=
@@ -674,7 +674,7 @@ for i, a := range want {
 	}
 }
 
-@ 함수 |BiLisa|는 |sample.correct|에 없으므로, 짜임새만 확인한다. 미소 영역의
+@ 함수 |BiLisa|는 \.{sample.correct}에 없으므로, 짜임새만 확인한다. 미소 영역의
 $16\times32$ 그림에서 밝은 픽셀로 이분 그래프를 지으면 정점이 $16+32=48$개이고,
 첫 부분 크기 |N1|이 16이며, 켜 둔 |B.I|에는 문턱 이상의 값이 담겨야 한다.
 

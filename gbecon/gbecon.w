@@ -724,8 +724,8 @@ for j := maxN; j >= 1; j-- {
 	}
 }
 
-@* 시험. \.{econ.dat}이 |../data|에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
-|sample.correct|와 대조한다.
+@* 시험. \.{econ.dat}이 \.{../data}에 있다고 보고, {\sc GB\_\,SAMPLE}이 내놓는
+\.{sample.correct}와 대조한다.
 
 @(gbecon_test.go@>=
 package gbecon

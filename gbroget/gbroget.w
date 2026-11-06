@@ -247,7 +247,7 @@ if len(s) > 0 && s[len(s)-1] == '\\' {
 }
 f.NextLine()
 
-@* 시험. \.{roget.dat}이 |../data|에 있다고 보고, 두 가지를 확인한다. 먼저
+@* 시험. \.{roget.dat}이 \.{../data}에 있다고 보고, 두 가지를 확인한다. 먼저
 |Roget(0,...)|이 기본값 1022개 정점을 내는지 본다.
 
 @(gbroget_test.go@>=
@@ -273,7 +273,7 @@ func TestRogetDefault(t *testing.T) {
 	}
 }
 
-@ 두 번째는 진짜 대조다. {\sc GB\_\,SAMPLE}이 내놓는 |sample.correct|에 따르면
+@ 두 번째는 진짜 대조다. {\sc GB\_\,SAMPLE}이 내놓는 \.{sample.correct}에 따르면
 |roget(1000,3,1009,1009)|은 정점 1000개·호 3573개짜리 그래프이고, 그 40번 정점은
 ``thought''(범주 461)이며 다섯 호가 각각 imagination(527)·memory(517)·
 inquiry(471)·inattention(468)·attention(467)로 간다. 정점 차례와 호 차례까지

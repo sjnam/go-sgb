@@ -1945,7 +1945,7 @@ if rg != nil {
 	rg.ID = fmt.Sprintf("partial_gates(%s,%d,%d,%d)", id, r, prob, seed)
 }
 
-@* 시험. {\sc GB\_\,SAMPLE}이 내놓는 |sample.correct|와 대조한다. 호출 |Risc(16)|은
+@* 시험. {\sc GB\_\,SAMPLE}이 내놓는 \.{sample.correct}와 대조한다. 호출 |Risc(16)|은
 게이트 $1400+115\cdot16=3240$개짜리 그래프이고, |PartialGates(Risc(16),1,43210,
 98765)|는 정점 1702개·호 3796개짜리 그래프이며 그 79번 정점은 래치 ``R10:10''이다.
 
