@@ -1,4 +1,4 @@
-//line gbio.w:505
+//line gbio.gw:505
 package gbio
 
 import (
@@ -24,7 +24,7 @@ func TestIO(t *testing.T) {
 		t.Fatalf("십육진수 읽기가 고장났다 (%#x)", v)
 	}
 
-//line gbio.w:534
+//line gbio.gw:534
 	f.NextLine() // 이제 빈 줄을 훑고 있어야 한다
 	if f.Char() != '\n' {
 		t.Fatal("줄 끝에 개행이 없다")
@@ -43,9 +43,9 @@ func TestIO(t *testing.T) {
 		t.Fatalf("문자열이 제대로 읽히지 않았다 (%q)", s)
 	}
 
-//line gbio.w:530
+//line gbio.gw:530
 
-//line gbio.w:553
+//line gbio.gw:553
 	if f.Digit(10) != -1 {
 		t.Fatal("숫자 아님이 감지되지 않았다")
 	}
@@ -63,10 +63,10 @@ func TestIO(t *testing.T) {
 		t.Fatalf("검사합이 틀렸거나 파일을 닫지 못했다: %v", err)
 	}
 
-//line gbio.w:531
+//line gbio.gw:531
 }
 
-//line gbio.w:576
+//line gbio.gw:576
 func TestOpenChecksHeader(t *testing.T) {
 	good, err := os.ReadFile("../data/test.dat")
 	if err != nil {
@@ -84,7 +84,7 @@ func TestOpenChecksHeader(t *testing.T) {
 	}
 	for _, c := range cases {
 
-//line gbio.w:601
+//line gbio.gw:601
 		lines := splitLines(good)
 		lines[c.line] = "x"
 		dir := t.TempDir()
@@ -98,10 +98,10 @@ func TestOpenChecksHeader(t *testing.T) {
 			t.Errorf("%s를 망가뜨렸는데 오류가 %v다", c.name, err)
 		}
 
-//line gbio.w:593
+//line gbio.gw:593
 	}
 
-//line gbio.w:618
+//line gbio.gw:618
 	if _, err := Open(filepath.Join(t.TempDir(), "없는파일.dat")); err == nil {
 		t.Error("없는 파일을 열었는데 오류가 없다")
 	}
@@ -123,10 +123,10 @@ func TestOpenChecksHeader(t *testing.T) {
 		t.Error("검사합이 어긋났는데 Close가 통과했다")
 	}
 
-//line gbio.w:595
+//line gbio.gw:595
 }
 
-//line gbio.w:643
+//line gbio.gw:643
 func splitLines(b []byte) []string {
 	var out []string
 	start := 0

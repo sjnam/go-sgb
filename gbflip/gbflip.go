@@ -1,13 +1,13 @@
-//line gbflip.w:34
+//line gbflip.gw:34
 package gbflip
 
-//line gbflip.w:57
+//line gbflip.gw:57
 type RNG struct {
 	a    [56]int64 // 유사난수 값들; |a[0]|은 파수꾼 $-1$
 	fptr int       // 다음에 내놓을 |a|의 위치
 }
 
-//line gbflip.w:74
+//line gbflip.gw:74
 func (r *RNG) Next() int64 {
 	if r.a[r.fptr] >= 0 {
 		v := r.a[r.fptr]
@@ -17,7 +17,7 @@ func (r *RNG) Next() int64 {
 	return r.cycle()
 }
 
-//line gbflip.w:97
+//line gbflip.gw:97
 func modDiff(x, y int64) int64 { return (x - y) & 0x7fffffff } // $2^{31}$을 법으로 한 차
 
 func (r *RNG) cycle() int64 {
@@ -32,7 +32,7 @@ func (r *RNG) cycle() int64 {
 	return r.a[55]
 }
 
-//line gbflip.w:122
+//line gbflip.gw:122
 func New(seed int64) *RNG {
 	r := new(RNG)
 	r.a[0] = -1 // 파수꾼
@@ -43,7 +43,7 @@ func New(seed int64) *RNG {
 	for i := 21; i != 0; i = (i + 21) % 55 {
 		r.a[i] = next
 
-//line gbflip.w:148
+//line gbflip.gw:148
 		next = modDiff(prev, next)
 		if seed&1 != 0 {
 			seed = 0x40000000 + (seed >> 1)
@@ -52,20 +52,20 @@ func New(seed int64) *RNG {
 		}
 		next = modDiff(next, seed)
 
-//line gbflip.w:132
+//line gbflip.gw:132
 		prev = r.a[i]
 	}
 
-//line gbflip.w:180
+//line gbflip.gw:180
 	for range 5 {
 		r.cycle()
 	}
 
-//line gbflip.w:135
+//line gbflip.gw:135
 	return r
 }
 
-//line gbflip.w:206
+//line gbflip.gw:206
 const twoToThe31 = int64(1) << 31
 
 func (r *RNG) Unif(m int64) int64 {

@@ -1,4 +1,4 @@
-//line gbgraph.w:29
+//line gbgraph.gw:29
 package gbgraph
 
 import (
@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-//line gbgraph.w:57
+//line gbgraph.gw:57
 type PanicCode int64
 
 const (
@@ -27,7 +27,7 @@ func (p PanicCode) Error() string {
 	return fmt.Sprintf("gbgraph: 패닉 부호 %d", int64(p))
 }
 
-//line gbgraph.w:91
+//line gbgraph.gw:91
 type Util struct {
 	V *Vertex // 정점을 가리킬 때
 	A *Arc    // 호를 가리킬 때
@@ -36,14 +36,14 @@ type Util struct {
 	I int64   // 정수일 때
 }
 
-//line gbgraph.w:108
+//line gbgraph.gw:108
 type Vertex struct {
 	Arcs             *Arc   // 이 정점에서 나가는 호들의 연결 리스트
 	Name             string // 이 정점을 상징적으로 식별하는 문자열
 	U, V, W, X, Y, Z Util   // 다목적 필드들
 }
 
-//line gbgraph.w:123
+//line gbgraph.gw:123
 type Arc struct {
 	Tip     *Vertex // 호가 가리키는 정점
 	Next    *Arc    // 같은 정점에서 나가는 다른 호
@@ -52,7 +52,7 @@ type Arc struct {
 	A, B    Util    // 다목적 필드들
 }
 
-//line gbgraph.w:177
+//line gbgraph.gw:177
 type Graph struct {
 	Vertices               []Vertex // 정점 배열; 길이는 |N+extraN|, 순회는 |g.Vertices[:g.N]|
 	N                      int64    // 정점의 총수
@@ -63,14 +63,14 @@ type Graph struct {
 	arcs                   []*Arc   // 할당 순서의 호 레코드; SGB 호환 저장을 위해서만 쓴다
 }
 
-//line gbgraph.w:204
+//line gbgraph.gw:204
 func (g *Graph) SetUtilType(k int, c byte) {
 	t := []byte(g.UtilTypes)
 	t[k] = c
 	g.UtilTypes = string(t)
 }
 
-//line gbgraph.w:216
+//line gbgraph.gw:216
 func (g *Graph) N1() int64 {
 	return g.UU.I
 }
@@ -80,7 +80,7 @@ func (g *Graph) MarkBipartite(n1 int64) {
 	g.SetUtilType(8, 'I')
 }
 
-//line gbgraph.w:236
+//line gbgraph.gw:236
 const extraN = 4 // |NewGraph|가 여분으로 마련하는 그림자 정점의 수
 
 func NewGraph(n int64) *Graph {
@@ -92,13 +92,13 @@ func NewGraph(n int64) *Graph {
 	}
 }
 
-//line gbgraph.w:253
+//line gbgraph.gw:253
 func (g *Graph) AllocVertex(name string) *Vertex {
 	g.Vertices = append(g.Vertices, Vertex{Name: name})
 	return &g.Vertices[len(g.Vertices)-1]
 }
 
-//line gbgraph.w:263
+//line gbgraph.gw:263
 const idFieldSize = 161 // \CEE/의 |ID| 배열 크기; 문자로는 160자까지
 
 func (g *Graph) MakeCompoundID(s1 string, gg *Graph, s2 string) {
@@ -110,7 +110,7 @@ func (g *Graph) MakeCompoundID(s1 string, gg *Graph, s2 string) {
 	}
 }
 
-//line gbgraph.w:276
+//line gbgraph.gw:276
 func (g *Graph) MakeDoubleCompoundID(s1 string, gg *Graph, s2 string,
 	ggg *Graph, s3 string) {
 	avail := idFieldSize - len(s1) - len(s2) - len(s3)
@@ -122,14 +122,14 @@ func (g *Graph) MakeDoubleCompoundID(s1 string, gg *Graph, s2 string,
 	}
 }
 
-//line gbgraph.w:299
+//line gbgraph.gw:299
 func (g *Graph) VirginArc() *Arc {
 	a := new(Arc)
 	g.arcs = append(g.arcs, a)
 	return a
 }
 
-//line gbgraph.w:311
+//line gbgraph.gw:311
 func (g *Graph) NewArc(u, v *Vertex, len int64) {
 	a := g.VirginArc()
 	a.Tip, a.Next, a.Len = v, u.Arcs, len
@@ -137,7 +137,7 @@ func (g *Graph) NewArc(u, v *Vertex, len int64) {
 	g.M++
 }
 
-//line gbgraph.w:353
+//line gbgraph.gw:353
 func (g *Graph) NewEdge(u, v *Vertex, len int64) {
 	a, b := g.VirginArc(), g.VirginArc() // |a|가 앞 번호, |b|가 뒤 번호
 	a.Partner, b.Partner = b, a
@@ -155,14 +155,14 @@ func (g *Graph) NewEdge(u, v *Vertex, len int64) {
 	g.M += 2
 }
 
-//line gbgraph.w:382
+//line gbgraph.gw:382
 func (g *Graph) Index(v *Vertex) int64 {
 	base := uintptr(unsafe.Pointer(&g.Vertices[0]))
 	off := uintptr(unsafe.Pointer(v)) - base
 	return int64(off / unsafe.Sizeof(Vertex{}))
 }
 
-//line gbgraph.w:394
+//line gbgraph.gw:394
 const arcsPerBlock = 102 // \CEE/ |gb_virgin_arc|의 블록 크기
 
 func (g *Graph) ArcRecords() []*Arc {
@@ -175,12 +175,12 @@ func (g *Graph) ArcRecords() []*Arc {
 	return records
 }
 
-//line gbgraph.w:409
+//line gbgraph.gw:409
 func (g *Graph) SetArcStore(arcs []*Arc) {
 	g.arcs = arcs
 }
 
-//line gbgraph.w:421
+//line gbgraph.gw:421
 func (v *Vertex) AllArcs() iter.Seq[*Arc] {
 	return func(yield func(*Arc) bool) {
 		for a := v.Arcs; a != nil; a = a.Next {
@@ -201,13 +201,13 @@ func (g *Graph) AllVertices() iter.Seq[*Vertex] {
 	}
 }
 
-//line gbgraph.w:457
+//line gbgraph.gw:457
 const (
 	hashMult  = 314159    // 무작위 곱수; 이 양반 파이($\pi$)를 참 좋아하는군.
 	hashPrime = 516595003 // 27182818번째 소수; $2^{29}$보다 작다
 )
 
-//line gbgraph.w:484
+//line gbgraph.gw:484
 func (g *Graph) hashVertex(t string) *Vertex {
 	var h int64
 	for i := range len(t) {
@@ -219,14 +219,14 @@ func (g *Graph) hashVertex(t string) *Vertex {
 	return &g.Vertices[h%g.N]
 }
 
-//line gbgraph.w:497
+//line gbgraph.gw:497
 func (g *Graph) HashIn(v *Vertex) {
 	u := g.hashVertex(v.Name)
 	v.U.V = u.V.V // v의 링크가 사슬의 옛 머리를 잇고
 	u.V.V = v     // v가 새 머리가 된다
 }
 
-//line gbgraph.w:508
+//line gbgraph.gw:508
 func (g *Graph) HashLookup(s string) *Vertex {
 	if g == nil || g.N <= 0 {
 		return nil
@@ -239,7 +239,7 @@ func (g *Graph) HashLookup(s string) *Vertex {
 	return nil
 }
 
-//line gbgraph.w:522
+//line gbgraph.gw:522
 func (g *Graph) HashSetup() {
 	if g == nil || g.N <= 0 {
 		return

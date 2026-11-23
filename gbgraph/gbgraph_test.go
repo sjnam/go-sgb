@@ -1,4 +1,4 @@
-//line gbgraph.w:547
+//line gbgraph.gw:547
 package gbgraph
 
 import "testing"
@@ -16,7 +16,7 @@ func TestGraph(t *testing.T) {
 	}
 }
 
-//line gbgraph.w:573
+//line gbgraph.gw:573
 func TestMixedArcAndEdge(t *testing.T) {
 	g := NewGraph(4)
 	v := func(i int) *Vertex { return &g.Vertices[i] }
@@ -33,7 +33,7 @@ func TestMixedArcAndEdge(t *testing.T) {
 			}
 			edges++
 
-//line gbgraph.w:600
+//line gbgraph.gw:600
 			if a.Partner.Partner != a {
 				t.Fatalf("짝의 짝이 자기가 아니다")
 			}
@@ -44,7 +44,7 @@ func TestMixedArcAndEdge(t *testing.T) {
 				t.Errorf("짝의 Tip이 출발점이 아니다")
 			}
 
-//line gbgraph.w:589
+//line gbgraph.gw:589
 		}
 	}
 	if edges != 6 { // 간선 세 개 = 호 여섯 개
@@ -52,7 +52,7 @@ func TestMixedArcAndEdge(t *testing.T) {
 	}
 }
 
-//line gbgraph.w:611
+//line gbgraph.gw:611
 func TestPartner(t *testing.T) {
 	g := NewGraph(2)
 	u, v := &g.Vertices[0], &g.Vertices[1]
@@ -75,7 +75,7 @@ func TestPartner(t *testing.T) {
 	}
 }
 
-//line gbgraph.w:636
+//line gbgraph.gw:636
 func TestHashAndIndex(t *testing.T) {
 	g := NewGraph(5)
 	names := []string{"aargh", "abaca", "abaci", "aback", "abaft"}
@@ -100,7 +100,7 @@ func TestHashAndIndex(t *testing.T) {
 	}
 }
 
-//line gbgraph.w:664
+//line gbgraph.gw:664
 func TestIterators(t *testing.T) {
 	g := NewGraph(3)
 	u := &g.Vertices[0]

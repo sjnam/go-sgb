@@ -2,7 +2,7 @@
 
 Donald Knuth의 [Stanford GraphBase](https://www-cs-faculty.stanford.edu/~knuth/sgb.html)
 (SGB)를 **한글 GWEB 문학적 프로그램**으로 옮겨 Go로 짜는 프로젝트다.
-`.w` 문서가 일차 산출물이고, 여기서 `gtangle`로 Go 소스를, `gweave`+`luatex`로
+`.gw` 문서가 일차 산출물이고, 여기서 `gtangle`로 Go 소스를, `gweave`+`luatex`로
 한글 PDF 문서를 뽑아낸다.
 
 ## 구조
@@ -11,47 +11,47 @@ SGB는 세 층으로 구성되고, 이식도 그 구조를 따른다.
 
 | 층 | 패키지/디렉터리 | 비고 |
 | --- | --- | --- |
-| 커널 | [gbflip](gbflip/gbflip.w) | 난수 |
-| | [gbio](gbio/gbio.w) | 데이터 파일 입출력 |
-| | [gbgraph](gbgraph/gbgraph.w) | 그래프 자료구조 |
-| | [gbsort](gbsort/gbsort.w) | 연결 리스트 정렬 |
-| 생성기·유틸리티 | [gbbasic](gbbasic/gbbasic.w) | 표준 그래프 여섯 생성기 |
-| | [gbbooks](gbbooks/gbbooks.w) | 문학 작품 인물 관계 그래프 |
-| | [gbecon](gbecon/gbecon.w) | 미국 경제 부문 간 흐름 그래프 |
-| | [gbgames](gbgames/gbgames.w) | 미식축구 점수 그래프 |
-| | [gbgates](gbgates/gbgates.w) | 논리 회로(RISC·곱셈기) 게이트 그래프 |
-| | [gblisa](gblisa/gblisa.w) | 모나리자 픽셀 행렬·평면·이분 그래프 |
-| | [gbmiles](gbmiles/gbmiles.w) | 북아메리카 도시 간 거리 그래프 |
-| | [gbplane](gbplane/gbplane.w) | 델로네 삼각분할 기반 평면 그래프 |
-| | [gbraman](gbraman/gbraman.w) | Ramanujan 그래프(사원수 기반) |
-| | [gbrand](gbrand/gbrand.w) | 무작위 그래프 |
-| | [gbroget](gbroget/gbroget.w) | Roget 유의어 사전 그래프 |
-| | [gbsave](gbsave/gbsave.w) | 그래프 저장·복원 |
-| | [gbwords](gbwords/gbwords.w) | 다섯 글자 낱말 그래프 |
-| | [gbdijk](gbdijk/gbdijk.w) | Dijkstra 최단경로 + 우선순위 큐 |
-| 데모 | [demos/assign_lisa](demos/assign_lisa/assign_lisa.w) | 배정 문제(헝가리 알고리즘) |
-| | [demos/book_components](demos/book_components/book_components.w) | 이중연결 성분 |
-| | [demos/econ_order](demos/econ_order/econ_order.w) | 경제 부문 준삼각 순서 |
-| | [demos/football](demos/football/football.w) | 팀 사이 승리 사슬 찾기 |
-| | [demos/girth](demos/girth/girth.w) | Ramanujan 그래프의 둘레·지름 |
-| | [demos/ladders](demos/ladders/ladders.w) | 낱말 사다리 |
-| | [demos/miles_span](demos/miles_span/miles_span.w) | 최소 신장 트리 |
-| | [demos/multiply](demos/multiply/multiply.w) | 곱셈 회로로 큰 수 곱하기 |
-| | [demos/queen](demos/queen/queen.w) | 퀸의 행마 |
-| | [demos/roget_components](demos/roget_components/roget_components.w) | Roget 그래프의 강한 성분 |
-| | [demos/take_risc](demos/take_risc/take_risc.w) | RISC 회로로 곱셈·나눗셈 |
-| 설치 검증 | [test_sample](test_sample.w) | 모든 생성기 표본 (저장소 루트) |
-| | [demos/word_components](demos/word_components/word_components.w) | 낱말 그래프 연결 성분 |
+| 커널 | [gbflip](gbflip/gbflip.gw) | 난수 |
+| | [gbio](gbio/gbio.gw) | 데이터 파일 입출력 |
+| | [gbgraph](gbgraph/gbgraph.gw) | 그래프 자료구조 |
+| | [gbsort](gbsort/gbsort.gw) | 연결 리스트 정렬 |
+| 생성기·유틸리티 | [gbbasic](gbbasic/gbbasic.gw) | 표준 그래프 여섯 생성기 |
+| | [gbbooks](gbbooks/gbbooks.gw) | 문학 작품 인물 관계 그래프 |
+| | [gbecon](gbecon/gbecon.gw) | 미국 경제 부문 간 흐름 그래프 |
+| | [gbgames](gbgames/gbgames.gw) | 미식축구 점수 그래프 |
+| | [gbgates](gbgates/gbgates.gw) | 논리 회로(RISC·곱셈기) 게이트 그래프 |
+| | [gblisa](gblisa/gblisa.gw) | 모나리자 픽셀 행렬·평면·이분 그래프 |
+| | [gbmiles](gbmiles/gbmiles.gw) | 북아메리카 도시 간 거리 그래프 |
+| | [gbplane](gbplane/gbplane.gw) | 델로네 삼각분할 기반 평면 그래프 |
+| | [gbraman](gbraman/gbraman.gw) | Ramanujan 그래프(사원수 기반) |
+| | [gbrand](gbrand/gbrand.gw) | 무작위 그래프 |
+| | [gbroget](gbroget/gbroget.gw) | Roget 유의어 사전 그래프 |
+| | [gbsave](gbsave/gbsave.gw) | 그래프 저장·복원 |
+| | [gbwords](gbwords/gbwords.gw) | 다섯 글자 낱말 그래프 |
+| | [gbdijk](gbdijk/gbdijk.gw) | Dijkstra 최단경로 + 우선순위 큐 |
+| 데모 | [demos/assign_lisa](demos/assign_lisa/assign_lisa.gw) | 배정 문제(헝가리 알고리즘) |
+| | [demos/book_components](demos/book_components/book_components.gw) | 이중연결 성분 |
+| | [demos/econ_order](demos/econ_order/econ_order.gw) | 경제 부문 준삼각 순서 |
+| | [demos/football](demos/football/football.gw) | 팀 사이 승리 사슬 찾기 |
+| | [demos/girth](demos/girth/girth.gw) | Ramanujan 그래프의 둘레·지름 |
+| | [demos/ladders](demos/ladders/ladders.gw) | 낱말 사다리 |
+| | [demos/miles_span](demos/miles_span/miles_span.gw) | 최소 신장 트리 |
+| | [demos/multiply](demos/multiply/multiply.gw) | 곱셈 회로로 큰 수 곱하기 |
+| | [demos/queen](demos/queen/queen.gw) | 퀸의 행마 |
+| | [demos/roget_components](demos/roget_components/roget_components.gw) | Roget 그래프의 강한 성분 |
+| | [demos/take_risc](demos/take_risc/take_risc.gw) | RISC 회로로 곱셈·나눗셈 |
+| 설치 검증 | [test_sample](test_sample.gw) | 모든 생성기 표본 (저장소 루트) |
+| | [demos/word_components](demos/word_components/word_components.gw) | 낱말 그래프 연결 성분 |
 
-패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.w` → package `gbflip`).
-각 패키지 `.w`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
+패키지 디렉터리 이름은 패키지명과 같다(`gbflip/gbflip.gw` → package `gbflip`).
+각 패키지 `.gw`는 본문(`패키지.go`)과 시험(`패키지_test.go`)을 함께 뽑는다 —
 `demos/`의 시연 프로그램에는 시험이 없다. 공유하는 **GWEB** 서식 힌트는
-루트 [gbtypes.w](gbtypes.w)에 모아 `@i`로 끌어와 쓴다.
+루트 [gbtypes.gw](gbtypes.gw)에 모아 `@i`로 끌어와 쓴다.
 
 **라이브러리 패키지(위 표의 `gb…`)의 tangle 산출물 `.go`·`_test.go`는 `go get`이
 되도록 저장소에 함께 커밋한다.** 그 밖의 산출물 — 데모와 루트 검증 프로그램의
 `.go`, 그리고 모든 `.tex`·`.pdf` — 은 커밋하지 않는다(`.gitignore` 참고). 일차
-산출물은 어디까지나 `.w`이고, `gb…/*.go`는 언제든 그 `.w`에서 다시 뽑아낼 수 있다.
+산출물은 어디까지나 `.gw`이고, `gb…/*.go`는 언제든 그 `.gw`에서 다시 뽑아낼 수 있다.
 
 ## 설치와 사용
 
@@ -78,10 +78,10 @@ import (
 
 ```sh
 make            # tangle + go vet + go test
-make tangle     # 각 .w -> .go (패키지는 + _test.go)
+make tangle     # 각 .gw -> .go (패키지는 + _test.go)
 make test       # go vet + go test
-make doc        # 각 .w를 조판해 .pdf로
-make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
+make doc        # 각 .gw를 조판해 .pdf로
+make clean      # 생성물 삭제 (.gw 원본과 data/는 남김)
 ```
 
 표준 Go 도구도 그대로 쓸 수 있다. 라이브러리 패키지의 `.go`는 이미 들어 있고,

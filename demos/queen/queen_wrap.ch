@@ -181,10 +181,10 @@ $$\vbox{\halign{\tt#\hfil\cr
 % 서로 다른 변경 파일을 얼마든지 물릴 수 있다.
 %
 % queen_wrap 프로그램을 돌리려면 이렇게 한다:
-%   gtangle -o ../queen_wrap queen.w queen_wrap.ch
+%   gtangle -o ../queen_wrap queen.gw queen_wrap.ch
 %   go build -o queen_wrap ../queen_wrap
 % 저장소 루트에서라면 make queen_wrap 한 줄이면 된다.
 %
 % 조판한 문서를 얻으려면 이렇게 한다:
-%   gweave -o ../queen_wrap queen.w queen_wrap.ch
+%   gweave -o ../queen_wrap queen.gw queen_wrap.ch
 %   (cd ../queen_wrap && luatex queen.tex)

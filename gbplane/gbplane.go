@@ -1,4 +1,4 @@
-//line gbplane.w:45
+//line gbplane.gw:45
 package gbplane
 
 import (
@@ -15,7 +15,7 @@ const (
 	maxCoord = 16384      // 좌표의 상한, $2^{14}$
 )
 
-//line gbplane.w:234
+//line gbplane.gw:234
 func boolInt(b bool) int64 {
 	if b {
 		return 1
@@ -23,7 +23,7 @@ func boolInt(b bool) int64 {
 	return 0
 }
 
-//line gbplane.w:242
+//line gbplane.gw:242
 func intSqrt(x int64) int64 {
 	if x <= 0 {
 		return 0
@@ -39,7 +39,7 @@ func intSqrt(x int64) int64 {
 	}
 	for {
 
-//line gbplane.w:265
+//line gbplane.gw:265
 		if x&m != 0 {
 			y += y + 1
 		} else {
@@ -62,7 +62,7 @@ func intSqrt(x int64) int64 {
 		m >>= 1
 		k--
 
-//line gbplane.w:257
+//line gbplane.gw:257
 		if k == 0 {
 			break
 		}
@@ -70,12 +70,12 @@ func intSqrt(x int64) int64 {
 	return q >> 1
 }
 
-//line gbplane.w:293
+//line gbplane.gw:293
 func signTest(x1, x2, x3, y1, y2, y3 int64) int64 {
 	var s1, s2, s3 int64
 	var a, b, c int64
 
-//line gbplane.w:303
+//line gbplane.gw:303
 	if x1 == 0 || y1 == 0 {
 		s1 = 0
 	} else if x1 > 0 {
@@ -98,9 +98,9 @@ func signTest(x1, x2, x3, y1, y2, y3 int64) int64 {
 		x3, s3 = -x3, -1
 	}
 
-//line gbplane.w:297
+//line gbplane.gw:297
 
-//line gbplane.w:328
+//line gbplane.gw:328
 	if (s1 >= 0 && s2 >= 0 && s3 >= 0) || (s1 <= 0 && s2 <= 0 && s3 <= 0) {
 		return s1 + s2 + s3
 	}
@@ -114,9 +114,9 @@ func signTest(x1, x2, x3, y1, y2, y3 int64) int64 {
 		y1, y3 = y3, y1
 	}
 
-//line gbplane.w:298
+//line gbplane.gw:298
 
-//line gbplane.w:345
+//line gbplane.gw:345
 	{
 		var lx, rx, ly, ry int64
 		lx, rx = x1/0x4000, x1%0x4000 // 아래 14비트를 떼낸다
@@ -130,9 +130,9 @@ func signTest(x1, x2, x3, y1, y2, y3 int64) int64 {
 		a, b, c = a-lx*ly, b-lx*ry-ly*rx, c-rx*ry
 	}
 
-//line gbplane.w:299
+//line gbplane.gw:299
 
-//line gbplane.w:362
+//line gbplane.gw:362
 	if a != 0 {
 		if a < 0 {
 			a, b, c, s3 = -a, -b, -c, -s3
@@ -169,10 +169,10 @@ func signTest(x1, x2, x3, y1, y2, y3 int64) int64 {
 	}
 	return -s3 * (b*0x4000 + c)
 
-//line gbplane.w:300
+//line gbplane.gw:300
 }
 
-//line gbplane.w:418
+//line gbplane.gw:418
 func ccw(u, v, w *gbgraph.Vertex) bool {
 	wx, wy := w.X.I, w.Y.I
 	det := (u.X.I-wx)*(v.Y.I-wy) - (u.Y.I-wy)*(v.X.I-wx)
@@ -188,19 +188,19 @@ func ccw(u, v, w *gbgraph.Vertex) bool {
 			u, v, det = v, u, -det
 		}
 
-//line gbplane.w:438
+//line gbplane.gw:438
 		if u.X.I > v.X.I || (u.X.I == v.X.I && (u.Y.I > v.Y.I ||
 			(u.Y.I == v.Y.I && (w.X.I > u.X.I ||
 				(w.X.I == u.X.I && w.Y.I >= u.Y.I))))) {
 			det = -det
 		}
 
-//line gbplane.w:433
+//line gbplane.gw:433
 	}
 	return det > 0
 }
 
-//line gbplane.w:462
+//line gbplane.gw:462
 func incircle(t, u, v, w *gbgraph.Vertex) bool {
 	wx, wy := w.X.I, w.Y.I
 	tx, ty := t.X.I-wx, t.Y.I-wy
@@ -210,7 +210,7 @@ func incircle(t, u, v, w *gbgraph.Vertex) bool {
 		vx*vx+vy*vy, tx*tx+ty*ty, ux*ux+uy*uy)
 	if det == 0 {
 
-//line gbplane.w:477
+//line gbplane.gw:477
 		det = 1
 		if t.Z.I > u.Z.I {
 			t, u, det = u, t, -det
@@ -228,9 +228,9 @@ func incircle(t, u, v, w *gbgraph.Vertex) bool {
 			u, v, det = v, u, -det
 		}
 
-//line gbplane.w:471
+//line gbplane.gw:471
 
-//line gbplane.w:500
+//line gbplane.gw:500
 		for _, dd := range [...]int64{
 			ff(t, u, v, w), gg(t, u, v, w),
 			ff(u, t, w, v), gg(u, t, w, v),
@@ -247,12 +247,12 @@ func incircle(t, u, v, w *gbgraph.Vertex) bool {
 			}
 		}
 
-//line gbplane.w:472
+//line gbplane.gw:472
 	}
 	return det > 0
 }
 
-//line gbplane.w:519
+//line gbplane.gw:519
 func ff(t, u, v, w *gbgraph.Vertex) int64 {
 	wx, wy := w.X.I, w.Y.I
 	tx, ty := t.X.I-wx, t.Y.I-wy
@@ -279,7 +279,7 @@ func jj(t, u, v, w *gbgraph.Vertex) int64 {
 		(t.X.I-vx)*(t.X.I-vx) - (t.Y.I-wy)*(t.Y.I-wy)
 }
 
-//line gbplane.w:552
+//line gbplane.gw:552
 type darc struct {
 	idx  int             // |arcBlock| 안의 자리; 짝을 찾는 데 쓴다
 	vert *gbgraph.Vertex // 이 호가 가는 정점
@@ -287,14 +287,14 @@ type darc struct {
 	inst *bnode          // 삼각형이 바뀔 때 고칠 지시
 }
 
-//line gbplane.w:567
+//line gbplane.gw:567
 type bnode struct {
 	u, v *gbgraph.Vertex // 분기 노드의 두 정점 (|u==nil|이면 끝 노드)
 	l, r *bnode          // |w|가 $uv$의 왼쪽·오른쪽일 때 갈 곳
 	tri  *darc           // 끝 노드: 삼각형의 한 호
 }
 
-//line gbplane.w:578
+//line gbplane.gw:578
 type dtri struct {
 	arcBlock []darc // 모든 호
 	maxIdx   int    // |arcBlock|의 마지막 자리, $6n-7$
@@ -304,13 +304,13 @@ type dtri struct {
 
 func (dt *dtri) mate(a *darc) *darc { return &dt.arcBlock[dt.maxIdx-a.idx] }
 
-//line gbplane.w:586
+//line gbplane.gw:586
 func (dt *dtri) off(a *darc, k int) *darc { return &dt.arcBlock[a.idx+k] }
 
-//line gbplane.w:587
+//line gbplane.gw:587
 func (dt *dtri) terminal(a *darc) *bnode { return &bnode{tri: a} }
 
-//line gbplane.w:593
+//line gbplane.gw:593
 func flip(c, d, e *darc, t, tp, tpp, p *gbgraph.Vertex, xp, xpp *bnode) {
 	ep, cp := e.next, c.next
 	cpp := cp.next
@@ -322,7 +322,7 @@ func flip(c, d, e *darc, t, tp, tpp, p *gbgraph.Vertex, xp, xpp *bnode) {
 	d.vert = tpp
 }
 
-//line gbplane.w:610
+//line gbplane.gw:610
 func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 	if g.N < 2 {
 		return // 정점이 둘은 있어야 간선이 있다
@@ -332,7 +332,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 	var p, q, r, s, t, tp, tpp, u, v *gbgraph.Vertex
 	var x, y, yp, ypp *bnode
 
-//line gbplane.w:632
+//line gbplane.gw:632
 	m := 6*g.N - 6
 	dt.arcBlock = make([]darc, m)
 	for i := range dt.arcBlock {
@@ -342,7 +342,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 	u = &g.Vertices[0]
 	v = &g.Vertices[1]
 
-//line gbplane.w:643
+//line gbplane.gw:643
 	dt.root.u, dt.root.v = u, v
 	a = &dt.arcBlock[dt.nextIdx]
 	x = dt.terminal(dt.off(a, 1))
@@ -358,11 +358,11 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 	dt.off(b, -1).vert, dt.off(b, -1).next, dt.off(b, -1).inst = v, b, x
 	dt.nextIdx += 3
 
-//line gbplane.w:619
+//line gbplane.gw:619
 	for pi := int64(2); pi < g.N; pi++ {
 		p = &g.Vertices[pi]
 
-//line gbplane.w:662
+//line gbplane.gw:662
 		x = &dt.root
 		for {
 			if ccw(x.u, x.v, p) {
@@ -376,14 +376,14 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 		}
 		a = x.tri
 
-//line gbplane.w:622
+//line gbplane.gw:622
 
-//line gbplane.w:680
+//line gbplane.gw:680
 		b = a.next
 		c = b.next
 		q, r, s = a.vert, b.vert, c.vert
 
-//line gbplane.w:700
+//line gbplane.gw:700
 		na := &dt.arcBlock[dt.nextIdx]
 		yp = dt.terminal(a)
 		ypp = dt.terminal(na)
@@ -399,10 +399,10 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 		e.inst, dt.off(e, -1).inst, dt.off(e, -2).inst = yp, ypp, y
 		dt.nextIdx += 3
 
-//line gbplane.w:684
+//line gbplane.gw:684
 		if q == nil {
 
-//line gbplane.w:720
+//line gbplane.gw:720
 			xp := new(bnode)
 			x.u, x.v, x.l = r, p, ypp
 			xp.u, xp.v, xp.l, xp.r = s, p, y, yp
@@ -412,7 +412,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 			t = d.vert
 			for t != r && ccw(p, s, t) {
 
-//line gbplane.w:737
+//line gbplane.gw:737
 				xpp := dt.terminal(d)
 				xp.r = d.inst
 				xp = d.inst
@@ -424,7 +424,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 				s, t = t, d.vert
 				yp.tri = a
 
-//line gbplane.w:729
+//line gbplane.gw:729
 			}
 			xp = dt.terminal(d.next)
 			x = d.inst
@@ -432,7 +432,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 			d.inst, d.next.inst, d.next.next.inst = xp, xp, xp
 			r = s // 이 |r| 값은 뒤따르는 탐색 단계를 줄여 준다
 
-//line gbplane.w:686
+//line gbplane.gw:686
 		} else {
 			x.u, x.v = r, p
 			xp := new(bnode)
@@ -443,16 +443,16 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 			x.r = xp
 		}
 
-//line gbplane.w:623
+//line gbplane.gw:623
 
-//line gbplane.w:752
+//line gbplane.gw:752
 		for {
 			d = dt.mate(c)
 			e = d.next
 			t, tp, tpp = d.vert, c.vert, e.vert
 			if tpp != nil && incircle(tpp, tp, t, p) {
 
-//line gbplane.w:768
+//line gbplane.gw:768
 				xp := dt.terminal(e)
 				xpp := dt.terminal(d)
 				x = c.inst
@@ -461,7 +461,7 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 				x.u, x.v, x.l, x.r = tpp, p, xp, xpp
 				flip(c, d, e, t, tp, tpp, p, xp, xpp)
 
-//line gbplane.w:758
+//line gbplane.gw:758
 				c = e
 			} else if tp == r {
 				break
@@ -471,19 +471,19 @@ func Delaunay(g *gbgraph.Graph, f func(u, v *gbgraph.Vertex)) {
 			}
 		}
 
-//line gbplane.w:624
+//line gbplane.gw:624
 	}
 
-//line gbplane.w:780
+//line gbplane.gw:780
 	for i := 0; i < dt.nextIdx; i++ {
 		ai := &dt.arcBlock[i]
 		f(ai.vert, dt.mate(ai).vert)
 	}
 
-//line gbplane.w:626
+//line gbplane.gw:626
 }
 
-//line gbplane.w:70
+//line gbplane.gw:70
 func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Graph, error) {
 	rng := gbflip.New(seed)
 	if xRange > maxCoord || yRange > maxCoord {
@@ -499,7 +499,7 @@ func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Gra
 		yRange = maxCoord
 	}
 
-//line gbplane.w:98
+//line gbplane.gw:98
 	g := gbgraph.NewGraph(n)
 	g.ID = fmt.Sprintf("plane(%d,%d,%d,%d,%d,%d)",
 		n, xRange, yRange, boolInt(extend), prob, seed)
@@ -518,9 +518,9 @@ func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Gra
 		infVertex.X.I, infVertex.Y.I, infVertex.Z.I = -1, -1, -1
 	}
 
-//line gbplane.w:85
+//line gbplane.gw:85
 
-//line gbplane.w:121
+//line gbplane.gw:121
 	newEuclidEdge := func(u, v *gbgraph.Vertex) {
 		if (rng.Next() >> 15) >= prob {
 			if u != nil {
@@ -538,14 +538,14 @@ func Plane(n, xRange, yRange int64, extend bool, prob, seed int64) (*gbgraph.Gra
 	}
 	Delaunay(g, newEuclidEdge)
 
-//line gbplane.w:86
+//line gbplane.gw:86
 	if extend {
 		g.N++ // ``무한'' 정점을 정식 정점으로 만든다
 	}
 	return g, nil
 }
 
-//line gbplane.w:802
+//line gbplane.gw:802
 func PlaneMiles(n, northWeight, westWeight, popWeight int64, extend bool,
 	prob, seed int64, dir string) (*gbgraph.Graph, error) {
 	rng := gbflip.New(seed)
@@ -557,7 +557,7 @@ func PlaneMiles(n, northWeight, westWeight, popWeight int64, extend bool,
 	g.ID = fmt.Sprintf("plane_miles(%d,%d,%d,%d,%d,%d,%d)",
 		n, northWeight, westWeight, popWeight, boolInt(extend), prob, seed)
 
-//line gbplane.w:820
+//line gbplane.gw:820
 	var infVertex *gbgraph.Vertex
 	if extend {
 		infVertex = &g.Vertices[g.N]
@@ -579,7 +579,7 @@ func PlaneMiles(n, northWeight, westWeight, popWeight int64, extend bool,
 	}
 	Delaunay(g, newMileEdge)
 
-//line gbplane.w:813
+//line gbplane.gw:813
 	if extend {
 		g.N++ // ``무한'' 정점을 정식 정점으로 만든다
 	}

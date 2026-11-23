@@ -1,4 +1,4 @@
-//line gbgames.w:85
+//line gbgames.gw:85
 package gbgames
 
 import (
@@ -12,7 +12,7 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-//line gbgames.w:108
+//line gbgames.gw:108
 const (
 	maxN       = 120     // 팀 수
 	maxDay     = 128     // 마지막 경기일
@@ -27,7 +27,7 @@ const (
 	mu1        = 847     // 시즌 끝 \\{UPI} 점수 최댓값
 )
 
-//line gbgames.w:126
+//line gbgames.gw:126
 type teamInfo struct {
 	name, nick, abb string
 	a0, u0, a1, u1  int64
@@ -35,7 +35,7 @@ type teamInfo struct {
 	vert            *gbgraph.Vertex
 }
 
-//line gbgames.w:138
+//line gbgames.gw:138
 type gamesBuilder struct {
 	g      *gbgraph.Graph
 	rng    *gbflip.RNG
@@ -47,14 +47,14 @@ type gamesBuilder struct {
 	n, ap0Weight, upi0Weight, ap1Weight, upi1Weight, firstDay, lastDay int64
 }
 
-//line gbgames.w:159
+//line gbgames.gw:159
 func Games(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, dir string) (*gbgraph.Graph, error) {
 	return GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		firstDay, lastDay, seed, gbflip.New(seed), dir)
 }
 
-//line gbgames.w:167
+//line gbgames.gw:167
 func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 	firstDay, lastDay, seed int64, rng *gbflip.RNG, dir string) (*gbgraph.Graph, error) {
 	b := &gamesBuilder{
@@ -73,7 +73,7 @@ func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 
 	b.fileName = filepath.Join(dir, "games.dat")
 
-//line gbgames.w:192
+//line gbgames.gw:192
 	if b.n == 0 || b.n > maxN {
 		b.n = maxN
 	}
@@ -90,9 +90,9 @@ func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		b.lastDay = maxDay
 	}
 
-//line gbgames.w:185
+//line gbgames.gw:185
 
-//line gbgames.w:210
+//line gbgames.gw:210
 	f, err := gbio.Open(b.fileName)
 	if err != nil {
 		return nil, gbgraph.EarlyDataFault // 파일을 열 수 없다
@@ -101,14 +101,14 @@ func GamesRNG(n, ap0Weight, upi0Weight, ap1Weight, upi1Weight,
 		return nil, err
 	}
 
-//line gbgames.w:315
+//line gbgames.gw:315
 	b.g = gbgraph.NewGraph(b.n)
 	b.g.UtilTypes = "IIZSSSIIZZZZZZ"
 	b.g.ID = fmt.Sprintf("games(%d,%d,%d,%d,%d,%d,%d,%d)",
 		b.n, b.ap0Weight, b.upi0Weight, b.ap1Weight, b.upi1Weight,
 		b.firstDay, b.lastDay, b.seed)
 
-//line gbgames.w:327
+//line gbgames.gw:327
 	buckets := gbsort.LinkSort(&b.nodes[maxN-1], b.rng)
 	vi := int64(0)
 Outer:
@@ -122,7 +122,7 @@ Outer:
 		}
 	}
 
-//line gbgames.w:218
+//line gbgames.gw:218
 	if err := b.readGames(f); err != nil {
 		return nil, err
 	}
@@ -130,11 +130,11 @@ Outer:
 		return nil, gbgraph.LateDataFault // 검사합 등 실패
 	}
 
-//line gbgames.w:186
+//line gbgames.gw:186
 	return b.g, nil
 }
 
-//line gbgames.w:231
+//line gbgames.gw:231
 func (b *gamesBuilder) readTeams(f *gbio.File) error {
 	for k := 0; k < maxN; k++ {
 		if err := b.readTeam(f); err != nil {
@@ -144,11 +144,11 @@ func (b *gamesBuilder) readTeams(f *gbio.File) error {
 	return nil
 }
 
-//line gbgames.w:245
+//line gbgames.gw:245
 func (b *gamesBuilder) readTeam(f *gbio.File) error {
 	var t teamInfo
 
-//line gbgames.w:257
+//line gbgames.gw:257
 	t.abb = f.String(' ')
 	if len(t.abb) > 5 || f.Char() != ' ' {
 		return gbgraph.SyntaxError // 자료가 어긋났다
@@ -169,9 +169,9 @@ func (b *gamesBuilder) readTeam(f *gbio.File) error {
 		t.conf = ""
 	}
 
-//line gbgames.w:248
+//line gbgames.gw:248
 
-//line gbgames.w:281
+//line gbgames.gw:281
 	t.a0 = f.Number(10)
 	if t.a0 > ma0 || f.Char() != ',' {
 		return gbgraph.SyntaxError + 4
@@ -191,9 +191,9 @@ func (b *gamesBuilder) readTeam(f *gbio.File) error {
 	key := b.ap0Weight*t.a0 + b.upi0Weight*t.u0 +
 		b.ap1Weight*t.a1 + b.upi1Weight*t.u1 + weightBias
 
-//line gbgames.w:249
+//line gbgames.gw:249
 
-//line gbgames.w:303
+//line gbgames.gw:303
 	b.nodes = append(b.nodes, gbsort.Node[teamInfo]{Key: key, Data: t})
 	i := len(b.nodes) - 1
 	if i > 0 {
@@ -201,12 +201,12 @@ func (b *gamesBuilder) readTeam(f *gbio.File) error {
 	}
 	b.lookup[t.abb] = &b.nodes[i]
 
-//line gbgames.w:250
+//line gbgames.gw:250
 	f.NextLine()
 	return nil
 }
 
-//line gbgames.w:343
+//line gbgames.gw:343
 func (b *gamesBuilder) addTeam(v *gbgraph.Vertex, p *gbsort.Node[teamInfo]) {
 	d := &p.Data
 	v.U.I = (d.a0 << 16) + d.a1 // |ap|
@@ -218,7 +218,7 @@ func (b *gamesBuilder) addTeam(v *gbgraph.Vertex, p *gbsort.Node[teamInfo]) {
 	d.vert = v
 }
 
-//line gbgames.w:375
+//line gbgames.gw:375
 func (b *gamesBuilder) readGames(f *gbio.File) error {
 	today := int64(0)
 	for !f.EOF() {
@@ -237,7 +237,7 @@ func (b *gamesBuilder) readGames(f *gbio.File) error {
 	return nil
 }
 
-//line gbgames.w:396
+//line gbgames.gw:396
 func (b *gamesBuilder) changeDate(f *gbio.File, today *int64) error {
 	var d int64
 	switch f.Char() { // 월 코드
@@ -265,7 +265,7 @@ func (b *gamesBuilder) changeDate(f *gbio.File, today *int64) error {
 	return nil
 }
 
-//line gbgames.w:427
+//line gbgames.gw:427
 func (b *gamesBuilder) readOneGame(f *gbio.File, today int64) error {
 	u := b.teamLookup(f)
 	su := f.Number(10)
@@ -289,7 +289,7 @@ func (b *gamesBuilder) readOneGame(f *gbio.File, today int64) error {
 	return nil
 }
 
-//line gbgames.w:453
+//line gbgames.gw:453
 func (b *gamesBuilder) teamLookup(f *gbio.File) *gbgraph.Vertex {
 	var sb strings.Builder
 	for f.Digit(10) < 0 {
@@ -302,7 +302,7 @@ func (b *gamesBuilder) teamLookup(f *gbio.File) *gbgraph.Vertex {
 	return nil
 }
 
-//line gbgames.w:469
+//line gbgames.gw:469
 func (b *gamesBuilder) newGame(u, v *gbgraph.Vertex, su, sv, venue, today int64) {
 	b.g.NewEdge(u, v, su)
 	a := u.Arcs // 방금 만든 |u|에서 |v|로 가는 호

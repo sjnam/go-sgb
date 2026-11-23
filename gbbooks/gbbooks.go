@@ -1,4 +1,4 @@
-//line gbbooks.w:92
+//line gbbooks.gw:92
 package gbbooks
 
 import (
@@ -12,7 +12,7 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-//line gbbooks.w:114
+//line gbbooks.gw:114
 const (
 	maxChaps   = 360     // 어떤 책도 이만큼 장이 많지 않다
 	maxChars   = 600     // 인물도 이만큼 많지 않다
@@ -22,7 +22,7 @@ const (
 	maxWeight  = 1000000 // 무게 계수의 절댓값 상한
 )
 
-//line gbbooks.w:129
+//line gbbooks.gw:129
 type bookBuilder struct {
 	g                                                    *gbgraph.Graph
 	rng                                                  *gbflip.RNG
@@ -38,7 +38,7 @@ type bookBuilder struct {
 	n, x, firstChapter, lastChapter, inWeight, outWeight int64
 }
 
-//line gbbooks.w:242
+//line gbbooks.gw:242
 type charInfo struct {
 	code    int64
 	in, out int64
@@ -48,8 +48,8 @@ type charInfo struct {
 
 // |Book|은 책의 인물 마주침을 무향 그래프로 짓는다.
 //
-//line gbbooks.w:147
-//line gbbooks.w:148
+//line gbbooks.gw:147
+//line gbbooks.gw:148
 func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
 	b := newBuilder(false)
@@ -58,15 +58,15 @@ func Book(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, se
 
 // |BiBook|은 인물과 장 사이의 이분 그래프를 짓는다.
 //
-//line gbbooks.w:154
-//line gbbooks.w:155
+//line gbbooks.gw:154
+//line gbbooks.gw:155
 func BiBook(title string, n, x, firstChapter, lastChapter, inWeight, outWeight, seed int64,
 	dir string) (*gbgraph.Graph, error) {
 	b := newBuilder(true)
 	return b.bgraph(title, n, x, firstChapter, lastChapter, inWeight, outWeight, seed, dir)
 }
 
-//line gbbooks.w:162
+//line gbbooks.gw:162
 func newBuilder(bipartite bool) *bookBuilder {
 	return &bookBuilder{
 		bipartite: bipartite,
@@ -76,7 +76,7 @@ func newBuilder(bipartite bool) *bookBuilder {
 	}
 }
 
-//line gbbooks.w:175
+//line gbbooks.gw:175
 func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	inWeight, outWeight, seed int64, dir string) (*gbgraph.Graph, error) {
 	b.rng = gbflip.New(seed)
@@ -85,7 +85,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	b.firstChapter, b.lastChapter = firstChapter, lastChapter
 	b.inWeight, b.outWeight = inWeight, outWeight
 
-//line gbbooks.w:198
+//line gbbooks.gw:198
 	if b.n == 0 {
 		b.n = maxChars
 	}
@@ -105,12 +105,12 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	}
 	b.fileName = filepath.Join(dir, t+".dat")
 
-//line gbbooks.w:183
+//line gbbooks.gw:183
 	if err := b.skim(); err != nil {
 		return nil, err
 	}
 
-//line gbbooks.w:547
+//line gbbooks.gw:547
 	if b.n > b.characters {
 		b.n = b.characters
 	}
@@ -124,7 +124,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 		b.firstChapter = b.lastChapter + 1
 	}
 
-//line gbbooks.w:566
+//line gbbooks.gw:566
 	size := b.n - b.x
 	if b.bipartite {
 		size += b.lastChapter - b.firstChapter + 1
@@ -142,7 +142,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 		b.chapBase = b.g.N1() - b.firstChapter
 	}
 
-//line gbbooks.w:593
+//line gbbooks.gw:593
 	for i := int64(0); i < b.characters; i++ {
 		d := &b.nodes[i].Data
 		b.nodes[i].Key = b.inWeight*d.in + b.outWeight*d.out + weightBias
@@ -154,7 +154,7 @@ func (b *bookBuilder) bgraph(title string, n, x, firstChapter, lastChapter,
 	}
 	buckets := gbsort.LinkSort(&b.nodes[b.characters-1], b.rng)
 
-//line gbbooks.w:610
+//line gbbooks.gw:610
 	vi := int64(0)
 	skip := b.x  // 이만큼은 뺀다
 	count := b.n // 이만큼의 노드를 본다
@@ -174,21 +174,21 @@ Outer:
 		}
 	}
 
-//line gbbooks.w:187
+//line gbbooks.gw:187
 	if err := b.fill(); err != nil {
 		return nil, err
 	}
 	return b.g, nil
 }
 
-//line gbbooks.w:258
+//line gbbooks.gw:258
 func (b *bookBuilder) skim() error {
 	f, err := gbio.Open(b.fileName)
 	if err != nil {
 		return gbgraph.EarlyDataFault // 파일을 열 수 없다
 	}
 
-//line gbbooks.w:275
+//line gbbooks.gw:275
 	for c := f.Number(36); c != 0; c = f.Number(36) {
 		if c >= maxCode || f.Char() != ' ' {
 			return gbgraph.SyntaxError // 읽을 수 없는 줄
@@ -203,9 +203,9 @@ func (b *bookBuilder) skim() error {
 	b.characters = int64(len(b.nodes))
 	f.NextLine() // 인물 자료를 끝맺는 빈 줄을 건너뛴다
 
-//line gbbooks.w:264
+//line gbbooks.gw:264
 
-//line gbbooks.w:384
+//line gbbooks.gw:384
 	k := int64(1)
 	for ; k < maxChaps && !f.EOF(); k++ {
 		s := f.String(':') // 장 번호를 지나쳐 읽는다
@@ -213,7 +213,7 @@ func (b *bookBuilder) skim() error {
 			k-- // 앞 장의 이어짐
 		}
 
-//line gbbooks.w:402
+//line gbbooks.gw:402
 		for f.Char() != '\n' {
 			c := f.Number(36)
 			if c >= maxCode {
@@ -233,7 +233,7 @@ func (b *bookBuilder) skim() error {
 			}
 		}
 
-//line gbbooks.w:391
+//line gbbooks.gw:391
 		f.NextLine()
 	}
 	if k == maxChaps {
@@ -241,21 +241,21 @@ func (b *bookBuilder) skim() error {
 	}
 	b.chapters = k - 1
 
-//line gbbooks.w:265
+//line gbbooks.gw:265
 	if f.Close() != nil {
 		return gbgraph.LateDataFault // 검사합 등 실패
 	}
 	return nil
 }
 
-//line gbbooks.w:312
+//line gbbooks.gw:312
 func (b *bookBuilder) fill() error {
 	f, err := gbio.Open(b.fileName)
 	if err != nil {
 		return gbgraph.Impossible + 1 // 앞서 성공했으니 있을 수 없다
 	}
 
-//line gbbooks.w:333
+//line gbbooks.gw:333
 	for c := f.Number(36); c != 0; c = f.Number(36) {
 		p := b.xnode[c]
 		if v := p.Data.vert; v != nil {
@@ -278,10 +278,10 @@ func (b *bookBuilder) fill() error {
 	}
 	f.NextLine()
 
-//line gbbooks.w:318
+//line gbbooks.gw:318
 	if b.bipartite {
 
-//line gbbooks.w:502
+//line gbbooks.gw:502
 		for i := int64(0); i < b.characters; i++ {
 			b.nodes[i].Data.chap = 0
 		}
@@ -292,7 +292,7 @@ func (b *bookBuilder) fill() error {
 			}
 			if k >= b.firstChapter && k <= b.lastChapter {
 
-//line gbbooks.w:519
+//line gbbooks.gw:519
 				u := &b.g.Vertices[b.chapBase+k]
 				if !cont {
 					u.Name = b.chapName[k]
@@ -312,15 +312,15 @@ func (b *bookBuilder) fill() error {
 					}
 				}
 
-//line gbbooks.w:512
+//line gbbooks.gw:512
 			}
 			f.NextLine()
 		}
 
-//line gbbooks.w:320
+//line gbbooks.gw:320
 	} else {
 
-//line gbbooks.w:438
+//line gbbooks.gw:438
 		clique := make([]*gbgraph.Vertex, 0, cliqueMax)
 		for k := int64(1); !f.EOF(); k++ {
 			if b.noteChapter(k, f.String(':')) {
@@ -328,7 +328,7 @@ func (b *bookBuilder) fill() error {
 			}
 			if k >= b.firstChapter && k <= b.lastChapter {
 
-//line gbbooks.w:454
+//line gbbooks.gw:454
 				c := f.Char() // 장 번호 뒤의 |':'|
 				for c != '\n' {
 					clique = clique[:0]
@@ -342,22 +342,22 @@ func (b *bookBuilder) fill() error {
 						}
 					}
 
-//line gbbooks.w:470
+//line gbbooks.gw:470
 					for qi := 0; qi+1 < len(clique); qi++ {
 						for ri := qi + 1; ri < len(clique); ri++ {
 							b.makeAdjacent(clique[qi], clique[ri], k)
 						}
 					}
 
-//line gbbooks.w:467
+//line gbbooks.gw:467
 				}
 
-//line gbbooks.w:445
+//line gbbooks.gw:445
 			}
 			f.NextLine()
 		}
 
-//line gbbooks.w:322
+//line gbbooks.gw:322
 	}
 	if f.Close() != nil {
 		return gbgraph.Impossible + 2
@@ -365,7 +365,7 @@ func (b *bookBuilder) fill() error {
 	return nil
 }
 
-//line gbbooks.w:425
+//line gbbooks.gw:425
 func (b *bookBuilder) noteChapter(k int64, s string) (cont bool) {
 	if len(s) > 0 && s[0] == '&' {
 		return true
@@ -374,7 +374,7 @@ func (b *bookBuilder) noteChapter(k int64, s string) (cont bool) {
 	return false
 }
 
-//line gbbooks.w:482
+//line gbbooks.gw:482
 func (b *bookBuilder) makeAdjacent(u, v *gbgraph.Vertex, k int64) {
 	for a := range u.AllArcs() {
 		if a.Tip == v {
@@ -386,7 +386,7 @@ func (b *bookBuilder) makeAdjacent(u, v *gbgraph.Vertex, k int64) {
 	a.A.I, a.Partner.A.I = k, k
 }
 
-//line gbbooks.w:633
+//line gbbooks.gw:633
 func (b *bookBuilder) title() string {
 	return strings.TrimSuffix(filepath.Base(b.fileName), ".dat")
 }

@@ -1,4 +1,4 @@
-//line gbflip.w:227
+//line gbflip.gw:227
 package gbflip
 
 import "testing"
@@ -16,7 +16,7 @@ func TestFlip(t *testing.T) {
 	}
 }
 
-//line gbflip.w:249
+//line gbflip.gw:249
 func TestIndependentStreams(t *testing.T) {
 	r1, r2 := New(-314159), New(271828)
 	want := New(-314159)
@@ -28,7 +28,7 @@ func TestIndependentStreams(t *testing.T) {
 	}
 }
 
-//line gbflip.w:265
+//line gbflip.gw:265
 func TestUnifRejectionTrace(t *testing.T) {
 	const m = int64(0x55555555)
 	if thr := twoToThe31 - twoToThe31%m; thr != m {
@@ -40,7 +40,7 @@ func TestUnifRejectionTrace(t *testing.T) {
 		r.Next()
 	}
 
-//line gbflip.w:279
+//line gbflip.gw:279
 	for _, want := range []int64{2081307921, 1621414801, 1469108743} {
 		if v := r.Next(); v != want {
 			t.Fatalf("물리쳐야 할 값 %d, 얻음 %d", want, v)
@@ -50,5 +50,5 @@ func TestUnifRejectionTrace(t *testing.T) {
 		t.Fatalf("받아들일 값 748103812, 얻음 %d", v)
 	}
 
-//line gbflip.w:276
+//line gbflip.gw:276
 }

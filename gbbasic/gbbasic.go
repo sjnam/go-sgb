@@ -1,4 +1,4 @@
-//line gbbasic.w:29
+//line gbbasic.gw:29
 package gbbasic
 
 import (
@@ -14,25 +14,25 @@ type (
 	Graph  = gbgraph.Graph
 	Vertex = gbgraph.Vertex
 
-//line gbbasic.w:43
+//line gbbasic.gw:43
 )
 
-//line gbbasic.w:60
+//line gbbasic.gw:60
 const (
 	maxD    = 91         // 차원 수의 상한
 	bufSize = 4096       // 이름 버퍼의 크기
 	maxNNN  = 1000000000 // 정점 수의 상한($10^9$)
 )
 
-//line gbbasic.w:1085
+//line gbbasic.gw:1085
 const shortImap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 	"abcdefghijklmnopqrstuvwxyz" +
 	"_^~&@,;.:?!%#$+-*/|<=>()[]{}`'"
 
-//line gbbasic.w:2588
+//line gbbasic.gw:2588
 const indGraph = 1000000000 // 유도 부호가 10억 이상이면 |subst|를 본다
 
-//line gbbasic.w:80
+//line gbbasic.gw:80
 type builder struct {
 	g   *Graph          // 짓고 있는 그래프
 	nn  [maxD + 2]int64 // 각 좌표의 크기
@@ -43,7 +43,7 @@ type builder struct {
 	yy  [maxD + 2]int64 // 좌표값(이동 후)
 }
 
-//line gbbasic.w:94
+//line gbbasic.gw:94
 func dotJoin(vals []int64, sep byte) string {
 	var sb strings.Builder
 	for i, x := range vals {
@@ -55,7 +55,7 @@ func dotJoin(vals []int64, sep byte) string {
 	return sb.String()
 }
 
-//line gbbasic.w:289
+//line gbbasic.gw:289
 func boolInt(b bool) int {
 	if b {
 		return 1
@@ -63,7 +63,7 @@ func boolInt(b bool) int {
 	return 0
 }
 
-//line gbbasic.w:1750
+//line gbbasic.gw:1750
 func ptrGeq(a, b *Vertex) bool {
 	return uintptr(unsafe.Pointer(a)) >= uintptr(unsafe.Pointer(b))
 }
@@ -71,9 +71,9 @@ func ptrGeq(a, b *Vertex) bool {
 // |newLikeG|는 |g|와 같은 정점(이름만 베낀)을 가진 빈 그래프를 만든다.
 // |Complement|, |Gunion|, |Intersection|이 함께 쓴다.
 //
-//line gbbasic.w:1754
-//line gbbasic.w:1755
-//line gbbasic.w:1756
+//line gbbasic.gw:1754
+//line gbbasic.gw:1755
+//line gbbasic.gw:1756
 func newLikeG(g *Graph) *Graph {
 	ng := gbgraph.NewGraph(g.N)
 	for i := int64(0); i < g.N; i++ {
@@ -88,8 +88,8 @@ func ptrLess(a, b *Vertex) bool {
 
 // |inArray|는 |v|가 |verts|가 뒷받침하는 배열 안의 정점인지 말한다.
 //
-//line gbbasic.w:1768
-//line gbbasic.w:1769
+//line gbbasic.gw:1768
+//line gbbasic.gw:1769
 func inArray(v *Vertex, verts []Vertex) bool {
 	if len(verts) == 0 {
 		return false
@@ -100,7 +100,7 @@ func inArray(v *Vertex, verts []Vertex) bool {
 	return p >= lo && p < hi
 }
 
-//line gbbasic.w:2010
+//line gbbasic.gw:2010
 func lineName(a, b string, directed bool) string {
 	if int64(len(a)) > (bufSize-3)/2 {
 		a = a[:(bufSize-3)/2]
@@ -115,7 +115,7 @@ func lineName(a, b string, directed bool) string {
 	return a + "-" + sep + b
 }
 
-//line gbbasic.w:2142
+//line gbbasic.gw:2142
 func pairName(a, b string) string {
 	if int64(len(a)) > bufSize/2-1 {
 		a = a[:bufSize/2-1]
@@ -126,7 +126,7 @@ func pairName(a, b string) string {
 	return a + "," + b
 }
 
-//line gbbasic.w:608
+//line gbbasic.gw:608
 func (b *builder) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (int64, [5]int64, error) {
 	if n0 == 0 {
 		n0 = -2
@@ -148,7 +148,7 @@ func (b *builder) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (int64, [5]int64
 		np[0] = clamp(n0)
 		b.nn[0] = np[0]
 
-//line gbbasic.w:637
+//line gbbasic.gw:637
 		done := false
 		for i := 0; i < 4; i++ {
 			if np[i+1] <= 0 {
@@ -166,11 +166,11 @@ func (b *builder) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (int64, [5]int64
 			d, periodic = 4, false
 		}
 
-//line gbbasic.w:629
+//line gbbasic.gw:629
 	}
 	if periodic {
 
-//line gbbasic.w:658
+//line gbbasic.gw:658
 		if d == 0 {
 			d = k - 2
 		} else {
@@ -183,12 +183,12 @@ func (b *builder) normalizeSimplex(n, n0, n1, n2, n3, n4 int64) (int64, [5]int64
 			}
 		}
 
-//line gbbasic.w:632
+//line gbbasic.gw:632
 	}
 	return d, np, nil
 }
 
-//line gbbasic.w:677
+//line gbbasic.gw:677
 func (b *builder) countSimplex(n, d int64) (int64, error) {
 	coef := make([]int64, n+1)
 	for k := int64(0); k <= b.nn[0]; k++ {
@@ -210,7 +210,7 @@ func (b *builder) countSimplex(n, d int64) (int64, error) {
 	return coef[n], nil
 }
 
-//line gbbasic.w:703
+//line gbbasic.gw:703
 func (b *builder) completePartial(k, d int64) error {
 	s := b.sig[k] - b.xx[k]
 	for k++; k <= d; k++ {
@@ -228,7 +228,7 @@ func (b *builder) completePartial(k, d int64) error {
 	return nil
 }
 
-//line gbbasic.w:724
+//line gbbasic.gw:724
 func (b *builder) advancePartial(d int64) (int64, bool) {
 	for k := d - 1; ; k-- {
 		if b.xx[k] < b.sig[k] && b.xx[k] < b.nn[k] {
@@ -241,18 +241,18 @@ func (b *builder) advancePartial(d int64) (int64, bool) {
 	}
 }
 
-//line gbbasic.w:740
+//line gbbasic.gw:740
 func (b *builder) assignSimplexName(v *Vertex, d int64) {
 	v.Name = dotJoin(b.xx[0:d+1], '.')
 	v.X.I, v.Y.I, v.Z.I = b.xx[0], b.xx[1], b.xx[2]
 }
 
-//line gbbasic.w:187
+//line gbbasic.gw:187
 func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	var d, n, k int64
 
-//line gbbasic.w:200
+//line gbbasic.gw:200
 	if piece == 0 {
 		piece = 1
 	}
@@ -275,7 +275,7 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 		d, periodic = 4, false
 	}
 
-//line gbbasic.w:226
+//line gbbasic.gw:226
 	if periodic {
 		if d == 0 {
 			d = k - 1
@@ -289,9 +289,9 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 		}
 	}
 
-//line gbbasic.w:191
+//line gbbasic.gw:191
 
-//line gbbasic.w:244
+//line gbbasic.gw:244
 	nnn := 1.0
 	n = 1
 	for j := int64(1); j <= d; j++ {
@@ -306,7 +306,7 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 		n1, n2, n3, n4, piece, wrap, boolInt(directed))
 	b.g.UtilTypes = "ZZZIIIZZZZZZZZ"
 
-//line gbbasic.w:268
+//line gbbasic.gw:268
 	for j := int64(1); j <= d; j++ {
 		b.xx[j] = 0
 	}
@@ -325,9 +325,9 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 		b.xx[kk]++
 	}
 
-//line gbbasic.w:192
+//line gbbasic.gw:192
 
-//line gbbasic.w:309
+//line gbbasic.gw:309
 	w := wrap
 	for k := int64(1); k <= d; k, w = k+1, w>>1 {
 		b.wr[k] = w & 1
@@ -341,7 +341,7 @@ func Board(n1, n2, n3, n4, piece, wrap int64, directed bool) (*Graph, error) {
 Outer:
 	for {
 
-//line gbbasic.w:332
+//line gbbasic.gw:332
 		kk := d
 		for b.sig[kk]+(b.del[kk]+1)*(b.del[kk]+1) > p {
 			b.del[kk] = 0
@@ -359,22 +359,22 @@ Outer:
 			continue Outer
 		}
 
-//line gbbasic.w:322
+//line gbbasic.gw:322
 		for {
 
-//line gbbasic.w:363
+//line gbbasic.gw:363
 			for k := int64(1); k <= d; k++ {
 				b.xx[k] = 0
 			}
 			for vi := int64(0); ; vi++ {
 
-//line gbbasic.w:390
+//line gbbasic.gw:390
 				for k := int64(1); k <= d; k++ {
 					b.yy[k] = b.xx[k] + b.del[k]
 				}
 				for l := int64(1); ; l++ {
 
-//line gbbasic.w:408
+//line gbbasic.gw:408
 					offBoard := false
 					for k := int64(1); k <= d; k++ {
 						if b.yy[k] < 0 {
@@ -399,10 +399,10 @@ Outer:
 						break
 					}
 
-//line gbbasic.w:395
+//line gbbasic.gw:395
 					if piece < 0 {
 
-//line gbbasic.w:433
+//line gbbasic.gw:433
 						equal := true
 						for k := int64(1); k <= d; k++ {
 							if b.yy[k] != b.xx[k] {
@@ -414,10 +414,10 @@ Outer:
 							break
 						}
 
-//line gbbasic.w:397
+//line gbbasic.gw:397
 					}
 
-//line gbbasic.w:445
+//line gbbasic.gw:445
 					j := b.yy[1]
 					for k := int64(2); k <= d; k++ {
 						j = b.nn[k]*j + b.yy[k]
@@ -428,7 +428,7 @@ Outer:
 						b.g.NewEdge(&b.g.Vertices[vi], &b.g.Vertices[j], l)
 					}
 
-//line gbbasic.w:399
+//line gbbasic.gw:399
 					if piece > 0 {
 						break
 					}
@@ -437,7 +437,7 @@ Outer:
 					}
 				}
 
-//line gbbasic.w:368
+//line gbbasic.gw:368
 				kk := d
 				for kk > 0 && b.xx[kk]+1 == b.nn[kk] {
 					b.xx[kk] = 0
@@ -449,9 +449,9 @@ Outer:
 				b.xx[kk]++
 			}
 
-//line gbbasic.w:324
+//line gbbasic.gw:324
 
-//line gbbasic.w:350
+//line gbbasic.gw:350
 			kk := d
 			for b.del[kk] <= 0 {
 				b.del[kk] = -b.del[kk]
@@ -462,49 +462,49 @@ Outer:
 			}
 			b.del[kk] = -b.del[kk] // |del[kk]| 앞의 어떤 성분이 양수다
 
-//line gbbasic.w:325
+//line gbbasic.gw:325
 		}
 	}
 
-//line gbbasic.w:193
+//line gbbasic.gw:193
 	return b.g, nil
 }
 
 // |Complete|는 |n|개 정점의 완전 그래프다.
 //
-//line gbbasic.w:459
-//line gbbasic.w:460
+//line gbbasic.gw:459
+//line gbbasic.gw:460
 func Complete(n int64) (*Graph, error) { return Board(n, 0, 0, 0, -1, 0, false) }
 
 // |Transitive|는 |n|개 정점의 추이 토너먼트다.
 //
-//line gbbasic.w:462
-//line gbbasic.w:463
+//line gbbasic.gw:462
+//line gbbasic.gw:463
 func Transitive(n int64) (*Graph, error) { return Board(n, 0, 0, 0, -1, 0, true) }
 
 // |Empty|는 |n|개 정점에 간선이 없는 그래프다.
 //
-//line gbbasic.w:465
-//line gbbasic.w:466
+//line gbbasic.gw:465
+//line gbbasic.gw:466
 func Empty(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 2, 0, false) }
 
 // |Circuit|은 길이 |n|의 무향 회로다.
 //
-//line gbbasic.w:468
-//line gbbasic.w:469
+//line gbbasic.gw:468
+//line gbbasic.gw:469
 func Circuit(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 1, 1, false) }
 
 // |Cycle|은 길이 |n|의 유향 순환이다.
 //
-//line gbbasic.w:471
-//line gbbasic.w:472
+//line gbbasic.gw:471
+//line gbbasic.gw:472
 func Cycle(n int64) (*Graph, error) { return Board(n, 0, 0, 0, 1, 1, true) }
 
-//line gbbasic.w:530
+//line gbbasic.gw:530
 func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 	b := &builder{}
 
-//line gbbasic.w:541
+//line gbbasic.gw:541
 	d, np, err := b.normalizeSimplex(n, n0, n1, n2, n3, n4)
 	if err != nil {
 		return nil, err
@@ -518,9 +518,9 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 		n, np[0], np[1], np[2], np[3], np[4], boolInt(directed))
 	b.g.UtilTypes = "VVZIIIZZZZZZZZ" // 해시표를 쓴다
 
-//line gbbasic.w:533
+//line gbbasic.gw:533
 
-//line gbbasic.w:559
+//line gbbasic.gw:559
 	b.yy[d+1] = 0
 	b.sig[0] = n
 	for k := d; k >= 0; k-- {
@@ -528,7 +528,7 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 	}
 	vi := int64(0)
 
-//line gbbasic.w:570
+//line gbbasic.gw:570
 	if b.yy[0] >= n {
 		k := int64(0)
 		if b.yy[1] >= n {
@@ -538,7 +538,7 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 		}
 		for {
 
-//line gbbasic.w:594
+//line gbbasic.gw:594
 			if err := b.completePartial(k, d); err != nil {
 				return nil, err
 			}
@@ -546,7 +546,7 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 			b.assignSimplexName(v, d)
 			b.g.HashIn(v)
 
-//line gbbasic.w:749
+//line gbbasic.gw:749
 			for j := int64(0); j < d; j++ {
 				if b.xx[j] != 0 {
 					b.xx[j]--
@@ -569,10 +569,10 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 				}
 			}
 
-//line gbbasic.w:601
+//line gbbasic.gw:601
 			vi++
 
-//line gbbasic.w:579
+//line gbbasic.gw:579
 			nk, ok := b.advancePartial(d)
 			if !ok {
 				break
@@ -584,11 +584,11 @@ func Simplex(n, n0, n1, n2, n3, n4 int64, directed bool) (*Graph, error) {
 		return nil, gbgraph.Impossible // 있을 수 없는 일
 	}
 
-//line gbbasic.w:534
+//line gbbasic.gw:534
 	return b.g, nil
 }
 
-//line gbbasic.w:810
+//line gbbasic.gw:810
 func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Graph, error) {
 	b := &builder{}
 	d, np, err := b.normalizeSimplex(n, n0, n1, n2, n3, n4)
@@ -604,7 +604,7 @@ func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Grap
 		n, np[0], np[1], np[2], np[3], np[4], sizeBits, boolInt(directed))
 	b.g.UtilTypes = "ZZZIIIZZZZZZZZ" // 해시표를 쓰지 않는다
 
-//line gbbasic.w:831
+//line gbbasic.gw:831
 	b.yy[d+1] = 0
 	b.sig[0] = n
 	for k := d; k >= 0; k-- {
@@ -612,7 +612,7 @@ func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Grap
 	}
 	vi := int64(0)
 
-//line gbbasic.w:841
+//line gbbasic.gw:841
 	if b.yy[0] >= n {
 		k := int64(0)
 		if b.yy[1] >= n {
@@ -627,7 +627,7 @@ func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Grap
 			v := &b.g.Vertices[vi]
 			b.assignSimplexName(v, d)
 
-//line gbbasic.w:871
+//line gbbasic.gw:871
 			for ui := int64(0); ui <= vi; ui++ {
 				u := &b.g.Vertices[ui]
 				parts := strings.Split(u.Name, ".")
@@ -649,7 +649,7 @@ func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Grap
 				}
 			}
 
-//line gbbasic.w:855
+//line gbbasic.gw:855
 			vi++
 			nk, ok := b.advancePartial(d)
 			if !ok {
@@ -662,25 +662,25 @@ func Subsets(n, n0, n1, n2, n3, n4 int64, sizeBits uint64, directed bool) (*Grap
 		return nil, gbgraph.Impossible
 	}
 
-//line gbbasic.w:825
+//line gbbasic.gw:825
 	return b.g, nil
 }
 
 // |DisjointSubsets|는 $n$원소 집합의 서로소인 $k$-부분집합들을 잇는다.
 //
-//line gbbasic.w:895
-//line gbbasic.w:896
+//line gbbasic.gw:895
+//line gbbasic.gw:896
 func DisjointSubsets(n, k int64) (*Graph, error) {
 	return Subsets(k, 1, 1-n, 0, 0, 0, 1, false)
 }
 
 // |Petersen|은 페테르센 그래프다.
 //
-//line gbbasic.w:900
-//line gbbasic.w:901
+//line gbbasic.gw:900
+//line gbbasic.gw:901
 func Petersen() (*Graph, error) { return DisjointSubsets(5, 2) }
 
-//line gbbasic.w:968
+//line gbbasic.gw:968
 func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	if n0 == 0 {
@@ -693,7 +693,7 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		return nil, err
 	}
 
-//line gbbasic.w:990
+//line gbbasic.gw:990
 	var n, ss, s int64
 	for k := int64(0); k <= d; k++ {
 		if b.nn[k] >= bufSize {
@@ -710,9 +710,9 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		maxInv = ss
 	}
 
-//line gbbasic.w:980
+//line gbbasic.gw:980
 
-//line gbbasic.w:1011
+//line gbbasic.gw:1011
 	coef := make([]int64, maxInv+1)
 	coef[0] = 1
 	s = b.nn[0]
@@ -742,14 +742,14 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		np[0], np[1], np[2], np[3], np[4], maxInv, boolInt(directed))
 	b.g.UtilTypes = "VVZZZZZZZZZZZZ" // 해시표를 쓴다
 
-//line gbbasic.w:981
+//line gbbasic.gw:981
 
-//line gbbasic.w:1044
+//line gbbasic.gw:1044
 	xtab := make([]int64, n+1)
 	ytab := make([]int64, n+1)
 	ztab := make([]int64, n+1)
 
-//line gbbasic.w:1062
+//line gbbasic.gw:1062
 	j := int64(0)
 	s = b.nn[0]
 	for k := int64(1); ; k++ {
@@ -763,13 +763,13 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		}
 	}
 
-//line gbbasic.w:1048
+//line gbbasic.gw:1048
 	buf := make([]byte, n)
 	m := int64(0) // 현재 뒤바뀜 수
 	vi := int64(0)
 	for {
 
-//line gbbasic.w:1090
+//line gbbasic.gw:1090
 		for i := int64(0); i < n; i++ {
 			buf[i] = shortImap[xtab[i+1]]
 		}
@@ -777,9 +777,9 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		v.Name = string(buf)
 		b.g.HashIn(v)
 
-//line gbbasic.w:1053
+//line gbbasic.gw:1053
 
-//line gbbasic.w:1101
+//line gbbasic.gw:1101
 		for j := int64(1); j < n; j++ {
 			if xtab[j] > xtab[j+1] {
 				buf[j-1] = shortImap[xtab[j+1]]
@@ -798,10 +798,10 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 			}
 		}
 
-//line gbbasic.w:1054
+//line gbbasic.gw:1054
 		vi++
 
-//line gbbasic.w:1124
+//line gbbasic.gw:1124
 		moved := false
 		var mk int64
 		for k := n; k > 0; k-- {
@@ -829,25 +829,25 @@ func Perms(n0, n1, n2, n3, n4, maxInv int64, directed bool) (*Graph, error) {
 		ytab[mk]++
 		m++
 
-//line gbbasic.w:1056
+//line gbbasic.gw:1056
 	}
 	if vi != b.g.N {
 		return nil, gbgraph.Impossible
 	}
 
-//line gbbasic.w:982
+//line gbbasic.gw:982
 	return b.g, nil
 }
 
 // |AllPerms|는 $n$원소 집합의 $n!$개 순열을 다 낳는다.
 //
-//line gbbasic.w:1152
-//line gbbasic.w:1153
+//line gbbasic.gw:1152
+//line gbbasic.gw:1153
 func AllPerms(n int64, directed bool) (*Graph, error) {
 	return Perms(1-n, 0, 0, 0, 0, 0, directed)
 }
 
-//line gbbasic.w:1168
+//line gbbasic.gw:1168
 func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 	b := &builder{}
 	if maxParts == 0 || maxParts > n {
@@ -860,7 +860,7 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 		return nil, gbgraph.BadSpecs // 부분이 너무 많다
 	}
 
-//line gbbasic.w:1185
+//line gbbasic.gw:1185
 	coef := make([]int64, n+1)
 	coef[0] = 1
 	for k := int64(1); k <= maxParts; k++ {
@@ -878,9 +878,9 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 	b.g.ID = fmt.Sprintf("parts(%d,%d,%d,%d)", n, maxParts, maxSize, boolInt(directed))
 	b.g.UtilTypes = "VVZZZZZZZZZZZZ" // 해시표를 쓴다
 
-//line gbbasic.w:1180
+//line gbbasic.gw:1180
 
-//line gbbasic.w:1207
+//line gbbasic.gw:1207
 	b.xx[0] = maxSize
 	b.sig[1] = n
 	for k, s := maxParts, int64(1); k > 0; k, s = k-1, s+1 {
@@ -893,7 +893,7 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 		b.xx[1] = (n-1)/maxParts + 1 // $\lceil n/|maxParts|\rceil$
 		for {
 
-//line gbbasic.w:1230
+//line gbbasic.gw:1230
 			s := b.sig[k] - b.xx[k]
 			k++
 			for s != 0 {
@@ -904,23 +904,23 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 			}
 			d = k - 1 // 가장 작은 부분이 $x_d$
 
-//line gbbasic.w:1219
+//line gbbasic.gw:1219
 
-//line gbbasic.w:1241
+//line gbbasic.gw:1241
 			v := &b.g.Vertices[vi]
 			v.Name = dotJoin(b.xx[1:d+1], '+')
 			b.g.HashIn(v)
 
-//line gbbasic.w:1220
+//line gbbasic.gw:1220
 
-//line gbbasic.w:1272
+//line gbbasic.gw:1272
 			if d < maxParts {
 				b.xx[d+1] = 0
 				for j := int64(1); j <= d; j++ {
 					if b.xx[j] != b.xx[j+1] {
 						for lo, hi := b.xx[j]/2, b.xx[j]-b.xx[j]/2; lo > 0; lo, hi = lo-1, hi+1 {
 
-//line gbbasic.w:1285
+//line gbbasic.gw:1285
 							k := j + 1
 							for b.xx[k] > hi {
 								b.nn[k-1] = b.xx[k]
@@ -945,17 +945,17 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 								b.g.NewEdge(v, u, 1)
 							}
 
-//line gbbasic.w:1278
+//line gbbasic.gw:1278
 						}
 					}
 					b.nn[j] = b.xx[j]
 				}
 			}
 
-//line gbbasic.w:1221
+//line gbbasic.gw:1221
 			vi++
 
-//line gbbasic.w:1248
+//line gbbasic.gw:1248
 			if d == 1 {
 				break
 			}
@@ -974,26 +974,26 @@ func Parts(n, maxParts, maxSize int64, directed bool) (*Graph, error) {
 			}
 			b.xx[k]++
 
-//line gbbasic.w:1223
+//line gbbasic.gw:1223
 		}
 	}
 	if vi != b.g.N {
 		return nil, gbgraph.Impossible
 	}
 
-//line gbbasic.w:1181
+//line gbbasic.gw:1181
 	return b.g, nil
 }
 
 // |AllParts|는 |n|의 분할 $p(n)$개를 다 낳는다.
 //
-//line gbbasic.w:1310
-//line gbbasic.w:1311
+//line gbbasic.gw:1310
+//line gbbasic.gw:1311
 func AllParts(n int64, directed bool) (*Graph, error) {
 	return Parts(n, 0, 0, directed)
 }
 
-//line gbbasic.w:1353
+//line gbbasic.gw:1353
 func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 	if 2*n+2 > bufSize {
 		return nil, gbgraph.BadSpecs // |n|이 우리에겐 너무 크다
@@ -1006,12 +1006,12 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 	}
 	var g *Graph
 
-//line gbbasic.w:1383
+//line gbbasic.gw:1383
 	cnt := make([]int64, n+2)
 	var nverts int64
 	if n >= 20 && maxHeight >= 6 {
 
-//line gbbasic.w:1408
+//line gbbasic.gw:1408
 		dd := (int64(1) << maxHeight) - 1 - n
 		if dd > 8 {
 			return nil, gbgraph.BadSpecs + 1 // 정점이 너무 많다
@@ -1042,7 +1042,7 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 			nverts = cnt[dd]
 		}
 
-//line gbbasic.w:1387
+//line gbbasic.gw:1387
 	} else {
 		cnt[0], cnt[1] = 1, 1
 		for j := int64(2); j <= maxHeight; j++ {
@@ -1060,9 +1060,9 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 	g.ID = fmt.Sprintf("binary(%d,%d,%d)", n, maxHeight, boolInt(directed))
 	g.UtilTypes = "VVZZZZZZZZZZZZ" // 해시표를 쓴다
 
-//line gbbasic.w:1365
+//line gbbasic.gw:1365
 
-//line gbbasic.w:1444
+//line gbbasic.gw:1444
 	d := n + n
 	xtab := make([]int64, d+1)
 	ytab := make([]int64, d+1)
@@ -1079,7 +1079,7 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 		}
 		for {
 
-//line gbbasic.w:1474
+//line gbbasic.gw:1474
 			for j := k + 1; j <= d; j++ {
 				if xtab[j-1] != 0 {
 					ltab[j] = ltab[j-1] >> 1
@@ -1097,9 +1097,9 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 				}
 			}
 
-//line gbbasic.w:1460
+//line gbbasic.gw:1460
 
-//line gbbasic.w:1494
+//line gbbasic.gw:1494
 			for k := int64(0); k <= d; k++ {
 				if xtab[k] != 0 {
 					buf[k] = '.'
@@ -1111,9 +1111,9 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 			v.Name = string(buf)
 			g.HashIn(v)
 
-//line gbbasic.w:1461
+//line gbbasic.gw:1461
 
-//line gbbasic.w:1510
+//line gbbasic.gw:1510
 			for j := int64(0); j < d; j++ {
 				if xtab[j] == 1 && xtab[j+1] == 1 {
 					i, s := j+1, int64(0)
@@ -1144,10 +1144,10 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 				}
 			}
 
-//line gbbasic.w:1462
+//line gbbasic.gw:1462
 			vi++
 
-//line gbbasic.w:1543
+//line gbbasic.gw:1543
 			done := false
 			for k = d - 1; ; k-- {
 				if k <= 0 {
@@ -1175,26 +1175,26 @@ func Binary(n, maxHeight int64, directed bool) (*Graph, error) {
 			}
 			xtab[k]++
 
-//line gbbasic.w:1464
+//line gbbasic.gw:1464
 		}
 	}
 	if vi != g.N {
 		return nil, gbgraph.Impossible
 	}
 
-//line gbbasic.w:1366
+//line gbbasic.gw:1366
 	return g, nil
 }
 
 // |AllTrees|는 |n|개 내부 노드의 이진 트리를 다 낳는다.
 //
-//line gbbasic.w:1571
-//line gbbasic.w:1572
+//line gbbasic.gw:1571
+//line gbbasic.gw:1572
 func AllTrees(n int64, directed bool) (*Graph, error) {
 	return Binary(n, 0, directed)
 }
 
-//line gbbasic.w:1607
+//line gbbasic.gw:1607
 func Complement(g *Graph, cp, self, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand // |g|가 어디 있나?
@@ -1204,7 +1204,7 @@ func Complement(g *Graph, cp, self, directed bool) (*Graph, error) {
 	ng.MakeCompoundID("complement(", g,
 		fmt.Sprintf(",%d,%d,%d)", boolInt(cp), boolInt(self), boolInt(directed)))
 
-//line gbbasic.w:1624
+//line gbbasic.gw:1624
 	for i := int64(0); i < n; i++ {
 		v := &g.Vertices[i]
 		u := &ng.Vertices[i]
@@ -1237,11 +1237,11 @@ func Complement(g *Graph, cp, self, directed bool) (*Graph, error) {
 		ng.Vertices[i].U.V = nil
 	}
 
-//line gbbasic.w:1616
+//line gbbasic.gw:1616
 	return ng, nil
 }
 
-//line gbbasic.w:1686
+//line gbbasic.gw:1686
 func Gunion(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	if g == nil || gg == nil {
 		return nil, gbgraph.MissingOperand
@@ -1251,14 +1251,14 @@ func Gunion(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	ng.MakeDoubleCompoundID("gunion(", g, ",", gg,
 		fmt.Sprintf(",%d,%d)", boolInt(multi), boolInt(directed)))
 
-//line gbbasic.w:1705
+//line gbbasic.gw:1705
 	for i := int64(0); i < n; i++ {
 		v := &g.Vertices[i]
 		vv := &ng.Vertices[i]
 		for a := v.Arcs; a != nil; a = a.Next {
 			u := &ng.Vertices[g.Index(a.Tip)]
 
-//line gbbasic.w:1726
+//line gbbasic.gw:1726
 			if directed {
 				if multi || u.U.V != vv {
 					ng.NewArc(vv, u, a.Len)
@@ -1278,14 +1278,14 @@ func Gunion(g, gg *Graph, multi, directed bool) (*Graph, error) {
 				}
 			}
 
-//line gbbasic.w:1711
+//line gbbasic.gw:1711
 		}
 		if i < gg.N {
 			for a := gg.Vertices[i].Arcs; a != nil; a = a.Next {
 				if ti := gg.Index(a.Tip); ti < n {
 					u := &ng.Vertices[ti]
 
-//line gbbasic.w:1726
+//line gbbasic.gw:1726
 					if directed {
 						if multi || u.U.V != vv {
 							ng.NewArc(vv, u, a.Len)
@@ -1305,20 +1305,20 @@ func Gunion(g, gg *Graph, multi, directed bool) (*Graph, error) {
 						}
 					}
 
-//line gbbasic.w:1717
+//line gbbasic.gw:1717
 				}
 			}
 		}
 	}
 
-//line gbbasic.w:1695
+//line gbbasic.gw:1695
 	for i := int64(0); i < n; i++ {
 		ng.Vertices[i].U.V, ng.Vertices[i].Z.A = nil, nil
 	}
 	return ng, nil
 }
 
-//line gbbasic.w:1785
+//line gbbasic.gw:1785
 func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	if g == nil || gg == nil {
 		return nil, gbgraph.MissingOperand
@@ -1328,7 +1328,7 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	ng.MakeDoubleCompoundID("intersection(", g, ",", gg,
 		fmt.Sprintf(",%d,%d)", boolInt(multi), boolInt(directed)))
 
-//line gbbasic.w:1805
+//line gbbasic.gw:1805
 	for i := int64(0); i < n; i++ {
 		if i >= gg.N {
 			continue
@@ -1336,7 +1336,7 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 		v := &g.Vertices[i]
 		vv := &ng.Vertices[i]
 
-//line gbbasic.w:1833
+//line gbbasic.gw:1833
 		for a := v.Arcs; a != nil; a = a.Next {
 			u := &ng.Vertices[g.Index(a.Tip)]
 			if u.U.V == vv {
@@ -1352,7 +1352,7 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 			}
 		}
 
-//line gbbasic.w:1812
+//line gbbasic.gw:1812
 		for a := gg.Vertices[i].Arcs; a != nil; a = a.Next {
 			ti := gg.Index(a.Tip)
 			if ti >= n {
@@ -1366,7 +1366,7 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 				}
 				if u.V.I < 0 {
 
-//line gbbasic.w:1871
+//line gbbasic.gw:1871
 					bb := u.Z.A // |vv|에서 |u|로 가는 이전 호나 간선
 					if l < bb.Len {
 						bb.Len = l
@@ -1375,10 +1375,10 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 						}
 					}
 
-//line gbbasic.w:1825
+//line gbbasic.gw:1825
 				} else {
 
-//line gbbasic.w:1852
+//line gbbasic.gw:1852
 					if directed {
 						ng.NewArc(vv, u, l)
 					} else {
@@ -1397,13 +1397,13 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 						u.V.I--
 					}
 
-//line gbbasic.w:1827
+//line gbbasic.gw:1827
 				}
 			}
 		}
 	}
 
-//line gbbasic.w:1794
+//line gbbasic.gw:1794
 	for i := int64(0); i < n; i++ {
 		v := &ng.Vertices[i]
 		v.U.V, v.Z.A, v.V.I, v.W.I = nil, nil, 0, 0
@@ -1411,7 +1411,7 @@ func Intersection(g, gg *Graph, multi, directed bool) (*Graph, error) {
 	return ng, nil
 }
 
-//line gbbasic.w:1903
+//line gbbasic.gw:1903
 func Lines(g *Graph, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
@@ -1427,7 +1427,7 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 	}
 	ng.MakeCompoundID("lines(", g, idTail)
 
-//line gbbasic.w:1933
+//line gbbasic.gw:1933
 	restore := func(cnt int64) {
 		var prev *Vertex
 		for ui := int64(0); ui < cnt; ui++ {
@@ -1443,9 +1443,9 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 		}
 	}
 
-//line gbbasic.w:1918
+//line gbbasic.gw:1918
 
-//line gbbasic.w:1953
+//line gbbasic.gw:1953
 	ui := int64(0)
 	for vidx := g.N - 1; vidx >= 0; vidx-- {
 		v := &g.Vertices[vidx]
@@ -1462,7 +1462,7 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 				}
 			}
 
-//line gbbasic.w:1981
+//line gbbasic.gw:1981
 			if ui >= m {
 				restore(ui)
 				return nil, gbgraph.InvalidOperand
@@ -1488,7 +1488,7 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 			}
 			ui++
 
-//line gbbasic.w:1969
+//line gbbasic.gw:1969
 		}
 	}
 	if ui != m {
@@ -1496,10 +1496,10 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 		return nil, gbgraph.InvalidOperand
 	}
 
-//line gbbasic.w:1919
+//line gbbasic.gw:1919
 	if directed {
 
-//line gbbasic.w:2028
+//line gbbasic.gw:2028
 		for ui := int64(0); ui < m; ui++ {
 			u := &ng.Vertices[ui]
 			v := u.V.V
@@ -1515,10 +1515,10 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 			}
 		}
 
-//line gbbasic.w:1921
+//line gbbasic.gw:1921
 	} else {
 
-//line gbbasic.w:2047
+//line gbbasic.gw:2047
 		for ui := int64(0); ui < m; ui++ {
 			u := &ng.Vertices[ui]
 			mapped := false
@@ -1542,7 +1542,7 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 			}
 		}
 
-//line gbbasic.w:1923
+//line gbbasic.gw:1923
 	}
 	restore(m)
 	return ng, nil
@@ -1550,14 +1550,14 @@ func Lines(g *Graph, directed bool) (*Graph, error) {
 
 // 곱의 종류.
 //
-//line gbbasic.w:2097
-//line gbbasic.w:2098
+//line gbbasic.gw:2097
+//line gbbasic.gw:2098
 const (
 	Cartesian = 0
 	Direct    = 1
 	Strong    = 2
 
-//line gbbasic.w:2102
+//line gbbasic.gw:2102
 )
 
 func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
@@ -1571,7 +1571,7 @@ func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 	n := g.N * gn
 	ng := gbgraph.NewGraph(n)
 
-//line gbbasic.w:2128
+//line gbbasic.gw:2128
 	for i := int64(0); i < g.N; i++ {
 		for j := int64(0); j < gn; j++ {
 			ng.Vertices[i*gn+j].Name = pairName(g.Vertices[i].Name, gg.Vertices[j].Name)
@@ -1585,10 +1585,10 @@ func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 	ng.MakeDoubleCompoundID("product(", g, ",", gg,
 		fmt.Sprintf(",%d,%d)", tf, boolInt(directed)))
 
-//line gbbasic.w:2115
+//line gbbasic.gw:2115
 	if typ&1 == 0 {
 
-//line gbbasic.w:2156
+//line gbbasic.gw:2156
 		for ju := int64(0); ju < gn; ju++ {
 			for a := gg.Vertices[ju].Arcs; a != nil; a = a.Next {
 				jv := gg.Index(a.Tip)
@@ -1602,14 +1602,14 @@ func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 				}
 				for i := int64(0); i < g.N; i++ {
 
-//line gbbasic.w:2190
+//line gbbasic.gw:2190
 					if directed {
 						ng.NewArc(&ng.Vertices[i*gn+ju], &ng.Vertices[i*gn+jv], a.Len)
 					} else {
 						ng.NewEdge(&ng.Vertices[i*gn+ju], &ng.Vertices[i*gn+jv], a.Len)
 					}
 
-//line gbbasic.w:2169
+//line gbbasic.gw:2169
 				}
 			}
 		}
@@ -1626,23 +1626,23 @@ func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 				}
 				for j := int64(0); j < gn; j++ {
 
-//line gbbasic.w:2197
+//line gbbasic.gw:2197
 					if directed {
 						ng.NewArc(&ng.Vertices[iu*gn+j], &ng.Vertices[iv*gn+j], a.Len)
 					} else {
 						ng.NewEdge(&ng.Vertices[iu*gn+j], &ng.Vertices[iv*gn+j], a.Len)
 					}
 
-//line gbbasic.w:2185
+//line gbbasic.gw:2185
 				}
 			}
 		}
 
-//line gbbasic.w:2117
+//line gbbasic.gw:2117
 	}
 	if typ != 0 {
 
-//line gbbasic.w:2206
+//line gbbasic.gw:2206
 		for iu := int64(0); iu < g.N; iu++ {
 			for a := g.Vertices[iu].Arcs; a != nil; a = a.Next {
 				iv := g.Index(a.Tip)
@@ -1673,19 +1673,19 @@ func Product(g, gg *Graph, typ int64, directed bool) (*Graph, error) {
 			}
 		}
 
-//line gbbasic.w:2120
+//line gbbasic.gw:2120
 	}
 	return ng, nil
 }
 
-//line gbbasic.w:2285
+//line gbbasic.gw:2285
 func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
 	}
 	var n, nneg int64
 
-//line gbbasic.w:2301
+//line gbbasic.gw:2301
 	for i := int64(0); i < g.N; i++ {
 		ind := g.Vertices[i].Z.I
 		if ind > 0 {
@@ -1709,10 +1709,10 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 	}
 	n += nneg
 
-//line gbbasic.w:2291
+//line gbbasic.gw:2291
 	ng := gbgraph.NewGraph(n)
 
-//line gbbasic.w:2329
+//line gbbasic.gw:2329
 	ui := int64(0)
 	for k := int64(1); k <= nneg; k++ {
 		ng.Vertices[ui].V.I = -k
@@ -1737,7 +1737,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 				}
 			} else if k >= indGraph {
 
-//line gbbasic.w:2466
+//line gbbasic.gw:2466
 				gg := v.Y.G
 				base := ui
 				for j := int64(0); j < gg.N; j++ {
@@ -1748,7 +1748,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 						svv := a.Tip
 						toV := &ng.Vertices[base+gg.Index(svv)]
 
-//line gbbasic.w:2484
+//line gbbasic.gw:2484
 						if svv == sv && !self {
 							continue
 						}
@@ -1780,12 +1780,12 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 							toV.Z.A = toV.Arcs
 						}
 
-//line gbbasic.w:2476
+//line gbbasic.gw:2476
 					}
 					ui++
 				}
 
-//line gbbasic.w:2353
+//line gbbasic.gw:2353
 			} else {
 				for j := int64(0); j < k; j++ {
 					ng.Vertices[ui].Name = fmt.Sprintf("%s:%d", v.Name, j)
@@ -1795,11 +1795,11 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 		}
 	}
 
-//line gbbasic.w:2293
+//line gbbasic.gw:2293
 	ng.MakeCompoundID("induced(", g,
 		fmt.Sprintf(",%s,%d,%d,%d)", description, boolInt(self), boolInt(multi), boolInt(directed)))
 
-//line gbbasic.w:2367
+//line gbbasic.gw:2367
 	for i := int64(0); i < g.N; i++ {
 		v := &g.Vertices[i]
 		u0 := v.Z.V
@@ -1817,7 +1817,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 			u := &ng.Vertices[ci]
 			if !multi {
 
-//line gbbasic.w:2392
+//line gbbasic.gw:2392
 				for a := range u.AllArcs() {
 					tip := a.Tip
 					tip.U.V = u
@@ -1828,11 +1828,11 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 					}
 				}
 
-//line gbbasic.w:2384
+//line gbbasic.gw:2384
 			}
 			for a := v.Arcs; a != nil; a = a.Next {
 
-//line gbbasic.w:2403
+//line gbbasic.gw:2403
 				vv := a.Tip
 				vvmap := vv.Z.V
 				if vvmap == nil {
@@ -1857,7 +1857,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 					}
 				}
 
-//line gbbasic.w:2431
+//line gbbasic.gw:2431
 				for ; j > 0; j, uui = j-1, uui+1 {
 					uu := &ng.Vertices[uui]
 					if u == uu && !self {
@@ -1865,7 +1865,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 					}
 					if uu.U.V == u && !multi {
 
-//line gbbasic.w:2453
+//line gbbasic.gw:2453
 						bb := uu.Z.A
 						if a.Len < bb.Len {
 							bb.Len = a.Len
@@ -1875,7 +1875,7 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 						}
 						continue
 
-//line gbbasic.w:2438
+//line gbbasic.gw:2438
 					}
 					if directed {
 						ng.NewArc(u, uu, a.Len)
@@ -1890,14 +1890,14 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 					}
 				}
 
-//line gbbasic.w:2387
+//line gbbasic.gw:2387
 			}
 		}
 	}
 
-//line gbbasic.w:2296
+//line gbbasic.gw:2296
 
-//line gbbasic.w:2520
+//line gbbasic.gw:2520
 	for v := range g.AllVertices() {
 		if v.Z.V != nil {
 			v.Z.I = v.Z.V.V.I // |ind|를 되살린다
@@ -1909,14 +1909,14 @@ func Induced(g *Graph, description string, self, multi, directed bool) (*Graph, 
 		v.U.V, v.V.I, v.Z.A = nil, 0, nil
 	}
 
-//line gbbasic.w:2297
+//line gbbasic.gw:2297
 	return ng, nil
 }
 
 // |BiComplete|는 크기 |n1|, |n2|의 완전 이분 그래프다.
 //
-//line gbbasic.w:2544
-//line gbbasic.w:2545
+//line gbbasic.gw:2544
+//line gbbasic.gw:2545
 func BiComplete(n1, n2 int64, directed bool) (*Graph, error) {
 	ng, err := Board(2, 0, 0, 0, 1, 0, directed)
 	if err != nil {
@@ -1935,8 +1935,8 @@ func BiComplete(n1, n2 int64, directed bool) (*Graph, error) {
 
 // |Wheel|은 |n1|개 중심점에 이어진 |n|개 정점의 바퀴다.
 //
-//line gbbasic.w:2564
-//line gbbasic.w:2565
+//line gbbasic.gw:2564
+//line gbbasic.gw:2565
 func Wheel(n, n1 int64, directed bool) (*Graph, error) {
 	ng, err := Board(2, 0, 0, 0, 1, 0, directed)
 	if err != nil {

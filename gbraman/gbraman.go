@@ -1,4 +1,4 @@
-//line gbraman.w:57
+//line gbraman.gw:57
 package gbraman
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-//line gbraman.w:77
+//line gbraman.gw:77
 var (
 	ErrQRange    = errors.New("q is out of range")
 	ErrPRange    = errors.New("p is out of range")
@@ -21,10 +21,10 @@ var (
 	ErrPTooBig   = errors.New("p is too big")
 	ErrPNotPrime = errors.New("p is not prime")
 
-//line gbraman.w:87
+//line gbraman.gw:87
 )
 
-//line gbraman.w:94
+//line gbraman.gw:94
 type builder struct {
 	q                 int64
 	qSqr, qSqrt, qInv []int64
@@ -37,7 +37,7 @@ type quaternion struct {
 	bar            int64 // 켤레(역원) 사원수의 인덱스
 }
 
-//line gbraman.w:110
+//line gbraman.gw:110
 func Raman(p, q, typ, reduce int64) (*gbgraph.Graph, error) {
 	bd := &builder{q: q}
 	if err := bd.prepareTables(p); err != nil {
@@ -58,7 +58,7 @@ func Raman(p, q, typ, reduce int64) (*gbgraph.Graph, error) {
 	return g, nil
 }
 
-//line gbraman.w:140
+//line gbraman.gw:140
 func (bd *builder) prepareTables(p int64) error {
 	q := bd.q
 	if q < 3 || q > 46337 {
@@ -71,7 +71,7 @@ func (bd *builder) prepareTables(p int64) error {
 	bd.qSqrt = make([]int64, q)
 	bd.qInv = make([]int64, q)
 
-//line gbraman.w:158
+//line gbraman.gw:158
 	for a := int64(1); a < q; a++ {
 		bd.qSqrt[a] = -1
 	}
@@ -83,9 +83,9 @@ func (bd *builder) prepareTables(p int64) error {
 		sq = (sq + a + a + 1) % q
 	}
 
-//line gbraman.w:152
+//line gbraman.gw:152
 
-//line gbraman.w:173
+//line gbraman.gw:173
 	var a, aa int64
 FindRoot:
 	for a = 2; ; a++ {
@@ -106,9 +106,9 @@ FindRoot:
 		}
 	}
 
-//line gbraman.w:153
+//line gbraman.gw:153
 
-//line gbraman.w:197
+//line gbraman.gw:197
 	b, bb := a, aa
 	for b != bb {
 		bd.qInv[b] = bb
@@ -120,11 +120,11 @@ FindRoot:
 	bd.qInv[b] = b // 이 자리에서 |b|는 |q-1|이라야 한다
 	bd.qInv[0] = q
 
-//line gbraman.w:154
+//line gbraman.gw:154
 	return nil
 }
 
-//line gbraman.w:213
+//line gbraman.gw:213
 func (bd *builder) chooseType(p, typ int64) (t, n, nFactor int64, err error) {
 	q := bd.q
 	if p == 2 {
@@ -149,7 +149,7 @@ func (bd *builder) chooseType(p, typ int64) (t, n, nFactor int64, err error) {
 		nFactor = q - 1
 	}
 
-//line gbraman.w:244
+//line gbraman.gw:244
 	switch typ {
 	case 1:
 		n = q + 1
@@ -165,20 +165,20 @@ func (bd *builder) chooseType(p, typ int64) (t, n, nFactor int64, err error) {
 		n = nFactor * q * (q + 1)
 	}
 
-//line gbraman.w:237
+//line gbraman.gw:237
 	if p >= 0x3fffffff/n { // $(p+1)n\ge2^{30}$
 		return 0, 0, 0, ErrPTooBig
 	}
 	return typ, n, nFactor, nil
 }
 
-//line gbraman.w:293
+//line gbraman.gw:293
 func (bd *builder) assignLabels(g *gbgraph.Graph, typ, nFactor int64) {
 	q := bd.q
 	switch typ {
 	case 1:
 
-//line gbraman.w:309
+//line gbraman.gw:309
 		g.SetUtilType(4, 'Z')
 		for a := int64(0); a < q; a++ {
 			g.Vertices[a].Name = strconv.FormatInt(a, 10)
@@ -187,10 +187,10 @@ func (bd *builder) assignLabels(g *gbgraph.Graph, typ, nFactor int64) {
 		g.Vertices[q].Name = "INF"
 		g.Vertices[q].X.I = q
 
-//line gbraman.w:298
+//line gbraman.gw:298
 	case 2:
 
-//line gbraman.w:321
+//line gbraman.gw:321
 		vi := int64(0)
 		for a := int64(0); a < q; a++ {
 			for aa := a + 1; aa <= q; aa++ {
@@ -205,10 +205,10 @@ func (bd *builder) assignLabels(g *gbgraph.Graph, typ, nFactor int64) {
 			}
 		}
 
-//line gbraman.w:300
+//line gbraman.gw:300
 	default:
 
-//line gbraman.w:341
+//line gbraman.gw:341
 		g.SetUtilType(5, 'I')
 		vi := int64(0)
 		for c := int64(0); c <= q; c++ {
@@ -217,7 +217,7 @@ func (bd *builder) assignLabels(g *gbgraph.Graph, typ, nFactor int64) {
 					v := &g.Vertices[vi]
 					v.Z.I = c
 
-//line gbraman.w:357
+//line gbraman.gw:357
 					var det int64
 					if typ == 3 {
 						det = bd.qSqr[a]
@@ -234,17 +234,17 @@ func (bd *builder) assignLabels(g *gbgraph.Graph, typ, nFactor int64) {
 						v.Name = fmt.Sprintf("(%d,%d;1,%d)", b, v.Y.I, c)
 					}
 
-//line gbraman.w:349
+//line gbraman.gw:349
 					vi++
 				}
 			}
 		}
 
-//line gbraman.w:302
+//line gbraman.gw:302
 	}
 }
 
-//line gbraman.w:450
+//line gbraman.gw:450
 func (bd *builder) computeGenerators(p int64) error {
 	bd.gen = make([]quaternion, p+2)
 	bd.genCount = 0
@@ -260,7 +260,7 @@ func (bd *builder) computeGenerators(p int64) error {
 	return nil
 }
 
-//line gbraman.w:483
+//line gbraman.gw:483
 func (bd *builder) quaternionGenerators(p int64) {
 	pp := (p >> 1) & 1 // $p\bmod4=1$이면 0, $p\bmod4=3$이면 1
 	for a, sa := 1-pp, p-(1-pp); sa > 0; sa, a = sa-((a+1)<<2), a+2 {
@@ -269,7 +269,7 @@ func (bd *builder) quaternionGenerators(p int64) {
 				for d, aa := c, cc; aa >= 0; aa, d = aa-((d+1)<<2), d+2 {
 					if aa == 0 {
 
-//line gbraman.w:533
+//line gbraman.gw:533
 						bd.deposit(a, b, c, d)
 						if b != 0 {
 							bd.deposit(a, -b, c, d)
@@ -279,7 +279,7 @@ func (bd *builder) quaternionGenerators(p int64) {
 							bd.deposit(a, b, -c, d)
 						}
 
-//line gbraman.w:547
+//line gbraman.gw:547
 						if b < c {
 							bd.deposit(a, c, b, d)
 							bd.deposit(a, -c, b, d)
@@ -293,7 +293,7 @@ func (bd *builder) quaternionGenerators(p int64) {
 							}
 						}
 
-//line gbraman.w:563
+//line gbraman.gw:563
 						if c < d {
 							bd.deposit(a, b, d, c)
 							bd.deposit(a, d, b, c)
@@ -317,14 +317,14 @@ func (bd *builder) quaternionGenerators(p int64) {
 							}
 						}
 
-//line gbraman.w:491
+//line gbraman.gw:491
 					}
 				}
 			}
 		}
 	}
 
-//line gbraman.w:597
+//line gbraman.gw:597
 	q := bd.q
 	var kk int64
 	for kk = q - 1; bd.qSqrt[kk] < 0; kk-- {
@@ -334,7 +334,7 @@ func (bd *builder) quaternionGenerators(p int64) {
 	for k := p; k >= 0; k-- {
 		a0, a1, a2, a3 := bd.gen[k].a0, bd.gen[k].a1, bd.gen[k].a2, bd.gen[k].a3
 
-//line gbraman.w:609
+//line gbraman.gw:609
 		a00 := (a0 + gg*a1 + hh*a3) % q
 		if a00 < 0 {
 			a00 += q
@@ -353,13 +353,13 @@ func (bd *builder) quaternionGenerators(p int64) {
 		}
 		bd.gen[k].a0, bd.gen[k].a1, bd.gen[k].a2, bd.gen[k].a3 = a00, a01, a10, a11
 
-//line gbraman.w:606
+//line gbraman.gw:606
 	}
 
-//line gbraman.w:497
+//line gbraman.gw:497
 }
 
-//line gbraman.w:509
+//line gbraman.gw:509
 func (bd *builder) deposit(a, b, c, d int64) {
 	if bd.genCount >= bd.maxGen { // |p+1|개를 이미 찾았다---|p|가 소수가 아니다
 		bd.genCount = bd.maxGen + 1
@@ -380,7 +380,7 @@ func (bd *builder) deposit(a, b, c, d int64) {
 	}
 }
 
-//line gbraman.w:640
+//line gbraman.gw:640
 func (bd *builder) specialGenerators() {
 	q := bd.q
 	s := bd.qSqrt[q-2]
@@ -395,7 +395,7 @@ func (bd *builder) specialGenerators() {
 	bd.genCount = 3
 }
 
-//line gbraman.w:663
+//line gbraman.gw:663
 func (bd *builder) appendEdges(g *gbgraph.Graph, p, typ, nFactor, reduce int64) {
 	n := g.N
 	for k := p; k >= 0; k-- {
@@ -414,7 +414,7 @@ func (bd *builder) appendEdges(g *gbgraph.Graph, p, typ, nFactor, reduce int64) 
 				}
 			} else {
 
-//line gbraman.w:690
+//line gbraman.gw:690
 				if u.Arcs != nil && u.Arcs.A.I == kk {
 					continue // |kk=k|이고 이 2-사이클은 이미 했다
 				}
@@ -439,18 +439,18 @@ func (bd *builder) appendEdges(g *gbgraph.Graph, p, typ, nFactor, reduce int64) 
 					v.Arcs = ap
 				}
 
-//line gbraman.w:681
+//line gbraman.gw:681
 			}
 		}
 	}
 }
 
-//line gbraman.w:717
+//line gbraman.gw:717
 func (bd *builder) image(g *gbgraph.Graph, v *gbgraph.Vertex, k, typ, nFactor int64) *gbgraph.Vertex {
 	q := bd.q
 	if typ < 3 {
 
-//line gbraman.w:799
+//line gbraman.gw:799
 		if typ == 1 {
 			return &g.Vertices[bd.linFrac(v.X.I, k)]
 		}
@@ -461,7 +461,7 @@ func (bd *builder) image(g *gbgraph.Graph, v *gbgraph.Vertex, k, typ, nFactor in
 		}
 		return &g.Vertices[aa*(2*q-1-aa)/2+a-1]
 
-//line gbraman.w:721
+//line gbraman.gw:721
 	}
 	a00, a01, a10, a11 := bd.gen[k].a0, bd.gen[k].a1, bd.gen[k].a2, bd.gen[k].a3
 	a, b := v.X.I, v.Y.I
@@ -472,7 +472,7 @@ func (bd *builder) image(g *gbgraph.Graph, v *gbgraph.Vertex, k, typ, nFactor in
 		c, d = 1, v.Z.I
 	}
 
-//line gbraman.w:735
+//line gbraman.gw:735
 	aa := (a*a00 + b*a10) % q
 	bb := (a*a01 + b*a11) % q
 	cc := (c*a00 + d*a10) % q
@@ -488,9 +488,9 @@ func (bd *builder) image(g *gbgraph.Graph, v *gbgraph.Vertex, k, typ, nFactor in
 	b = (norm * bb) % q
 	a = (norm * aa) % q
 
-//line gbraman.w:731
+//line gbraman.gw:731
 
-//line gbraman.w:753
+//line gbraman.gw:753
 	if c == 0 {
 		d = q
 		aa = a
@@ -507,10 +507,10 @@ func (bd *builder) image(g *gbgraph.Graph, v *gbgraph.Vertex, k, typ, nFactor in
 	}
 	return &g.Vertices[(d*q+b)*nFactor+det-1]
 
-//line gbraman.w:732
+//line gbraman.gw:732
 }
 
-//line gbraman.w:779
+//line gbraman.gw:779
 func (bd *builder) linFrac(a, k int64) int64 {
 	q := bd.qInv[0] // 법; |qInv[0]=q|
 	a00, a01, a10, a11 := bd.gen[k].a0, bd.gen[k].a1, bd.gen[k].a2, bd.gen[k].a3

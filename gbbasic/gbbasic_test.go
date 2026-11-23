@@ -1,11 +1,11 @@
-//line gbbasic.w:2594
+//line gbbasic.gw:2594
 package gbbasic
 
 import (
 	"testing"
 )
 
-//line gbbasic.w:2607
+//line gbbasic.gw:2607
 func TestComplete(t *testing.T) {
 	g, err := Complete(5)
 	if err != nil {
@@ -29,7 +29,7 @@ func degree(v *Vertex) (d int64) {
 	return
 }
 
-//line gbbasic.w:2633
+//line gbbasic.gw:2633
 func TestQueenBoard(t *testing.T) {
 	g, err := Board(3, 4, 0, 0, -1, 0, false) // 룩
 	if err != nil {
@@ -46,7 +46,7 @@ func TestQueenBoard(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2653
+//line gbbasic.gw:2653
 func TestSimplexTriangle(t *testing.T) {
 	g, err := Simplex(3, 0, 0, 0, 0, 0, false)
 	if err != nil {
@@ -60,7 +60,7 @@ func TestSimplexTriangle(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2669
+//line gbbasic.gw:2669
 func TestPetersen(t *testing.T) {
 	g, err := Petersen()
 	if err != nil {
@@ -79,7 +79,7 @@ func TestPetersen(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2690
+//line gbbasic.gw:2690
 func TestPerms(t *testing.T) {
 	g, err := Perms(2, 1, 1, 0, 0, 0, false)
 	if err != nil {
@@ -97,7 +97,7 @@ func TestPerms(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2710
+//line gbbasic.gw:2710
 func TestParts(t *testing.T) {
 	g, err := AllParts(5, false)
 	if err != nil {
@@ -111,7 +111,7 @@ func TestParts(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2726
+//line gbbasic.gw:2726
 func TestBinary(t *testing.T) {
 	g, err := AllTrees(3, false)
 	if err != nil {
@@ -130,7 +130,7 @@ func TestBinary(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2748
+//line gbbasic.gw:2748
 func TestComplement(t *testing.T) {
 	k5, _ := Complete(5)
 	c, err := Complement(k5, false, false, false)
@@ -150,7 +150,7 @@ func TestComplement(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2770
+//line gbbasic.gw:2770
 func TestGunionQueen(t *testing.T) {
 	rook, _ := Board(3, 4, 0, 0, -1, 0, false)
 	bishop, _ := Board(3, 4, 0, 0, -2, 0, false)
@@ -171,7 +171,7 @@ func TestGunionQueen(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2793
+//line gbbasic.gw:2793
 func TestIntersection(t *testing.T) {
 	a, _ := Complete(5)
 	b, _ := Complete(5)
@@ -184,7 +184,7 @@ func TestIntersection(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2808
+//line gbbasic.gw:2808
 func TestLinesTriangle(t *testing.T) {
 	k3, _ := Complete(3)
 	l, err := Lines(k3, false)
@@ -199,7 +199,7 @@ func TestLinesTriangle(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2825
+//line gbbasic.gw:2825
 func TestProductC4(t *testing.T) {
 	k2a, _ := Complete(2)
 	k2b, _ := Complete(2)
@@ -217,7 +217,7 @@ func TestProductC4(t *testing.T) {
 	}
 }
 
-//line gbbasic.w:2846
+//line gbbasic.gw:2846
 func TestBiCompleteAndWheel(t *testing.T) {
 	bc, err := BiComplete(2, 3, false)
 	if err != nil {

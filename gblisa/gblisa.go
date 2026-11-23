@@ -1,4 +1,4 @@
-//line gblisa.w:103
+//line gblisa.gw:103
 package gblisa
 
 import (
@@ -19,9 +19,9 @@ const (
 // |Region|은 그림에서 이름난 부분을 가리키는 입력 구간이다.
 // 구간은 $[M0,M1)$행, $[N0,N1)$열로 오른쪽이 열려 있다.
 //
-//line gblisa.w:87
-//line gblisa.w:88
-//line gblisa.w:89
+//line gblisa.gw:87
+//line gblisa.gw:88
+//line gblisa.gw:89
 type Region struct{ M0, M1, N0, N1 int64 }
 
 var (
@@ -29,7 +29,7 @@ var (
 	Eyes  = Region{61, 80, 91, 140}  // $19\times49$짜리 두 눈
 )
 
-//line gblisa.w:128
+//line gblisa.gw:128
 type Matrix struct {
 	M, N           int64   // 기본값 적용 뒤의 행·열 수
 	D              int64   // 기본값 적용 뒤의 최대 픽셀 값
@@ -38,10 +38,10 @@ type Matrix struct {
 	ID             string  // \.{"lisa(...)"} 꼴의 식별 문자열
 }
 
-//line gblisa.w:162
+//line gblisa.gw:162
 func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 
-//line gblisa.w:174
+//line gblisa.gw:174
 	if m1 == 0 || m1 > maxM {
 		m1 = maxM
 	}
@@ -77,10 +77,10 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 	id := fmt.Sprintf("lisa(%d,%d,%d,%d,%d,%d,%d,%d,%d)",
 		m, n, d, m0, m1, n0, n1, d0, d1)
 
-//line gblisa.w:164
+//line gblisa.gw:164
 	matx := make([]int64, m*n)
 
-//line gblisa.w:214
+//line gblisa.gw:214
 	df, err := gbio.Open(filepath.Join(dir, "lisa.dat"))
 	if err != nil {
 		return nil, gbgraph.EarlyDataFault // 파일을 열 수 없다
@@ -92,7 +92,7 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 	}
 	inRow := make([]int64, maxN)
 
-//line gblisa.w:245
+//line gblisa.gw:245
 	kappa, kap := int64(0), int64(0)
 	for k := int64(0); k < m; k++ {
 		base := k * n
@@ -103,7 +103,7 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 		for {
 			if kap >= kappa {
 
-//line gblisa.w:325
+//line gblisa.gw:325
 				j := int64(15)
 				p := int64(0)
 				var dd int64
@@ -132,7 +132,7 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 				inRow[p] = dd >> 8
 				df.NextLine()
 
-//line gblisa.w:255
+//line gblisa.gw:255
 				kappa += m
 			}
 			nk := kappa
@@ -141,7 +141,7 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 			}
 			fac := nk - kap
 
-//line gblisa.w:276
+//line gblisa.gw:276
 			lambda := n
 			curPix := n0
 			lam := int64(0)
@@ -166,14 +166,14 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 				matx[base+l] += fac * sum
 			}
 
-//line gblisa.w:263
+//line gblisa.gw:263
 			kap = nk
 			if kap >= nextKap {
 				break
 			}
 		}
 
-//line gblisa.w:304
+//line gblisa.gw:304
 		for l := int64(0); l < n; l++ {
 			switch s := matx[base+l]; {
 			case s <= d0:
@@ -185,10 +185,10 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 			}
 		}
 
-//line gblisa.w:269
+//line gblisa.gw:269
 	}
 
-//line gblisa.w:225
+//line gblisa.gw:225
 	for i := m1; i < maxM; i++ {
 		for j := 0; j < 5; j++ {
 			df.NextLine() // 입력 한 행을 건너뛴다
@@ -198,12 +198,12 @@ func Lisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*Matrix, error) {
 		return nil, gbgraph.LateDataFault // 검사합 따위의 오류
 	}
 
-//line gblisa.w:166
+//line gblisa.gw:166
 	return &Matrix{M: m, N: n, D: d, M0: m0, M1: m1, N0: n0, N1: n1,
 		Pix: matx, ID: id}, nil
 }
 
-//line gblisa.w:391
+//line gblisa.gw:391
 func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Graph, error) {
 	mx, err := Lisa(m, n, d, m0, m1, n0, n1, d0, d1, dir)
 	if err != nil {
@@ -212,14 +212,14 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 	a := mx.Pix
 	m, n = mx.M, mx.N
 
-//line gblisa.w:433
+//line gblisa.gw:433
 	f := make([]int64, n)
 	regs := int64(0)
 	apos := n*(m+1) - 1
 	for k := m; k >= 0; k-- {
 		for l := n - 1; l >= 0; l-- {
 
-//line gblisa.w:452
+//line gblisa.gw:452
 			if k < m {
 				switch {
 				case k > 0 && a[apos-n] == a[apos]:
@@ -237,7 +237,7 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 				}
 			}
 
-//line gblisa.w:439
+//line gblisa.gw:439
 			if k > 0 && l < n-1 && a[apos-n] == a[apos-n+1] {
 				f[l+1] = l
 			}
@@ -246,18 +246,18 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 		}
 	}
 
-//line gblisa.w:399
+//line gblisa.gw:399
 
-//line gblisa.w:470
+//line gblisa.gw:470
 	g := gbgraph.NewGraph(regs)
 	g.ID = "plane_" + mx.ID
 	g.UtilTypes = "ZZZIIIZZIIZZZZ"
 	g.UU.I = m // |matrix_rows|
 	g.VV.I = n // |matrix_cols|
 
-//line gblisa.w:400
+//line gblisa.gw:400
 
-//line gblisa.w:483
+//line gblisa.gw:483
 	regs = 0
 	u := make([]*gbgraph.Vertex, n)
 	ap, aloc := int64(0), int64(0)
@@ -266,7 +266,7 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 			w := u[l] // 자리 |[k-1,l]|의 정점
 			var v *gbgraph.Vertex
 
-//line gblisa.w:508
+//line gblisa.gw:508
 			if a[ap] < 0 {
 				v = &g.Vertices[regs]
 				v.Name = strconv.FormatInt(regs, 10)
@@ -277,7 +277,7 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 				v = u[a[ap]]
 			}
 
-//line gblisa.w:491
+//line gblisa.gw:491
 			u[l] = v
 			v.Z.I = aloc // |last_pixel|
 			if k > 0 && v != w {
@@ -291,11 +291,11 @@ func PlaneLisa(m, n, d, m0, m1, n0, n1, d0, d1 int64, dir string) (*gbgraph.Grap
 		}
 	}
 
-//line gblisa.w:401
+//line gblisa.gw:401
 	return g, nil
 }
 
-//line gblisa.w:524
+//line gblisa.gw:524
 func adjac(g *gbgraph.Graph, u, v *gbgraph.Vertex) {
 	for a := range u.AllArcs() {
 		if a.Tip == v {
@@ -305,7 +305,7 @@ func adjac(g *gbgraph.Graph, u, v *gbgraph.Vertex) {
 	g.NewEdge(u, v, 1)
 }
 
-//line gblisa.w:551
+//line gblisa.gw:551
 func BiLisa(m, n, m0, m1, n0, n1, thresh int64, c bool, dir string) (*gbgraph.Graph, error) {
 	mx, err := Lisa(m, n, 65535, m0, m1, n0, n1, 0, 0, dir)
 	if err != nil {
@@ -314,7 +314,7 @@ func BiLisa(m, n, m0, m1, n0, n1, thresh int64, c bool, dir string) (*gbgraph.Gr
 	m, n = mx.M, mx.N
 	m0, m1, n0, n1 = mx.M0, mx.M1, mx.N0, mx.N1
 
-//line gblisa.w:567
+//line gblisa.gw:567
 	g := gbgraph.NewGraph(m + n)
 	cflag := byte('0')
 	if c {
@@ -331,9 +331,9 @@ func BiLisa(m, n, m0, m1, n0, n1, thresh int64, c bool, dir string) (*gbgraph.Gr
 		g.Vertices[m+l].Name = "c" + strconv.FormatInt(l, 10)
 	}
 
-//line gblisa.w:559
+//line gblisa.gw:559
 
-//line gblisa.w:584
+//line gblisa.gw:584
 	ap := int64(0)
 	for k := int64(0); k < m; k++ {
 		uu := &g.Vertices[k]
@@ -353,6 +353,6 @@ func BiLisa(m, n, m0, m1, n0, n1, thresh int64, c bool, dir string) (*gbgraph.Gr
 		}
 	}
 
-//line gblisa.w:560
+//line gblisa.gw:560
 	return g, nil
 }

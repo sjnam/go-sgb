@@ -1,4 +1,4 @@
-//line gbecon.w:731
+//line gbecon.gw:731
 package gbecon
 
 import (
@@ -25,14 +25,14 @@ func TestEconDefaults(t *testing.T) {
 	}
 }
 
-//line gbecon.w:763
+//line gbecon.gw:763
 func TestEconSample(t *testing.T) {
 	g, err := Econ(40, 0, 400, -111, dataDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gbecon.w:774
+//line gbecon.gw:774
 	if g.ID != "econ(40,0,400,-111)" {
 		t.Errorf("ID = %q", g.ID)
 	}
@@ -43,9 +43,9 @@ func TestEconSample(t *testing.T) {
 		t.Errorf("UtilTypes = %q", g.UtilTypes)
 	}
 
-//line gbecon.w:769
+//line gbecon.gw:769
 
-//line gbecon.w:785
+//line gbecon.gw:785
 	v := &g.Vertices[11]
 	if v.Name != "Printing and publishing" || v.Y.I != 69451 {
 		t.Fatalf("정점 11 = %q[%d], 원함 Printing and publishing[69451]",
@@ -68,7 +68,7 @@ func TestEconSample(t *testing.T) {
 		{"Users", 3999362, 30676},
 	}
 
-//line gbecon.w:809
+//line gbecon.gw:809
 	if len(got) != len(want) {
 		t.Fatalf("정점 11의 호 %d개, 원함 %d개", len(got), len(want))
 	}
@@ -78,9 +78,9 @@ func TestEconSample(t *testing.T) {
 		}
 	}
 
-//line gbecon.w:770
+//line gbecon.gw:770
 
-//line gbecon.w:821
+//line gbecon.gw:821
 	users := &g.Vertices[g.N-1]
 	if users.Name != "Users" {
 		t.Fatalf("마지막 정점 = %q, 원함 Users", users.Name)
@@ -92,10 +92,10 @@ func TestEconSample(t *testing.T) {
 		t.Errorf("정점 11의 SIC_codes가 비어 있다")
 	}
 
-//line gbecon.w:771
+//line gbecon.gw:771
 }
 
-//line gbecon.w:839
+//line gbecon.gw:839
 func find(g *gbgraph.Graph, name string) *gbgraph.Vertex {
 	for i := int64(0); i < g.N; i++ {
 		if g.Vertices[i].Name == name {
@@ -114,7 +114,7 @@ func flowTo(u *gbgraph.Vertex, name string) (int64, bool) {
 	return 0, false
 }
 
-//line gbecon.w:858
+//line gbecon.gw:858
 func TestApparelExample(t *testing.T) {
 	g, err := Econ(0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -128,7 +128,7 @@ func TestApparelExample(t *testing.T) {
 		t.Errorf("Apparel 총액 = %d, 원함 54031", ap.Y.I)
 	}
 
-//line gbecon.w:883
+//line gbecon.gw:883
 	for _, c := range []struct {
 		to   string
 		want int64
@@ -142,7 +142,7 @@ func TestApparelExample(t *testing.T) {
 		}
 	}
 
-//line gbecon.w:871
+//line gbecon.gw:871
 	if f, ok := flowTo(users, "Apparel"); !ok || f != 19409 {
 		t.Errorf("Users->Apparel = %d, 원함 19409", f)
 	}
@@ -154,14 +154,14 @@ func TestApparelExample(t *testing.T) {
 	}
 }
 
-//line gbecon.w:901
+//line gbecon.gw:901
 func TestNegativeFlowsAndTotal(t *testing.T) {
 	g, err := Econ(0, 0, 0, 0, dataDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gbecon.w:920
+//line gbecon.gw:920
 	var neg, sum int64
 	for i := int64(0); i < g.N; i++ {
 		for a := range g.Vertices[i].AllArcs() {
@@ -179,7 +179,7 @@ func TestNegativeFlowsAndTotal(t *testing.T) {
 		t.Errorf("석유·천연가스 -> Users = %d, 원함 -27032", f)
 	}
 
-//line gbecon.w:907
+//line gbecon.gw:907
 	if neg != 10 {
 		t.Errorf("음의 호 = %d개, 원함 10개", neg)
 	}
@@ -192,7 +192,7 @@ func TestNegativeFlowsAndTotal(t *testing.T) {
 	}
 }
 
-//line gbecon.w:942
+//line gbecon.gw:942
 func TestThresholdAndPruning(t *testing.T) {
 	for _, c := range []struct{ thresh, want int64 }{
 		{0, 4602}, {1, 4473}, {6000, 72},
@@ -206,7 +206,7 @@ func TestThresholdAndPruning(t *testing.T) {
 		}
 	}
 
-//line gbecon.w:961
+//line gbecon.gw:961
 	for _, c := range []struct {
 		n     int64
 		names []string
@@ -225,10 +225,10 @@ func TestThresholdAndPruning(t *testing.T) {
 		}
 	}
 
-//line gbecon.w:955
+//line gbecon.gw:955
 }
 
-//line gbecon.w:983
+//line gbecon.gw:983
 func TestSICLists(t *testing.T) {
 	g, err := Econ(80, 1, 0, 0, dataDir)
 	if err != nil {

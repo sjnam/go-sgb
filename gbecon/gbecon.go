@@ -1,4 +1,4 @@
-//line gbecon.w:148
+//line gbecon.gw:148
 package gbecon
 
 import (
@@ -16,7 +16,7 @@ const (
 	adjSec = 80 // \.{Adjustments} 부문의 부호 번호 (|maxN-1|)
 )
 
-//line gbecon.w:177
+//line gbecon.gw:177
 type node struct {
 	idx     int             // |nodeBlock| 안의 전위 순회 위치
 	rchild  *node           // 거시 부문의 오른쪽 자식
@@ -30,7 +30,7 @@ type node struct {
 	sicList *gbgraph.Arc    // SIC 부호 목록의 첫 항목
 }
 
-//line gbecon.w:193
+//line gbecon.gw:193
 type builder struct {
 	rng             *gbflip.RNG
 	f               *gbio.File
@@ -43,16 +43,16 @@ type builder struct {
 	stackPtr        int
 }
 
-//line gbecon.w:209
+//line gbecon.gw:209
 func (b *builder) left(p *node) *node {
 	return &b.nodeBlock[p.idx+1]
 }
 
-//line gbecon.w:217
+//line gbecon.gw:217
 func Econ(n, omit, threshold, seed int64, dir string) (*gbgraph.Graph, error) {
 	b := &builder{rng: gbflip.New(seed)}
 
-//line gbecon.w:236
+//line gbecon.gw:236
 	if omit > 2 {
 		omit = 2
 	}
@@ -65,15 +65,15 @@ func Econ(n, omit, threshold, seed int64, dir string) (*gbgraph.Graph, error) {
 		threshold = 65536
 	}
 
-//line gbecon.w:220
+//line gbecon.gw:220
 	b.n, b.omit, b.thresh = n, omit, threshold
 
-//line gbecon.w:249
+//line gbecon.gw:249
 	b.g = gbgraph.NewGraph(n)
 	b.g.ID = fmt.Sprintf("econ(%d,%d,%d,%d)", n, omit, threshold, seed)
 	b.g.UtilTypes = "ZZZZIAIZZZZZZZ"
 
-//line gbecon.w:222
+//line gbecon.gw:222
 	if err := b.readData(dir); err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func Econ(n, omit, threshold, seed int64, dir string) (*gbgraph.Graph, error) {
 	return b.g, nil
 }
 
-//line gbecon.w:268
+//line gbecon.gw:268
 func (b *builder) readData(dir string) error {
 	b.nodeBlock = make([]node, 2*maxN-3)
 	for i := range b.nodeBlock {
@@ -99,7 +99,7 @@ func (b *builder) readData(dir string) error {
 	}
 	b.f = f
 
-//line gbecon.w:291
+//line gbecon.gw:291
 	b.stackPtr = 0
 	for pi := 0; pi < normN+normN-1; pi++ {
 		p := &b.nodeBlock[pi]
@@ -128,7 +128,7 @@ func (b *builder) readData(dir string) error {
 		b.f.NextLine()
 	}
 
-//line gbecon.w:321
+//line gbecon.gw:321
 	if b.stackPtr != 0 {
 		return gbgraph.SyntaxError + 3 // 트리가 뒤틀렸다
 	}
@@ -145,10 +145,10 @@ func (b *builder) readData(dir string) error {
 	users.title = "Users"
 	b.nodeIndex[maxN] = users
 
-//line gbecon.w:279
+//line gbecon.gw:279
 	for k := int64(1); k <= maxN; k++ {
 
-//line gbecon.w:348
+//line gbecon.gw:348
 		if b.f.Char() != '\n' {
 			return gbgraph.SyntaxError + 5 // 행 사이 빈 줄이 없다
 		}
@@ -161,7 +161,7 @@ func (b *builder) readData(dir string) error {
 			s += x
 			b.nodeIndex[j].total += x
 
-//line gbecon.w:364
+//line gbecon.gw:364
 			if j%10 == 0 {
 				if b.f.Char() != '\n' {
 					return gbgraph.SyntaxError + 6 // 입력 파일의 동기가 어긋났다
@@ -171,16 +171,16 @@ func (b *builder) readData(dir string) error {
 				return gbgraph.SyntaxError + 7 // 항목 뒤에 쉼표가 없다
 			}
 
-//line gbecon.w:360
+//line gbecon.gw:360
 		}
 		p.table[maxN] = s // |table[1]|부터 |table[80]|까지의 합
 
-//line gbecon.w:281
+//line gbecon.gw:281
 	}
 	return nil
 }
 
-//line gbecon.w:380
+//line gbecon.gw:380
 func (b *builder) chooseSectors(seed int64) {
 	l := b.n + b.omit - 2 // 원하는 부분트리의 잎 수
 	switch {
@@ -195,7 +195,7 @@ func (b *builder) chooseSectors(seed int64) {
 	}
 }
 
-//line gbecon.w:407
+//line gbecon.gw:407
 func (b *builder) growLargest(l int64) {
 	special := b.nodeIndex[maxN]
 	for i := b.nodeIndex[adjSec].idx - 1; i >= 0; i-- { // 아래에서 위로
@@ -208,7 +208,7 @@ func (b *builder) growLargest(l int64) {
 	k := int64(1) // 태그했거나 리스트에 얹은 노드 수
 	for k < l {
 
-//line gbecon.w:426
+//line gbecon.gw:426
 		p := special.link // |total|이 가장 큰 |p|를 뗀다
 		special.link = p.link
 		if p.rchild == nil {
@@ -228,14 +228,14 @@ func (b *builder) growLargest(l int64) {
 			k++
 		}
 
-//line gbecon.w:419
+//line gbecon.gw:419
 	}
 	for p := special.link; p != special; p = p.link {
 		p.tag = 1 // 리스트에 남은 것을 모두 태그한다
 	}
 }
 
-//line gbecon.w:472
+//line gbecon.gw:472
 func (b *builder) growRandom(l int64) {
 	b.nodeBlock[0].tag = l
 	adjIdx := b.nodeIndex[adjSec].idx
@@ -247,7 +247,7 @@ func (b *builder) growRandom(l int64) {
 	for i := 0; i < adjIdx; i++ { // 뿌리부터 위에서 아래로
 		if p := &b.nodeBlock[i]; p.tag > 1 {
 
-//line gbecon.w:488
+//line gbecon.gw:488
 			l := p.tag
 			pl, pr := b.left(p), p.rchild
 			switch {
@@ -257,7 +257,7 @@ func (b *builder) growRandom(l int64) {
 				pl.tag, pr.tag = l-1, 1
 			default:
 
-//line gbecon.w:542
+//line gbecon.gw:542
 				var ss int64
 				scale := false
 				if p.idx == 0 { // 뿌리
@@ -266,14 +266,14 @@ func (b *builder) growRandom(l int64) {
 					}
 					for k := max(l-pr.table[0], 1); k <= pl.table[0] && k < l; k++ {
 
-//line gbecon.w:566
+//line gbecon.gw:566
 						if scale {
 							ss += ((pl.table[k] + 0x3ff) >> 10) * pr.table[l-k]
 						} else {
 							ss += pl.table[k] * pr.table[l-k]
 						}
 
-//line gbecon.w:550
+//line gbecon.gw:550
 					}
 				} else {
 					ss = p.table[l]
@@ -283,26 +283,26 @@ func (b *builder) growRandom(l int64) {
 				var k int64
 				for k = max(l-pr.table[0], 1); ss <= rr; k++ {
 
-//line gbecon.w:566
+//line gbecon.gw:566
 					if scale {
 						ss += ((pl.table[k] + 0x3ff) >> 10) * pr.table[l-k]
 					} else {
 						ss += pl.table[k] * pr.table[l-k]
 					}
 
-//line gbecon.w:559
+//line gbecon.gw:559
 				}
 				pl.tag, pr.tag = k-1, l-k+1
 
-//line gbecon.w:497
+//line gbecon.gw:497
 			}
 
-//line gbecon.w:483
+//line gbecon.gw:483
 		}
 	}
 }
 
-//line gbecon.w:506
+//line gbecon.gw:506
 func (b *builder) computeTL(p *node) {
 	pl, pr := b.left(p), p.rchild
 	p.table[1], p.table[2] = 1, 1 // $T(1)$과 $T(2)$는 늘 1
@@ -321,7 +321,7 @@ func (b *builder) computeTL(p *node) {
 		p.table[0] = pl.table[0] + 1
 	default:
 
-//line gbecon.w:529
+//line gbecon.gw:529
 		p.table[2] = 0
 		for j := pl.table[0]; j >= 1; j-- {
 			t := pl.table[j]
@@ -330,15 +330,15 @@ func (b *builder) computeTL(p *node) {
 			}
 		}
 
-//line gbecon.w:524
+//line gbecon.gw:524
 		p.table[0] = pl.table[0] + pr.table[0]
 	}
 }
 
-//line gbecon.w:586
+//line gbecon.gw:586
 func (b *builder) makeArcs() error {
 
-//line gbecon.w:599
+//line gbecon.gw:599
 	for i := b.nodeIndex[adjSec].idx; i >= 0; i-- { // 아래에서 위로
 		p := &b.nodeBlock[i]
 		if p.SIC != 0 { // 원래 잎
@@ -351,7 +351,7 @@ func (b *builder) makeArcs() error {
 			}
 			if p.tag <= 1 {
 
-//line gbecon.w:618
+//line gbecon.gw:618
 				a := pl.sicList
 				jj, kk := pl.SIC, pr.SIC
 				p.sicList = a
@@ -373,14 +373,14 @@ func (b *builder) makeArcs() error {
 				b.nodeIndex[jj] = p
 				b.nodeIndex[kk] = nil
 
-//line gbecon.w:611
+//line gbecon.gw:611
 			}
 		}
 	}
 
-//line gbecon.w:588
+//line gbecon.gw:588
 
-//line gbecon.w:650
+//line gbecon.gw:650
 	switch b.omit {
 	case 2:
 		b.nodeIndex[adjSec], b.nodeIndex[maxN] = nil, nil
@@ -397,9 +397,9 @@ func (b *builder) makeArcs() error {
 		p.table[maxN] = 0
 	}
 
-//line gbecon.w:589
+//line gbecon.gw:589
 
-//line gbecon.w:678
+//line gbecon.gw:678
 	for k := maxN; k >= 1; k-- {
 		if p := b.nodeIndex[k]; p != nil {
 			if b.thresh == 0 {
@@ -411,9 +411,9 @@ func (b *builder) makeArcs() error {
 		}
 	}
 
-//line gbecon.w:590
+//line gbecon.gw:590
 
-//line gbecon.w:692
+//line gbecon.gw:692
 	vi := b.n
 	for k := maxN; k >= 1; k-- {
 		if p := b.nodeIndex[k]; p != nil {
@@ -431,9 +431,9 @@ func (b *builder) makeArcs() error {
 		return gbgraph.Impossible // 알고리즘 버그; 있을 수 없다
 	}
 
-//line gbecon.w:591
+//line gbecon.gw:591
 
-//line gbecon.w:712
+//line gbecon.gw:712
 	for j := maxN; j >= 1; j-- {
 		p := b.nodeIndex[j]
 		if p == nil {
@@ -449,6 +449,6 @@ func (b *builder) makeArcs() error {
 		}
 	}
 
-//line gbecon.w:592
+//line gbecon.gw:592
 	return nil
 }

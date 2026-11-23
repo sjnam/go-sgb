@@ -1,4 +1,4 @@
-//line gbio.w:38
+//line gbio.gw:38
 package gbio
 
 import (
@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-//line gbio.w:65
+//line gbio.gw:65
 type IOErrors int64
 
 const (
@@ -31,7 +31,7 @@ func (e IOErrors) Error() string {
 	return fmt.Sprintf("gbio: 오류 부호 %#x", int64(e))
 }
 
-//line gbio.w:93
+//line gbio.gw:93
 type File struct {
 	file       *os.File      // 열린 파일; 닫힌 뒤에는 |nil|
 	rd         *bufio.Reader // |file|을 감싼 버퍼 입력
@@ -46,7 +46,7 @@ type File struct {
 	errors     IOErrors      // 지금까지 눈에 띈 이상들
 }
 
-//line gbio.w:115
+//line gbio.gw:115
 func (f *File) fillBuf() {
 	f.buffer = f.buffer[:0]
 	for len(f.buffer) < 80 {
@@ -78,10 +78,10 @@ func (f *File) fillBuf() {
 	f.pos = 0
 }
 
-//line gbio.w:163
+//line gbio.gw:163
 const checksumPrime = 1<<30 - 83 // 마법의 수를 만드는 큰 소수 $p$
 
-//line gbio.w:182
+//line gbio.gw:182
 const unexpectedChar = 127 // |imap|에 없는 문자들의 내부 부호
 
 const imap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -98,7 +98,7 @@ var icode = func() (t [256]byte) {
 	return
 }()
 
-//line gbio.w:203
+//line gbio.gw:203
 func ImapChr(d int64) byte {
 	if d < 0 || d >= int64(len(imap)) {
 		return 0
@@ -110,7 +110,7 @@ func ImapOrd(c byte) int64 {
 	return int64(icode[c])
 }
 
-//line gbio.w:218
+//line gbio.gw:218
 func NewChecksum(s string, old int64) int64 {
 	a := old
 	for i := range len(s) {
@@ -119,7 +119,7 @@ func NewChecksum(s string, old int64) int64 {
 	return a
 }
 
-//line gbio.w:231
+//line gbio.gw:231
 func (f *File) NextLine() {
 	f.lineNo++
 	if f.lineNo > f.totLines {
@@ -133,12 +133,12 @@ func (f *File) NextLine() {
 	}
 }
 
-//line gbio.w:247
+//line gbio.gw:247
 func (f *File) EOF() bool {
 	return !f.moreData
 }
 
-//line gbio.w:259
+//line gbio.gw:259
 func (f *File) Char() byte {
 	if f.pos < len(f.buffer) {
 		c := f.buffer[f.pos]
@@ -154,7 +154,7 @@ func (f *File) Backup() {
 	}
 }
 
-//line gbio.w:289
+//line gbio.gw:289
 func (f *File) Digit(d int64) int64 {
 	if f.pos == len(f.buffer) {
 		return -1
@@ -180,7 +180,7 @@ func (f *File) Number(d int64) int64 {
 	return a
 }
 
-//line gbio.w:326
+//line gbio.gw:326
 func (f *File) String(c byte) string {
 	start := f.pos
 	for f.pos < len(f.buffer) && f.buffer[f.pos] != c {
@@ -189,7 +189,7 @@ func (f *File) String(c byte) string {
 	return string(f.buffer[start:f.pos])
 }
 
-//line gbio.w:347
+//line gbio.gw:347
 func RawOpen(name string) (*File, error) {
 	baseName := filepath.Base(name)
 	file, err := os.Open(name)
@@ -210,7 +210,7 @@ func RawOpen(name string) (*File, error) {
 	return f, nil
 }
 
-//line gbio.w:386
+//line gbio.gw:386
 func Open(name string) (*File, error) {
 	f, err := RawOpen(name)
 	if err != nil {
@@ -222,14 +222,14 @@ func Open(name string) (*File, error) {
 		return nil, f.errors
 	}
 
-//line gbio.w:408
+//line gbio.gw:408
 	if !bytes.HasPrefix(f.buffer, []byte("* File \""+f.name+"\"")) {
 		return bad(BadFirstLine)
 	}
 
-//line gbio.w:397
+//line gbio.gw:397
 
-//line gbio.w:413
+//line gbio.gw:413
 	f.fillBuf()
 	if f.buffer[0] != '*' {
 		return bad(BadSecondLine)
@@ -239,9 +239,9 @@ func Open(name string) (*File, error) {
 		return bad(BadThirdLine)
 	}
 
-//line gbio.w:398
+//line gbio.gw:398
 
-//line gbio.w:423
+//line gbio.gw:423
 	f.fillBuf()
 	if !bytes.HasPrefix(f.buffer, []byte("* (Checksum parameters ")) {
 		return bad(BadFourthLine)
@@ -256,12 +256,12 @@ func Open(name string) (*File, error) {
 		return bad(BadFourthLine)
 	}
 
-//line gbio.w:399
+//line gbio.gw:399
 	f.NextLine() // 이제 첫 실제 데이터 줄이 버퍼에 있다
 	return f, nil
 }
 
-//line gbio.w:447
+//line gbio.gw:447
 func (f *File) Close() error {
 	if f.file == nil {
 		f.errors |= NoFileOpen
@@ -289,7 +289,7 @@ func (f *File) Close() error {
 	return nil
 }
 
-//line gbio.w:480
+//line gbio.gw:480
 func (f *File) RawClose() int64 {
 	if f.file != nil {
 		f.file.Close()

@@ -1,4 +1,4 @@
-//line gbsave.w:103
+//line gbsave.gw:103
 package gbsave
 
 import (
@@ -24,7 +24,7 @@ const (
 	ignoredData   = 0x20 // |'Z'| 형식인데 값이 0이 아니다, 내보내지 않는다
 )
 
-//line gbsave.w:137
+//line gbsave.gw:137
 func vertUtil(v *gbgraph.Vertex, pos int) *gbgraph.Util {
 	switch pos {
 	case 0:
@@ -42,7 +42,7 @@ func vertUtil(v *gbgraph.Vertex, pos int) *gbgraph.Util {
 	}
 }
 
-//line gbsave.w:155
+//line gbsave.gw:155
 func arcUtil(a *gbgraph.Arc, pos int) *gbgraph.Util {
 	if pos == 6 {
 		return &a.A
@@ -67,7 +67,7 @@ func graphUtil(g *gbgraph.Graph, pos int) *gbgraph.Util {
 	}
 }
 
-//line gbsave.w:186
+//line gbsave.gw:186
 type reader struct {
 	f             *gbio.File
 	g             *gbgraph.Graph
@@ -89,7 +89,7 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 	r.g = &gbgraph.Graph{Vertices: make([]gbgraph.Vertex, nV), UtilTypes: utilTypes}
 	r.arcs = make([]gbgraph.Arc, mA)
 
-//line gbsave.w:268
+//line gbsave.gw:268
 	if err := r.parseGraphRecord(); err != nil {
 		f.RawClose()
 		return nil, err
@@ -118,9 +118,9 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbsave.w:207
+//line gbsave.gw:207
 
-//line gbsave.w:463
+//line gbsave.gw:463
 	for i := 0; i+1 < len(r.arcs); i += 2 {
 		r.arcs[i].Partner = &r.arcs[i+1]
 		r.arcs[i+1].Partner = &r.arcs[i]
@@ -140,11 +140,11 @@ func RestoreGraph(filename string) (*gbgraph.Graph, error) {
 		return nil, gbgraph.LateDataFault
 	}
 
-//line gbsave.w:208
+//line gbsave.gw:208
 	return r.g, nil
 }
 
-//line gbsave.w:215
+//line gbsave.gw:215
 func (r *reader) parseHeader() (string, int64, int64, error) {
 	for {
 		line := r.f.String(')')
@@ -167,7 +167,7 @@ func (r *reader) parseHeader() (string, int64, int64, error) {
 	}
 }
 
-//line gbsave.w:241
+//line gbsave.gw:241
 func (r *reader) parseGraphRecord() error {
 	if r.f.Char() != '"' {
 		return gbgraph.SyntaxError
@@ -194,7 +194,7 @@ func (r *reader) parseGraphRecord() error {
 	return r.finishRecord()
 }
 
-//line gbsave.w:300
+//line gbsave.gw:300
 func (r *reader) parseVertex(v *gbgraph.Vertex) error {
 	r.commaExpected = false
 	var name, arcs gbgraph.Util
@@ -234,7 +234,7 @@ func (r *reader) parseArc(a *gbgraph.Arc) error {
 	return r.finishRecord()
 }
 
-//line gbsave.w:343
+//line gbsave.gw:343
 func (r *reader) field(u *gbgraph.Util, t byte) error {
 	if t != 'Z' && r.commaExpected {
 		if r.f.Char() != ',' {
@@ -254,7 +254,7 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 	switch t {
 	case 'I':
 
-//line gbsave.w:373
+//line gbsave.gw:373
 		if c == '-' {
 			u.I = -r.f.Number(10)
 		} else {
@@ -262,10 +262,10 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 			u.I = r.f.Number(10)
 		}
 
-//line gbsave.w:362
+//line gbsave.gw:362
 	case 'V':
 
-//line gbsave.w:383
+//line gbsave.gw:383
 		switch {
 		case c == 'V':
 			k := r.f.Number(10)
@@ -278,16 +278,16 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 		case c == '0':
 		// |nil|; 이미 0이다
 		//
-//line gbsave.w:393
-//line gbsave.w:394
+//line gbsave.gw:393
+//line gbsave.gw:394
 		default:
 			return gbgraph.SyntaxError
 		}
 
-//line gbsave.w:364
+//line gbsave.gw:364
 	case 'A':
 
-//line gbsave.w:399
+//line gbsave.gw:399
 		switch {
 		case c == 'A':
 			k := r.f.Number(10)
@@ -298,16 +298,16 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 		case c == '0':
 		// |nil|
 		//
-//line gbsave.w:407
-//line gbsave.w:408
+//line gbsave.gw:407
+//line gbsave.gw:408
 		default:
 			return gbgraph.SyntaxError
 		}
 
-//line gbsave.w:366
+//line gbsave.gw:366
 	case 'S':
 
-//line gbsave.w:416
+//line gbsave.gw:416
 		if c != '"' {
 			return gbgraph.SyntaxError
 		}
@@ -317,12 +317,12 @@ func (r *reader) field(u *gbgraph.Util, t byte) error {
 		}
 		u.S = s
 
-//line gbsave.w:368
+//line gbsave.gw:368
 	}
 	return nil
 }
 
-//line gbsave.w:429
+//line gbsave.gw:429
 func (r *reader) readString() (string, bool) {
 	var sb strings.Builder
 	for {
@@ -350,7 +350,7 @@ func (r *reader) finishRecord() error {
 	return nil
 }
 
-//line gbsave.w:485
+//line gbsave.gw:485
 func parseChecksum(line string, sum *int64) (int, error) {
 	const prefix = "* Checksum "
 	if !strings.HasPrefix(line, prefix) {
@@ -364,7 +364,7 @@ func parseChecksum(line string, sum *int64) (int, error) {
 	return 1, nil
 }
 
-//line gbsave.w:537
+//line gbsave.gw:537
 type writer struct {
 	out           *bufio.Writer
 	buf           []byte
@@ -380,7 +380,7 @@ func (w *writer) flushLine() {
 	w.buf = w.buf[:0]
 }
 
-//line gbsave.w:556
+//line gbsave.gw:556
 func (w *writer) moveItem(item string) {
 	if len(w.buf)+len(item) <= 78 {
 		w.buf = append(w.buf, item...)
@@ -405,7 +405,7 @@ func (w *writer) moveItem(item string) {
 	w.buf = append(w.buf, rem...)
 }
 
-//line gbsave.w:584
+//line gbsave.gw:584
 func SaveGraph(g *gbgraph.Graph, filename string) error {
 	if g == nil || g.Vertices == nil {
 		return gbgraph.MissingOperand
@@ -424,7 +424,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	defer file.Close()
 	w := &writer{out: bufio.NewWriter(file)}
 
-//line gbsave.w:611
+//line gbsave.gw:611
 	w.out.WriteString("* GraphBase graph (util_types ")
 	for i := 0; i < 14; i++ {
 		switch c := g.UtilTypes[i]; c {
@@ -440,7 +440,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	w.out.WriteString(strconv.FormatInt(int64(len(arcRecords)), 10))
 	w.out.WriteString("A)\n")
 
-//line gbsave.w:718
+//line gbsave.gw:718
 	w.commaExpected = false
 	id := w.quote(g.ID)
 	if len(g.ID) > maxSvID {
@@ -455,7 +455,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 	}
 	w.flushLine()
 
-//line gbsave.w:736
+//line gbsave.gw:736
 	w.out.WriteString("* Vertices\n")
 	for i := range g.Vertices {
 		v := &g.Vertices[i]
@@ -472,7 +472,7 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 		w.flushLine()
 	}
 
-//line gbsave.w:756
+//line gbsave.gw:756
 	w.out.WriteString("* Arcs\n")
 	for _, a := range arcRecords {
 		w.commaExpected = false
@@ -496,12 +496,12 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 		w.flushLine()
 	}
 
-//line gbsave.w:628
+//line gbsave.gw:628
 	w.out.WriteString("* Checksum ")
 	w.out.WriteString(strconv.FormatInt(w.magic, 10))
 	w.out.WriteString("\n")
 
-//line gbsave.w:783
+//line gbsave.gw:783
 	if w.anomalies != 0 {
 		w.out.WriteString("> WARNING: I had trouble making this file from the given graph!\n")
 		if w.anomalies&badTypeCode != 0 {
@@ -520,11 +520,11 @@ func SaveGraph(g *gbgraph.Graph, filename string) error {
 		w.out.WriteString("> but the graph you get won't be exactly like the original.\n")
 	}
 
-//line gbsave.w:602
+//line gbsave.gw:602
 	return w.out.Flush()
 }
 
-//line gbsave.w:637
+//line gbsave.gw:637
 func (w *writer) field(item string, t byte) {
 	if t == 'Z' {
 		return
@@ -536,7 +536,7 @@ func (w *writer) field(item string, t byte) {
 	w.moveItem(item)
 }
 
-//line gbsave.w:657
+//line gbsave.gw:657
 func (w *writer) util(u *gbgraph.Util, t byte, g *gbgraph.Graph, arcIndex map[*gbgraph.Arc]int64) {
 	switch t {
 	case 'I':
@@ -568,7 +568,7 @@ func (w *writer) util(u *gbgraph.Util, t byte, g *gbgraph.Graph, arcIndex map[*g
 	}
 }
 
-//line gbsave.w:693
+//line gbsave.gw:693
 func (w *writer) quote(s string) string {
 	var sb strings.Builder
 	sb.WriteByte('"')

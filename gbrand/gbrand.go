@@ -1,4 +1,4 @@
-//line gbrand.w:66
+//line gbrand.gw:66
 package gbrand
 
 import (
@@ -9,13 +9,13 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-//line gbrand.w:84
+//line gbrand.gw:84
 const (
 	probUnit = 1 << 30 // 확률의 단위, $2^{30}$
 	maxSpan  = 1 << 31 // |maxLen-minLen|의 상한, $2^{31}$
 )
 
-//line gbrand.w:96
+//line gbrand.gw:96
 func distCode(dist []int64) string {
 	if dist != nil {
 		return "dist"
@@ -41,7 +41,7 @@ func normMulti(multi int64) int64 {
 	}
 }
 
-//line gbrand.w:127
+//line gbrand.gw:127
 func checkDist(dist []int64, base gbgraph.PanicCode) error {
 	if dist == nil {
 		return nil
@@ -62,24 +62,24 @@ func checkDist(dist []int64, base gbgraph.PanicCode) error {
 	return nil
 }
 
-//line gbrand.w:157
+//line gbrand.gw:157
 type magicEntry struct {
 	prob int64
 	inx  int64
 }
 
-//line gbrand.w:169
+//line gbrand.gw:169
 type walkerNode struct {
 	key int64 // 확률(다듬어지는 중)
 	j   int64 // 뽑힐 정점 번호
 }
 
-//line gbrand.w:180
+//line gbrand.gw:180
 func walker(n, nn int64, dist []int64) []magicEntry {
 	table := make([]magicEntry, nn)
 	t := probUnit / nn // 이 나눗셈은 나머지 없이 떨어진다
 
-//line gbrand.w:195
+//line gbrand.gw:195
 	var hi, lo []walkerNode
 	for j := nn - 1; j >= n; j-- {
 		lo = append(lo, walkerNode{key: 0, j: j})
@@ -93,9 +93,9 @@ func walker(n, nn int64, dist []int64) []magicEntry {
 		}
 	}
 
-//line gbrand.w:184
+//line gbrand.gw:184
 
-//line gbrand.w:215
+//line gbrand.gw:215
 	for len(hi) > 0 {
 		p := hi[len(hi)-1]
 		hi = hi[:len(hi)-1]
@@ -104,7 +104,7 @@ func walker(n, nn int64, dist []int64) []magicEntry {
 		x := t*q.j + q.key - 1
 		table[q.j] = magicEntry{prob: x + x + 1, inx: p.j}
 
-//line gbrand.w:226
+//line gbrand.gw:226
 		p.key -= t - q.key
 		if p.key > t {
 			hi = append(hi, p)
@@ -112,12 +112,12 @@ func walker(n, nn int64, dist []int64) []magicEntry {
 			lo = append(lo, p)
 		}
 
-//line gbrand.w:223
+//line gbrand.gw:223
 	}
 
-//line gbrand.w:185
+//line gbrand.gw:185
 
-//line gbrand.w:237
+//line gbrand.gw:237
 	for len(lo) > 0 {
 		q := lo[len(lo)-1]
 		lo = lo[:len(lo)-1]
@@ -125,15 +125,15 @@ func walker(n, nn int64, dist []int64) []magicEntry {
 		table[q.j] = magicEntry{prob: x + x + 1}
 	}
 
-//line gbrand.w:186
+//line gbrand.gw:186
 	return table
 }
 
-//line gbrand.w:250
+//line gbrand.gw:250
 func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int64,
 	minLen, maxLen, seed int64) (*gbgraph.Graph, error) {
 
-//line gbrand.w:269
+//line gbrand.gw:269
 	if n == 0 {
 		return nil, gbgraph.BadSpecs // 정점이 하나는 있어야 한다
 	}
@@ -150,7 +150,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 		return nil, err
 	}
 
-//line gbrand.w:253
+//line gbrand.gw:253
 	rng := gbflip.New(seed)
 	g := gbgraph.NewGraph(n)
 	for k := int64(0); k < n; k++ {
@@ -160,7 +160,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 		n, m, normMulti(multi), boolInt(self), boolInt(directed),
 		distCode(distFrom), distCode(distTo), minLen, maxLen, seed)
 
-//line gbrand.w:290
+//line gbrand.gw:290
 	var fromTable, toTable []magicEntry
 	nn, kk := int64(1), int64(31)
 	for nn < n {
@@ -174,9 +174,9 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 		toTable = walker(n, nn, distTo)
 	}
 
-//line gbrand.w:262
+//line gbrand.gw:262
 
-//line gbrand.w:318
+//line gbrand.gw:318
 	pick := func(table []magicEntry) *gbgraph.Vertex {
 		uu := rng.Next()
 		k := uu >> kk
@@ -193,10 +193,10 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 		return minLen + rng.Unif(maxLen-minLen+1)
 	}
 
-//line gbrand.w:310
+//line gbrand.gw:310
 	for mm := m; mm > 0; mm-- {
 
-//line gbrand.w:335
+//line gbrand.gw:335
 		for {
 			var u, v *gbgraph.Vertex
 			if distFrom != nil {
@@ -213,7 +213,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 				continue // 자기 고리는 안 된다---다시 뽑는다
 			}
 
-//line gbrand.w:365
+//line gbrand.gw:365
 			if multi <= 0 {
 				var dup *gbgraph.Arc
 				for a := range u.AllArcs() {
@@ -237,7 +237,7 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 				}
 			}
 
-//line gbrand.w:351
+//line gbrand.gw:351
 			if directed {
 				g.NewArc(u, v, randLen())
 			} else {
@@ -246,19 +246,19 @@ func RandomGraph(n, m, multi int64, self, directed bool, distFrom, distTo []int6
 			break
 		}
 
-//line gbrand.w:312
+//line gbrand.gw:312
 	}
 
-//line gbrand.w:263
+//line gbrand.gw:263
 	return g, nil
 }
 
 // |RandomBigraph|는 두 갈래 |n1|·|n2|개 정점, 간선 |m|개짜리 무작위 이분
 // 그래프를 짓는다.
 //
-//line gbrand.w:394
-//line gbrand.w:395
-//line gbrand.w:396
+//line gbrand.gw:394
+//line gbrand.gw:395
+//line gbrand.gw:396
 func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 	minLen, maxLen, seed int64) (*gbgraph.Graph, error) {
 	if n1 == 0 || n2 == 0 {
@@ -272,7 +272,7 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 	}
 	n := n1 + n2
 
-//line gbrand.w:424
+//line gbrand.gw:424
 	distFrom := make([]int64, n)
 	distTo := make([]int64, n)
 	if dist1 != nil {
@@ -290,7 +290,7 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 		}
 	}
 
-//line gbrand.w:409
+//line gbrand.gw:409
 	g, err := RandomGraph(n, m, multi, false, false, distFrom, distTo, minLen, maxLen, seed)
 	if err != nil {
 		return nil, err
@@ -303,8 +303,8 @@ func RandomBigraph(n1, n2, m, multi int64, dist1, dist2 []int64,
 
 // |RandomLengths|는 그래프 |g|의 모든 호에 새 무작위 길이를 매긴다.
 //
-//line gbrand.w:444
-//line gbrand.w:445
+//line gbrand.gw:444
+//line gbrand.gw:445
 func RandomLengths(g *gbgraph.Graph, directed bool, minLen, maxLen int64,
 	dist []int64, seed int64) error {
 	if g == nil {
@@ -318,7 +318,7 @@ func RandomLengths(g *gbgraph.Graph, directed bool, minLen, maxLen int64,
 	}
 	rng := gbflip.New(seed)
 
-//line gbrand.w:469
+//line gbrand.gw:469
 	var distTable []magicEntry
 	kk := int64(31)
 	if dist != nil {
@@ -334,11 +334,11 @@ func RandomLengths(g *gbgraph.Graph, directed bool, minLen, maxLen int64,
 		distTable = walker(n, nn, dist)
 	}
 
-//line gbrand.w:458
+//line gbrand.gw:458
 	g.MakeCompoundID("random_lengths(", g, fmt.Sprintf(",%d,%d,%d,%s,%d)",
 		boolInt(directed), minLen, maxLen, distCode(dist), seed))
 
-//line gbrand.w:490
+//line gbrand.gw:490
 	randLen := func() int64 {
 		if minLen == maxLen {
 			return minLen
@@ -373,6 +373,6 @@ func RandomLengths(g *gbgraph.Graph, directed bool, minLen, maxLen int64,
 		}
 	}
 
-//line gbrand.w:461
+//line gbrand.gw:461
 	return nil
 }

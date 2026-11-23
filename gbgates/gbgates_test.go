@@ -1,4 +1,4 @@
-//line gbgates.w:1953
+//line gbgates.gw:1953
 package gbgates
 
 import (
@@ -19,7 +19,7 @@ func TestRiscSize(t *testing.T) {
 	}
 }
 
-//line gbgates.w:1974
+//line gbgates.gw:1974
 func TestPartialGates(t *testing.T) {
 	g, err := Risc(16)
 	if err != nil {
@@ -41,7 +41,7 @@ func TestPartialGates(t *testing.T) {
 	}
 }
 
-//line gbgates.w:1999
+//line gbgates.gw:1999
 func TestProdMultiplies(t *testing.T) {
 	const m, n = 8, 8
 	g, err := Prod(m, n)

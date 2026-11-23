@@ -1,4 +1,4 @@
-//line gbbooks.w:641
+//line gbbooks.gw:641
 package gbbooks
 
 import (
@@ -10,7 +10,7 @@ import (
 
 const dataDir = "../data"
 
-//line gbbooks.w:661
+//line gbbooks.gw:661
 func TestAnnaFull(t *testing.T) {
 	g, err := Book("anna", 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -27,7 +27,7 @@ func TestAnnaFull(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:681
+//line gbbooks.gw:681
 func TestAnnaVertexFields(t *testing.T) {
 	g, err := Book("anna", 0, 0, 0, 0, 1, 1, 0, dataDir)
 	if err != nil {
@@ -42,7 +42,7 @@ func TestAnnaVertexFields(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:700
+//line gbbooks.gw:700
 func TestAnnaKareninEntry(t *testing.T) {
 	g, err := Book("anna", 0, 0, 0, 0, 1, 1, 0, dataDir)
 	if err != nil {
@@ -64,7 +64,7 @@ func TestAnnaKareninEntry(t *testing.T) {
 	t.Fatal("코드 AL인 인물을 찾지 못했다")
 }
 
-//line gbbooks.w:725
+//line gbbooks.gw:725
 func TestAnnaSelect(t *testing.T) {
 	g, err := Book("anna", 50, 0, 0, 0, 1, 1, 0, dataDir)
 	if err != nil {
@@ -85,7 +85,7 @@ func TestAnnaSelect(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:749
+//line gbbooks.gw:749
 func TestDavidExclude(t *testing.T) {
 	g, err := Book("david", 0, 1, 0, 0, 1, 1, 0, dataDir)
 	if err != nil {
@@ -99,7 +99,7 @@ func TestDavidExclude(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:768
+//line gbbooks.gw:768
 func TestChapterCounts(t *testing.T) {
 	for _, c := range []struct {
 		title        string
@@ -112,7 +112,7 @@ func TestChapterCounts(t *testing.T) {
 		{"homer", 561, 24},
 	} {
 
-//line gbbooks.w:784
+//line gbbooks.gw:784
 		g, err := Book(c.title, 0, 0, 0, 0, 1, 1, 0, dataDir)
 		if err != nil {
 			t.Fatalf("%s: %v", c.title, err)
@@ -125,11 +125,11 @@ func TestChapterCounts(t *testing.T) {
 			t.Errorf("%s: ID = %q, 원함 %q", c.title, g.ID, want)
 		}
 
-//line gbbooks.w:780
+//line gbbooks.gw:780
 	}
 }
 
-//line gbbooks.w:800
+//line gbbooks.gw:800
 func TestBiBookAnna(t *testing.T) {
 	g, err := BiBook("anna", 50, 0, 10, 120, 1, 1, 0, dataDir)
 	if err != nil {
@@ -146,7 +146,7 @@ func TestBiBookAnna(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:821
+//line gbbooks.gw:821
 func TestBiBookChapterNames(t *testing.T) {
 	g, err := BiBook("jean", 80, 0, 0, 0, 1, 1, 0, dataDir)
 	if err != nil {
@@ -161,7 +161,7 @@ func TestBiBookChapterNames(t *testing.T) {
 	}
 }
 
-//line gbbooks.w:839
+//line gbbooks.gw:839
 func isBipartite(g *gbgraph.Graph) bool {
 	n1 := g.N1()
 	for i := int64(0); i < g.N; i++ {

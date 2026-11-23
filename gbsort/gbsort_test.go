@@ -1,4 +1,4 @@
-//line gbsort.w:187
+//line gbsort.gw:187
 package gbsort
 
 import (
@@ -17,7 +17,7 @@ func collect[T any](s [128]*Node[T]) []*Node[T] {
 	return out
 }
 
-//line gbsort.w:206
+//line gbsort.gw:206
 func TestLinkSortOrder(t *testing.T) {
 	r := gbflip.New(-314159)
 	const n = 1000
@@ -37,7 +37,7 @@ func TestLinkSortOrder(t *testing.T) {
 	}
 }
 
-//line gbsort.w:229
+//line gbsort.gw:229
 func TestLinkSortBuckets(t *testing.T) {
 	r := gbflip.New(271828)
 	const n = 500
@@ -62,7 +62,7 @@ func TestLinkSortBuckets(t *testing.T) {
 	}
 }
 
-//line gbsort.w:259
+//line gbsort.gw:259
 func shuffleOrder(seed int64) []int {
 	r := gbflip.New(seed)
 	var head *Node[int]

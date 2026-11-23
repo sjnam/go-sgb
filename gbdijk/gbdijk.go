@@ -1,4 +1,4 @@
-//line gbdijk.w:40
+//line gbdijk.gw:40
 package gbdijk
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-//line gbdijk.w:253
+//line gbdijk.gw:253
 type PriorityQueue interface {
 	Init(d int64)
 	Enqueue(v *gbgraph.Vertex, d int64)
@@ -16,16 +16,16 @@ type PriorityQueue interface {
 	DelMin() *gbgraph.Vertex
 }
 
-//line gbdijk.w:266
+//line gbdijk.gw:266
 func llink(v *gbgraph.Vertex) *gbgraph.Vertex { return v.V.V }
 
-//line gbdijk.w:267
+//line gbdijk.gw:267
 func rlink(v *gbgraph.Vertex) *gbgraph.Vertex { return v.W.V }
 
-//line gbdijk.w:268
+//line gbdijk.gw:268
 func setLlink(v, x *gbgraph.Vertex) { v.V.V = x }
 
-//line gbdijk.w:269
+//line gbdijk.gw:269
 func setRlink(v, x *gbgraph.Vertex) { v.W.V = x }
 
 func insertRight(t, v *gbgraph.Vertex) { // |v|를 |t|와 그 |rlink| 사이에
@@ -49,7 +49,7 @@ func unlink(v *gbgraph.Vertex) { // |v|를 두 이웃으로부터 떼어낸다
 	setLlink(rlink(v), llink(v))
 }
 
-//line gbdijk.w:109
+//line gbdijk.gw:109
 func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 	hh func(*gbgraph.Vertex) int64,
 	pq PriorityQueue, trace io.Writer) int64 {
@@ -61,7 +61,7 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 		pq = NewDList()
 	}
 
-//line gbdijk.w:141
+//line gbdijk.gw:141
 	for v := range gg.AllVertices() {
 		v.Y.V = nil // |backlink|를 지운다
 	}
@@ -70,22 +70,22 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 	uu.X.I = hh(uu) // |hh| 값
 	pq.Init(0)      // 큐를 비운다
 
-//line gbdijk.w:120
+//line gbdijk.gw:120
 	t := uu
 	if trace != nil {
 
-//line gbdijk.w:174
+//line gbdijk.gw:174
 		fmt.Fprintf(trace, "Distances from %s", uu.Name)
 		if hasHH {
 			fmt.Fprintf(trace, " [%d]", uu.X.I)
 		}
 		fmt.Fprint(trace, ":\n")
 
-//line gbdijk.w:123
+//line gbdijk.gw:123
 	}
 	for t != vv {
 
-//line gbdijk.w:153
+//line gbdijk.gw:153
 		d := t.Z.I - t.X.I // |dist|에서 |hh| 값을 뺀 값
 		for a := range t.AllArcs() {
 			v := a.Tip
@@ -102,35 +102,35 @@ func Dijkstra(uu, vv *gbgraph.Vertex, gg *gbgraph.Graph,
 			}
 		}
 
-//line gbdijk.w:126
+//line gbdijk.gw:126
 		t = pq.DelMin()
 		if t == nil {
 			return -1 // 큐가 비면 |vv|로 갈 길이 없다
 		}
 		if trace != nil {
 
-//line gbdijk.w:181
+//line gbdijk.gw:181
 			fmt.Fprintf(trace, " %d to %s", t.Z.I-t.X.I+uu.X.I, t.Name)
 			if hasHH {
 				fmt.Fprintf(trace, " [%d]", t.X.I)
 			}
 			fmt.Fprintf(trace, " via %s\n", t.Y.V.Name)
 
-//line gbdijk.w:132
+//line gbdijk.gw:132
 		}
 	}
 	return vv.Z.I - vv.X.I + uu.X.I // |uu|에서 |vv|까지의 참거리
 }
 
-//line gbdijk.w:299
+//line gbdijk.gw:299
 type dlist struct {
 	head gbgraph.Vertex // 늘 있는 리스트 머리
 }
 
 // |NewDList|는 빈 이중 연결 리스트 큐를 만든다.
 //
-//line gbdijk.w:303
-//line gbdijk.w:304
+//line gbdijk.gw:303
+//line gbdijk.gw:304
 func NewDList() PriorityQueue { return new(dlist) }
 
 func (q *dlist) Init(d int64) {
@@ -140,7 +140,7 @@ func (q *dlist) Init(d int64) {
 	h.Z.I = d - 1
 }
 
-//line gbdijk.w:319
+//line gbdijk.gw:319
 func (q *dlist) Enqueue(v *gbgraph.Vertex, d int64) {
 	t := llink(&q.head)
 	v.Z.I = d
@@ -160,7 +160,7 @@ func (q *dlist) DelMin() *gbgraph.Vertex {
 	return t
 }
 
-//line gbdijk.w:342
+//line gbdijk.gw:342
 func (q *dlist) Requeue(v *gbgraph.Vertex, d int64) {
 	t := llink(v)
 	unlink(v)
@@ -171,7 +171,7 @@ func (q *dlist) Requeue(v *gbgraph.Vertex, d int64) {
 	insertRight(t, v)
 }
 
-//line gbdijk.w:373
+//line gbdijk.gw:373
 type list128 struct {
 	head      [128]gbgraph.Vertex // 128개의 리스트 머리
 	masterKey int64               // 큐에 있을 수 있는 가장 작은 키
@@ -179,8 +179,8 @@ type list128 struct {
 
 // |NewList128|은 호 길이가 128 미만일 때 쓰는 빠른 큐를 만든다.
 //
-//line gbdijk.w:378
-//line gbdijk.w:379
+//line gbdijk.gw:378
+//line gbdijk.gw:379
 func NewList128() PriorityQueue { return new(list128) }
 
 func (q *list128) Init(d int64) {
@@ -192,7 +192,7 @@ func (q *list128) Init(d int64) {
 	}
 }
 
-//line gbdijk.w:395
+//line gbdijk.gw:395
 func (q *list128) DelMin() *gbgraph.Vertex {
 	for d := q.masterKey; d < q.masterKey+128; d++ {
 		u := &q.head[d&0x7f] // |d % 128|
@@ -206,7 +206,7 @@ func (q *list128) DelMin() *gbgraph.Vertex {
 	return nil // 128개 열이 모두 비었다
 }
 
-//line gbdijk.w:416
+//line gbdijk.gw:416
 func (q *list128) Enqueue(v *gbgraph.Vertex, d int64) {
 	v.Z.I = d
 	insertLeft(&q.head[d&0x7f], v)
@@ -221,14 +221,14 @@ func (q *list128) Requeue(v *gbgraph.Vertex, d int64) {
 	}
 }
 
-//line gbdijk.w:193
+//line gbdijk.gw:193
 func PrintResult(vv *gbgraph.Vertex, out io.Writer) {
 	if vv.Y.V == nil {
 		fmt.Fprintf(out, "Sorry, %s is unreachable.\n", vv.Name)
 		return
 	}
 
-//line gbdijk.w:207
+//line gbdijk.gw:207
 	var t *gbgraph.Vertex
 	p := vv
 	for {
@@ -241,16 +241,16 @@ func PrintResult(vv *gbgraph.Vertex, out io.Writer) {
 		}
 	}
 
-//line gbdijk.w:199
+//line gbdijk.gw:199
 
-//line gbdijk.w:223
+//line gbdijk.gw:223
 	for s := t; s != nil; s = s.Y.V {
 		fmt.Fprintf(out, "%10d %s\n", s.Z.I-s.X.I+p.X.I, s.Name)
 	}
 
-//line gbdijk.w:200
+//line gbdijk.gw:200
 
-//line gbdijk.w:231
+//line gbdijk.gw:231
 	t = p
 	for {
 		q := t.Y.V
@@ -262,5 +262,5 @@ func PrintResult(vv *gbgraph.Vertex, out io.Writer) {
 		}
 	}
 
-//line gbdijk.w:201
+//line gbdijk.gw:201
 }

@@ -1,4 +1,4 @@
-//line gbraman.w:812
+//line gbraman.gw:812
 package gbraman
 
 import "testing"
@@ -37,7 +37,7 @@ func TestRamanBadSpecs(t *testing.T) {
 	}
 }
 
-//line gbraman.w:855
+//line gbraman.gw:855
 func TestRamanTypeZeroExample(t *testing.T) {
 	g, err := Raman(2, 43, 0, 0)
 	if err != nil {
@@ -50,7 +50,7 @@ func TestRamanTypeZeroExample(t *testing.T) {
 		t.Errorf("N = %d, 원함 %d", g.N, 44*43*42)
 	}
 
-//line gbraman.w:872
+//line gbraman.gw:872
 	for i := int64(0); i < g.N; i++ {
 		d := 0
 		for range g.Vertices[i].AllArcs() {
@@ -61,10 +61,10 @@ func TestRamanTypeZeroExample(t *testing.T) {
 		}
 	}
 
-//line gbraman.w:867
+//line gbraman.gw:867
 }
 
-//line gbraman.w:887
+//line gbraman.gw:887
 func TestVertexCountFormulas(t *testing.T) {
 	const q = 13
 	for _, c := range []struct {
@@ -86,7 +86,7 @@ func TestVertexCountFormulas(t *testing.T) {
 	}
 }
 
-//line gbraman.w:913
+//line gbraman.gw:913
 func TestGeneratorCount(t *testing.T) {
 	for _, c := range []struct{ p, q, deg int64 }{
 		{3, 13, 4},

@@ -1,18 +1,18 @@
-//line gbplane.w:846
+//line gbplane.gw:846
 package gbplane
 
 import "testing"
 
 const dataDir = "../data"
 
-//line gbplane.w:859
+//line gbplane.gw:859
 func TestPlaneMiles(t *testing.T) {
 	g, err := PlaneMiles(50, 500, -100, 1, true, 40000, 271818, dataDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gbplane.w:869
+//line gbplane.gw:869
 	if g.ID != "plane_miles(50,500,-100,1,1,40000,271818)" {
 		t.Errorf("ID = %q", g.ID)
 	}
@@ -23,9 +23,9 @@ func TestPlaneMiles(t *testing.T) {
 		t.Errorf("UtilTypes = %q", g.UtilTypes)
 	}
 
-//line gbplane.w:865
+//line gbplane.gw:865
 
-//line gbplane.w:880
+//line gbplane.gw:880
 	v := &g.Vertices[14]
 	if v.Name != "Saint Louis, MO" || v.W.I != 453085 ||
 		v.X.I != 3293 || v.Y.I != 1785 || v.Z.I != 24 {
@@ -43,7 +43,7 @@ func TestPlaneMiles(t *testing.T) {
 		{"Waterloo, IA", 373}, {"South Bend, IN", 358}, {"San Diego, CA", 1875},
 	}
 
-//line gbplane.w:899
+//line gbplane.gw:899
 	if len(got) != len(want) {
 		t.Fatalf("정점 14의 호 %d개, 원함 %d개", len(got), len(want))
 	}
@@ -53,10 +53,10 @@ func TestPlaneMiles(t *testing.T) {
 		}
 	}
 
-//line gbplane.w:866
+//line gbplane.gw:866
 }
 
-//line gbplane.w:913
+//line gbplane.gw:913
 func TestPlaneFullTriangulation(t *testing.T) {
 	const n = 20
 	g, err := Plane(n, 1000, 1000, true, 0, 12345)
@@ -70,7 +70,7 @@ func TestPlaneFullTriangulation(t *testing.T) {
 		t.Fatalf("M=%d, 원함 %d (호 $6(n-1)$개)", g.M, 6*(n-1))
 	}
 
-//line gbplane.w:932
+//line gbplane.gw:932
 	avg := float64(g.M) / float64(g.N)
 	if want := 6 * float64(n-1) / float64(n+1); avg != want {
 		t.Errorf("평균 차수 = %.4f, 원함 %.4f", avg, want)
@@ -79,10 +79,10 @@ func TestPlaneFullTriangulation(t *testing.T) {
 		t.Errorf("평균 차수 %.4f는 6보다 작아야 한다", avg)
 	}
 
-//line gbplane.w:926
+//line gbplane.gw:926
 }
 
-//line gbplane.w:944
+//line gbplane.gw:944
 func TestPlaneHalfDiscarded(t *testing.T) {
 	const n = 400
 	g, err := Plane(n, 4000, 4000, true, 32768, 271828)

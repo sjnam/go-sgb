@@ -1,18 +1,18 @@
-//line gblisa.w:608
+//line gblisa.gw:608
 package gblisa
 
 import "testing"
 
 const dataDir = "../data"
 
-//line gblisa.w:623
+//line gblisa.gw:623
 func TestPlaneLisa(t *testing.T) {
 	g, err := PlaneLisa(100, 100, 50, 1, 300, 1, 200, 2975050, 11900200, dataDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gblisa.w:633
+//line gblisa.gw:633
 	if g.ID != "plane_lisa(100,100,50,1,300,1,200,2975050,11900200)" {
 		t.Errorf("ID = %q", g.ID)
 	}
@@ -26,9 +26,9 @@ func TestPlaneLisa(t *testing.T) {
 		t.Errorf("matrix_rows,cols = %d,%d, 원함 100,100", g.UU.I, g.VV.I)
 	}
 
-//line gblisa.w:629
+//line gblisa.gw:629
 
-//line gblisa.w:647
+//line gblisa.gw:647
 	v := &g.Vertices[1294]
 	if v.Name != "1294" || v.X.I != 11 || v.Y.I != 2407 || v.Z.I != 2408 {
 		t.Fatalf("정점 1294 = %q[%d][%d][%d], 원함 1294[11][2407][2408]",
@@ -48,7 +48,7 @@ func TestPlaneLisa(t *testing.T) {
 		{"1293", 10, 2406, 2508}, {"1255", 10, 2307, 2307},
 	}
 
-//line gblisa.w:668
+//line gblisa.gw:668
 	if len(got) != len(want) {
 		t.Fatalf("정점 1294의 호 %d개, 원함 %d개", len(got), len(want))
 	}
@@ -58,10 +58,10 @@ func TestPlaneLisa(t *testing.T) {
 		}
 	}
 
-//line gblisa.w:630
+//line gblisa.gw:630
 }
 
-//line gblisa.w:682
+//line gblisa.gw:682
 func TestBiLisa(t *testing.T) {
 	g, err := BiLisa(0, 0, 94, 110, 97, 129, 30000, false, dataDir)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestBiLisa(t *testing.T) {
 		t.Fatalf("N=%d N1=%d, 원함 N=48 N1=16", g.N, g.N1())
 	}
 
-//line gblisa.w:694
+//line gblisa.gw:694
 	for k := int64(0); k < g.N; k++ {
 		for a := range g.Vertices[k].AllArcs() {
 			if a.B.I < 30000 {
@@ -80,10 +80,10 @@ func TestBiLisa(t *testing.T) {
 		}
 	}
 
-//line gblisa.w:691
+//line gblisa.gw:691
 }
 
-//line gblisa.w:708
+//line gblisa.gw:708
 func TestDocumentedExamples(t *testing.T) {
 	full, err := Lisa(0, 0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -97,16 +97,16 @@ func TestDocumentedExamples(t *testing.T) {
 		t.Errorf("ID = %q", full.ID)
 	}
 
-//line gblisa.w:725
+//line gblisa.gw:725
 	for i, v := range full.Pix {
 		if v < 0 || v > 255 {
 			t.Fatalf("픽셀 %d = %d, 범위 밖", i, v)
 		}
 	}
 
-//line gblisa.w:721
+//line gblisa.gw:721
 
-//line gblisa.w:732
+//line gblisa.gw:732
 	big, err := Lisa(1000, 1000, 255, 0, 250, 0, 250, 0, 0, dataDir)
 	if err != nil {
 		t.Fatal(err)
@@ -122,10 +122,10 @@ func TestDocumentedExamples(t *testing.T) {
 		}
 	}
 
-//line gblisa.w:722
+//line gblisa.gw:722
 }
 
-//line gblisa.w:752
+//line gblisa.gw:752
 func TestNamedRegions(t *testing.T) {
 	for _, c := range []struct {
 		name       string

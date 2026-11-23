@@ -1,0 +1,31 @@
+% go-sgb의 여러 .gw가 공유하는 gweave 서식 힌트.
+% 각 모듈 .gw의 첫 줄에서 @i ../gbtypes.gw 로 끌어온다.
+@d CantOpenFile	CantCloseFile	BadFirstLine BadSecondLine
+@d BadThirdLine	BadFourthLine	FileEndedPrematurely
+@d MissingNewline	WrongNumberOfLines WrongChecksum
+@d NoFileOpen	BadLastLine            
+@d NULL
+
+@s extern int
+@s char int
+@s unsigned int
+@s long int
+
+@s Reader int
+@s Writer int
+@s iter.Seq int
+@s testing.T int
+@s testing.B int
+@s strings.Builder int
+
+@s RNG int
+@s File int
+@s IOErrors int
+@s Util int
+@s Vertex int
+@s Arc int
+@s Graph int
+@s PanicCode int
+@s Node int
+@s PriorityQueue int
+@s gblisa.Region int

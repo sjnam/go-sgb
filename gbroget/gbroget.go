@@ -1,4 +1,4 @@
-//line gbroget.w:69
+//line gbroget.gw:69
 package gbroget
 
 import (
@@ -12,21 +12,21 @@ import (
 
 const maxN = 1022 // Roget 책의 범주 수
 
-//line gbroget.w:89
+//line gbroget.gw:89
 func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error) {
 	rng := gbflip.New(seed)
 	if n == 0 || n > maxN {
 		n = maxN
 	}
 
-//line gbroget.w:105
+//line gbroget.gw:105
 	g := gbgraph.NewGraph(n)
 	g.ID = fmt.Sprintf("roget(%d,%d,%d,%d)", n, minDistance, prob, seed)
 	g.SetUtilType(0, 'I') // |cat_no|는 정수 유틸리티 필드다
 
-//line gbroget.w:95
+//line gbroget.gw:95
 
-//line gbroget.w:125
+//line gbroget.gw:125
 	cats := make([]int64, maxN)
 	mapping := make([]*gbgraph.Vertex, maxN+1)
 	for i := int64(0); i < maxN; i++ {
@@ -40,9 +40,9 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 		cats[j] = cats[pool]
 	}
 
-//line gbroget.w:96
+//line gbroget.gw:96
 
-//line gbroget.w:151
+//line gbroget.gw:151
 	f, err := gbio.Open(filepath.Join(dir, "roget.dat"))
 	if err != nil {
 		return nil, gbgraph.EarlyDataFault // \.{roget.dat}을 열 수 없다
@@ -50,7 +50,7 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 	k := int64(1)
 	for ; !f.EOF(); k++ {
 
-//line gbroget.w:170
+//line gbroget.gw:170
 		if v := mapping[k]; v != nil { // 이 범주가 뽑혔다
 			if f.Number(10) != k {
 				return nil, gbgraph.SyntaxError // 동기가 어긋났다
@@ -62,7 +62,7 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 			v.Name = name
 			v.U.I = k // 범주 번호를 |cat_no|에 담는다
 
-//line gbroget.w:191
+//line gbroget.gw:191
 			j := f.Number(10)
 			if j != 0 {
 			arcs:
@@ -71,7 +71,7 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 						return nil, gbgraph.SyntaxError + 2 // 범주 번호가 범위 밖이다
 					}
 
-//line gbroget.w:229
+//line gbroget.gw:229
 					dist := j - k
 					if dist < 0 {
 						dist = -dist
@@ -81,7 +81,7 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 						g.NewArc(v, mapping[j], 1)
 					}
 
-//line gbroget.w:199
+//line gbroget.gw:199
 					switch f.Char() {
 					case '\\':
 						f.NextLine()
@@ -100,20 +100,20 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 			}
 			f.NextLine()
 
-//line gbroget.w:181
+//line gbroget.gw:181
 		} else {
 
-//line gbroget.w:244
+//line gbroget.gw:244
 			s := f.String('\n')
 			if len(s) > 0 && s[len(s)-1] == '\\' {
 				f.NextLine() // 첫 줄이 백슬래시로 끝났다
 			}
 			f.NextLine()
 
-//line gbroget.w:183
+//line gbroget.gw:183
 		}
 
-//line gbroget.w:158
+//line gbroget.gw:158
 	}
 	if f.Close() != nil {
 		return nil, gbgraph.LateDataFault // \.{roget.dat}에 탈이 있다
@@ -122,6 +122,6 @@ func Roget(n, minDistance, prob, seed int64, dir string) (*gbgraph.Graph, error)
 		return nil, gbgraph.Impossible // |maxN| 값이 틀렸다
 	}
 
-//line gbroget.w:97
+//line gbroget.gw:97
 	return g, nil
 }

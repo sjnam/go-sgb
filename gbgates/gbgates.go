@@ -1,4 +1,4 @@
-//line gbgates.w:79
+//line gbgates.gw:79
 package gbgates
 
 import (
@@ -26,7 +26,7 @@ var (
 
 func isBoolean(v *gbgraph.Vertex) bool { return v == gateFalse || v == gateTrue }
 
-//line gbgates.w:105
+//line gbgates.gw:105
 func theBoolean(v *gbgraph.Vertex) int64 {
 	if v == gateTrue {
 		return 1
@@ -34,10 +34,10 @@ func theBoolean(v *gbgraph.Vertex) int64 {
 	return 0
 }
 
-//line gbgates.w:106
+//line gbgates.gw:106
 func tipValue(v *gbgraph.Vertex) int64 { return v.X.I }
 
-//line gbgates.w:107
+//line gbgates.gw:107
 func boolGate(bit int64) *gbgraph.Vertex {
 	if bit != 0 {
 		return gateTrue
@@ -47,11 +47,11 @@ func boolGate(bit int64) *gbgraph.Vertex {
 
 // IsBoolean은 v가 상수 게이트(0이나 1)인지 알려주는 공개 술어다.
 //
-//line gbgates.w:109
-//line gbgates.w:110
+//line gbgates.gw:109
+//line gbgates.gw:110
 func IsBoolean(v *gbgraph.Vertex) bool { return isBoolean(v) }
 
-//line gbgates.w:195
+//line gbgates.gw:195
 type builder struct {
 	g      *gbgraph.Graph
 	nextV  int    // 아직 이름을 안 매긴 첫 정점
@@ -72,7 +72,7 @@ func (b *builder) newVert(t int64) *gbgraph.Vertex {
 	return v
 }
 
-//line gbgates.w:220
+//line gbgates.gw:220
 func (b *builder) vAt(i int64) *gbgraph.Vertex { return &b.g.Vertices[i] }
 
 func (b *builder) at(v *gbgraph.Vertex, k int64) *gbgraph.Vertex {
@@ -94,7 +94,7 @@ func (b *builder) firstOf(n int, t int64) *gbgraph.Vertex {
 	return first
 }
 
-//line gbgates.w:247
+//line gbgates.gw:247
 func (b *builder) make2(t int64, v1, v2 *gbgraph.Vertex) *gbgraph.Vertex {
 	v := b.newVert(t)
 	b.g.NewArc(v, v1, DELAY)
@@ -120,7 +120,7 @@ func (b *builder) make5(t int64, v1, v2, v3, v4, v5 *gbgraph.Vertex) *gbgraph.Ve
 	return v
 }
 
-//line gbgates.w:278
+//line gbgates.gw:278
 func (b *builder) comp(v *gbgraph.Vertex) *gbgraph.Vertex {
 	if v.W.V != nil {
 		return v.W.V
@@ -147,7 +147,7 @@ func (b *builder) makeXor(u, v *gbgraph.Vertex) *gbgraph.Vertex {
 	return b.make2(OR, t1, t2)
 }
 
-//line gbgates.w:136
+//line gbgates.gw:136
 func GateEval(g *gbgraph.Graph, inVec string) (string, int64) {
 	if g == nil {
 		return "", -2 // 그래프가 없다
@@ -161,7 +161,7 @@ func GateEval(g *gbgraph.Graph, inVec string) (string, int64) {
 		v := &g.Vertices[vi]
 		var t int64
 
-//line gbgates.w:155
+//line gbgates.gw:155
 		switch v.Y.I {
 		case 'I':
 			continue // 입력 게이트 값은 밖에서 매긴다
@@ -188,21 +188,21 @@ func GateEval(g *gbgraph.Graph, inVec string) (string, int64) {
 			return "", -1 // 모르는 게이트 종류
 		}
 
-//line gbgates.w:149
+//line gbgates.gw:149
 		v.X.I = t
 	}
 
-//line gbgates.w:182
+//line gbgates.gw:182
 	var sb strings.Builder
 	for a := g.ZZ.A; a != nil; a = a.Next {
 		sb.WriteByte(byte('0' + tipValue(a.Tip)))
 	}
 	return sb.String(), 0
 
-//line gbgates.w:152
+//line gbgates.gw:152
 }
 
-//line gbgates.w:389
+//line gbgates.gw:389
 func Risc(regs int64) (*gbgraph.Graph, error) {
 	if regs < 2 || regs > 16 {
 		regs = 16
@@ -211,7 +211,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 	b.g.ID = fmt.Sprintf("risc(%d)", regs)
 	b.g.UtilTypes = "ZZZIIVZZZZZZZA"
 
-//line gbgates.w:414
+//line gbgates.gw:414
 	var (
 		mem                                 [16]*gbgraph.Vertex
 		reg                                 [16]*gbgraph.Vertex
@@ -231,9 +231,9 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		latch.Z.V = b.make2(AND, u, runBit) // |u&runBit|가 래치의 새 값
 	}
 
-//line gbgates.w:397
+//line gbgates.gw:397
 
-//line gbgates.w:437
+//line gbgates.gw:437
 	b.prefix, b.count = "RUN", -1
 	runBit = b.newVert('I')
 	b.startPrefix("M")
@@ -262,9 +262,9 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		reg[r] = b.firstOf(16, 'L')
 	}
 
-//line gbgates.w:398
+//line gbgates.gw:398
 
-//line gbgates.w:470
+//line gbgates.gw:470
 	b.startPrefix("D")
 	imm = b.make3(AND, b.comp(extra), b.comp(mem[4]), b.comp(mem[5])) // $\.A=0$
 	rel = b.make3(AND, b.comp(extra), mem[4], b.comp(mem[5]))         // $\.A=1$
@@ -279,12 +279,12 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 			b.make2(AND, b.comp(extra), mem[12+k]))
 	}
 
-//line gbgates.w:399
+//line gbgates.gw:399
 
-//line gbgates.w:485
+//line gbgates.gw:485
 	b.startPrefix("F")
 
-//line gbgates.w:505
+//line gbgates.gw:505
 	for r = 0; r < regs; r++ {
 		destMatch[r] = b.make4(AND, b.evenComp(r, dest[0]), b.evenComp(r>>1, dest[1]),
 			b.evenComp(r>>2, dest[2]), b.evenComp(r>>3, dest[3]))
@@ -299,7 +299,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:520
+//line gbgates.gw:520
 	for k = 0; k < 16; k++ {
 		for r = 0; r < regs; r++ {
 			tmp[r] = b.make5(AND, b.at(reg[r], k), b.evenComp(r, mem[0]),
@@ -311,7 +311,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:730
+//line gbgates.gw:730
 	b.makeAdder(4, oldDest[:], mem[:], incDest[:], nil, 1)
 	up = b.make2(AND, incDest[4], b.comp(mem[3]))   // 나머지 비트는 늘어야 한다
 	down = b.make2(AND, b.comp(incDest[4]), mem[3]) // 나머지 비트는 줄어야 한다
@@ -330,7 +330,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:489
+//line gbgates.gw:489
 	for k = 0; k < 16; k++ {
 		mk := 3
 		if k < 4 {
@@ -343,9 +343,9 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 			b.make2(AND, extra, mem[k]))
 	}
 
-//line gbgates.w:400
+//line gbgates.gw:400
 
-//line gbgates.w:532
+//line gbgates.gw:532
 	b.startPrefix("L")
 	for k = 0; k < 16; k++ {
 		log[k] = b.make4(OR,
@@ -355,9 +355,9 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 			b.make3(AND, mod[3], oldDest[k], source[k]))
 	}
 
-//line gbgates.w:401
+//line gbgates.gw:401
 
-//line gbgates.w:542
+//line gbgates.gw:542
 	b.startPrefix("C")
 	tmp[0] = b.make4(OR,
 		b.make3(AND, mod[0], b.comp(sign), b.comp(nonzero)),
@@ -371,15 +371,15 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		b.make3(AND, mod[3], carry, overflow))
 	change = b.make3(OR, b.comp(cond), b.make2(AND, tmp[0], b.comp(op)), b.make2(AND, tmp[1], op))
 
-//line gbgates.w:402
+//line gbgates.gw:402
 
-//line gbgates.w:751
+//line gbgates.gw:751
 	b.startPrefix("A")
 
-//line gbgates.w:763
+//line gbgates.gw:763
 	for k = 0; k < 16; k++ {
 
-//line gbgates.w:783
+//line gbgates.gw:783
 		var a1, a2, a3, a4 *gbgraph.Vertex
 		if k == 0 {
 			a1 = b.make4(AND, source[15], mod[0], b.comp(mod[1]), b.comp(mod[2]))
@@ -403,7 +403,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		}
 		shift[k] = b.make4(OR, a1, a2, a3, a4)
 
-//line gbgates.w:765
+//line gbgates.gw:765
 	}
 	shift[16] = b.make4(OR,
 		b.make2(AND, b.comp(mod[2]), source[15]),
@@ -418,7 +418,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 				b.comp(source[12]), b.comp(source[11]))),
 		b.make3(AND, mod[2], mod[1], b.make3(OR, source[0], source[1], source[2]))) // ``넘침''
 
-//line gbgates.w:753
+//line gbgates.gw:753
 	b.makeAdder(16, oldDest[:], source[:], sum[:], b.make2(AND, carry, mod[0]), 1)  // 가산기
 	b.makeAdder(16, oldDest[:], source[:], diff[:], b.make2(AND, carry, mod[0]), 0) // 감산기
 	sum[17] = b.make2(OR,
@@ -428,12 +428,12 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		b.make3(AND, oldDest[15], b.comp(source[15]), b.comp(diff[15])),
 		b.make3(AND, b.comp(oldDest[15]), source[15], diff[15])) // 넘침
 
-//line gbgates.w:403
+//line gbgates.gw:403
 
-//line gbgates.w:559
+//line gbgates.gw:559
 	b.startPrefix("Z")
 
-//line gbgates.w:568
+//line gbgates.gw:568
 	nextLoc[0] = b.comp(reg[0])
 	nextNextLoc[0] = reg[0]
 	nextLoc[1] = b.makeXor(b.at(reg[0], 1), reg[0])
@@ -445,7 +445,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		t5 = b.make2(AND, t5, b.at(reg[0], k))
 	}
 
-//line gbgates.w:580
+//line gbgates.gw:580
 	jump = b.make5(AND, op, mod[0], mod[1], mod[2], mod[3]) // |cond=0|이라 가정
 	for k = 0; k < 16; k++ {
 		result[k] = b.make5(OR,
@@ -465,7 +465,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 			b.make5(AND, op, mod[3], b.comp(mod[2]), mod[1], diff[k]))
 	}
 
-//line gbgates.w:613
+//line gbgates.gw:613
 	t5 = b.make2(AND, change, b.comp(ind)) // 목적 레지스터가 바뀌어야 하나?
 	for r = 1; r < regs; r++ {
 		t4 := b.make2(AND, t5, destMatch[r]) // 레지스터 |r|이 바뀌어야 하나?
@@ -475,7 +475,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:623
+//line gbgates.gw:623
 	t5 = b.make4(OR,
 		b.make2(AND, sign, cond),
 		b.make2(AND, sign, jump),
@@ -509,7 +509,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		b.make5(AND, result[16], b.comp(cond), b.comp(jump), b.comp(ind), op))
 	latchit(t5, carry)
 
-//line gbgates.w:604
+//line gbgates.gw:604
 	for k = 0; k < 10; k++ {
 		latchit(mem[k+6], b.at(prog, k))
 	}
@@ -518,7 +518,7 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 	nzs = b.make4(OR, mem[0], mem[1], mem[2], mem[3])
 	nzd = b.make4(OR, dest[0], dest[1], dest[2], dest[3])
 
-//line gbgates.w:661
+//line gbgates.gw:661
 	skip = b.make2(AND, cond, b.comp(change)) // 거짓 조건?
 	hop = b.make2(AND, b.comp(cond), jump)    // \.{JUMP} 명령?
 	normal = b.make4(OR,
@@ -537,23 +537,23 @@ func Risc(regs int64) (*gbgraph.Graph, error) {
 		latchit(t4, b.at(reg[0], k))
 		t4 = b.make2(OR, b.make2(AND, special, oldSrc[k]), b.make2(AND, b.comp(special), t5))
 
-//line gbgates.w:684
+//line gbgates.gw:684
 		a := b.g.VirginArc()
 		a.Tip = b.make2(AND, t4, runBit)
 		a.Next = b.g.ZZ.A
 		b.g.ZZ.A = a
 
-//line gbgates.w:679
+//line gbgates.gw:679
 	}
 
-//line gbgates.w:404
+//line gbgates.gw:404
 	if b.nextV != int(b.g.N) {
 		return nil, gbgraph.Impossible // 게이트 수를 잘못 셌다
 	}
 	return b.g, nil
 }
 
-//line gbgates.w:702
+//line gbgates.gw:702
 func (b *builder) makeAdder(n int, x, y, z []*gbgraph.Vertex, carry *gbgraph.Vertex, add int64) {
 	k := 0
 	if carry == nil {
@@ -578,40 +578,40 @@ func (b *builder) makeAdder(n int, x, y, z []*gbgraph.Vertex, carry *gbgraph.Ver
 	z[n] = carry
 }
 
-//line gbgates.w:823
+//line gbgates.gw:823
 func RunRisc(g *gbgraph.Graph, rom []int64, traceRegs int64, trace io.Writer) ([18]int64, int64) {
 	var riscState [18]int64
 	if traceRegs > 0 {
 
-//line gbgates.w:912
+//line gbgates.gw:912
 		for r := int64(0); r < traceRegs; r++ {
 			fmt.Fprintf(trace, " r%-2d ", r)
 		}
 		fmt.Fprint(trace, " P XSNKV MEM\n")
 
-//line gbgates.w:827
+//line gbgates.gw:827
 	}
 
-//line gbgates.w:853
+//line gbgates.gw:853
 	if _, code := GateEval(g, "0"); code < 0 {
 		return riscState, code
 	}
 	g.Vertices[0].X.I = 1
 
-//line gbgates.w:829
+//line gbgates.gw:829
 	var l int64
 	for {
 
-//line gbgates.w:862
+//line gbgates.gw:862
 		l = 0
 		for a := g.ZZ.A; a != nil; a = a.Next {
 			l = 2*l + a.Tip.X.I
 		}
 
-//line gbgates.w:832
+//line gbgates.gw:832
 		if traceRegs > 0 {
 
-//line gbgates.w:918
+//line gbgates.gw:918
 			readAlt := func(base int64) int64 {
 				v := g.Vertices[base]
 				var m int64
@@ -642,13 +642,13 @@ func RunRisc(g *gbgraph.Graph, rom []int64, traceRegs int64, trace io.Writer) ([
 				fmt.Fprintf(trace, "%04x\n", rom[l])
 			}
 
-//line gbgates.w:834
+//line gbgates.gw:834
 		}
 		if l >= int64(len(rom)) {
 			break // 메모리 검사에 걸리면 멈춘다
 		}
 
-//line gbgates.w:873
+//line gbgates.gw:873
 		m := rom[l]
 		for vi := 1; vi <= 16; vi++ {
 			g.Vertices[vi].X.I = m & 1
@@ -656,13 +656,13 @@ func RunRisc(g *gbgraph.Graph, rom []int64, traceRegs int64, trace io.Writer) ([
 		}
 		GateEval(g, "")
 
-//line gbgates.w:839
+//line gbgates.gw:839
 	}
 	if traceRegs > 0 {
 		fmt.Fprintf(trace, "Execution terminated with memory address %04x.\n", l)
 	}
 
-//line gbgates.w:884
+//line gbgates.gw:884
 	readReg := func(base int64) int64 {
 		v := g.Vertices[base]
 		var m int64
@@ -688,11 +688,11 @@ func RunRisc(g *gbgraph.Graph, rom []int64, traceRegs int64, trace io.Writer) ([
 	riscState[16] = m
 	riscState[17] = l
 
-//line gbgates.w:844
+//line gbgates.gw:844
 	return riscState, 0
 }
 
-//line gbgates.w:949
+//line gbgates.gw:949
 func statusStr(bit int64, c byte) string {
 	if bit != 0 {
 		return string(c)
@@ -700,7 +700,7 @@ func statusStr(bit int64, c byte) string {
 	return "."
 }
 
-//line gbgates.w:971
+//line gbgates.gw:971
 func prGate(out io.Writer, v *gbgraph.Vertex) {
 	fmt.Fprintf(out, "%s = ", v.Name)
 	switch v.Y.I {
@@ -742,8 +742,8 @@ func PrintGates(out io.Writer, g *gbgraph.Graph) {
 
 // |reverseArcs|는 호 목록을 제자리에서 뒤집어 새 머리를 준다.
 //
-//line gbgates.w:1033
-//line gbgates.w:1034
+//line gbgates.gw:1033
+//line gbgates.gw:1034
 func reverseArcs(head *gbgraph.Arc) *gbgraph.Arc {
 	var prev *gbgraph.Arc
 	for a := head; a != nil; {
@@ -755,7 +755,7 @@ func reverseArcs(head *gbgraph.Arc) *gbgraph.Arc {
 	return prev
 }
 
-//line gbgates.w:1051
+//line gbgates.gw:1051
 func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
@@ -766,7 +766,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 	var newVerts []*gbgraph.Vertex
 	newComp := func(u *gbgraph.Vertex, availArc *gbgraph.Arc) *gbgraph.Vertex {
 
-//line gbgates.w:1347
+//line gbgates.gw:1347
 		nv := new(gbgraph.Vertex)
 		nv.Y.I = NOT
 		nv.Name = u.Name + "~"
@@ -779,16 +779,16 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 		newVerts = append(newVerts, nv)
 		return nv
 
-//line gbgates.w:1061
+//line gbgates.gw:1061
 	}
 
-//line gbgates.w:1074
+//line gbgates.gw:1074
 	for {
 		var latchPtr *gbgraph.Vertex
 		for i := int64(0); i < g.N; i++ {
 			v := &g.Vertices[i]
 
-//line gbgates.w:1088
+//line gbgates.gw:1088
 			setConst := func(bit int64) { v.Z.I = bit; v.Y.I = 'C'; v.Arcs = nil }
 			setEq := func(u *gbgraph.Vertex) { v.Z.V = u; v.Y.I = '='; v.Arcs = nil }
 			resetBar := true // 정규 인버터만 |false|로: 새 |bar| 링크를 지키려 리셋을 건너뛴다
@@ -799,8 +799,8 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			case 'I', 'C':
 			// 그대로 둔다
 			//
-//line gbgates.w:1096
-//line gbgates.w:1097
+//line gbgates.gw:1096
+//line gbgates.gw:1097
 			case '=':
 				u := v.Z.V
 				if u.Y.I == '=' {
@@ -810,7 +810,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 				}
 			case NOT:
 
-//line gbgates.w:1130
+//line gbgates.gw:1130
 				u := v.Arcs.Tip
 				if u.Y.I == '=' {
 					u = u.Z.V
@@ -825,15 +825,15 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 					resetBar = false // \CEE/의 |goto done|: |v.bar|을 지키려 리셋을 건너뛴다
 				}
 
-//line gbgates.w:1106
+//line gbgates.gw:1106
 			case AND:
 
-//line gbgates.w:1148
+//line gbgates.gw:1148
 				{
 					var aa *gbgraph.Arc
 					zero := false
 
-//line gbgates.w:1163
+//line gbgates.gw:1163
 					for a := v.Arcs; a != nil; a = a.Next {
 						u := a.Tip
 						if u.Y.I == '=' {
@@ -849,7 +849,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							bypass = true
 						} else {
 
-//line gbgates.w:1189
+//line gbgates.gw:1189
 							for bb := v.Arcs; bb != a; bb = bb.Next {
 								if bb.Tip == u {
 									bypass = true
@@ -861,13 +861,13 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 								}
 							}
 
-//line gbgates.w:1178
+//line gbgates.gw:1178
 							if zero {
 								break
 							}
 						}
 
-//line gbgates.w:1204
+//line gbgates.gw:1204
 						if bypass {
 							if aa != nil {
 								aa.Next = a.Next
@@ -878,10 +878,10 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							aa = a
 						}
 
-//line gbgates.w:1183
+//line gbgates.gw:1183
 					}
 
-//line gbgates.w:1152
+//line gbgates.gw:1152
 					if zero {
 						setConst(0)
 					} else if v.Arcs == nil {
@@ -889,22 +889,22 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 					}
 				}
 
-//line gbgates.w:1108
+//line gbgates.gw:1108
 
-//line gbgates.w:1125
+//line gbgates.gw:1125
 				if v.Arcs != nil && v.Arcs.Next == nil {
 					setEq(v.Arcs.Tip)
 				}
 
-//line gbgates.w:1109
+//line gbgates.gw:1109
 			case OR:
 
-//line gbgates.w:1217
+//line gbgates.gw:1217
 				{
 					var aa *gbgraph.Arc
 					one := false
 
-//line gbgates.w:1232
+//line gbgates.gw:1232
 					for a := v.Arcs; a != nil; a = a.Next {
 						u := a.Tip
 						if u.Y.I == '=' {
@@ -920,7 +920,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							bypass = true
 						} else {
 
-//line gbgates.w:1257
+//line gbgates.gw:1257
 							for bb := v.Arcs; bb != a; bb = bb.Next {
 								if bb.Tip == u {
 									bypass = true
@@ -932,13 +932,13 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 								}
 							}
 
-//line gbgates.w:1247
+//line gbgates.gw:1247
 							if one {
 								break
 							}
 						}
 
-//line gbgates.w:1204
+//line gbgates.gw:1204
 						if bypass {
 							if aa != nil {
 								aa.Next = a.Next
@@ -949,10 +949,10 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							aa = a
 						}
 
-//line gbgates.w:1252
+//line gbgates.gw:1252
 					}
 
-//line gbgates.w:1221
+//line gbgates.gw:1221
 					if one {
 						setConst(1)
 					} else if v.Arcs == nil {
@@ -960,22 +960,22 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 					}
 				}
 
-//line gbgates.w:1111
+//line gbgates.gw:1111
 
-//line gbgates.w:1125
+//line gbgates.gw:1125
 				if v.Arcs != nil && v.Arcs.Next == nil {
 					setEq(v.Arcs.Tip)
 				}
 
-//line gbgates.w:1112
+//line gbgates.gw:1112
 			case XOR:
 
-//line gbgates.w:1273
+//line gbgates.gw:1273
 				{
 					var cmp int64
 					var aa *gbgraph.Arc
 
-//line gbgates.w:1287
+//line gbgates.gw:1287
 					for a := v.Arcs; a != nil; a = a.Next {
 						u := a.Tip
 						if u.Y.I == '=' {
@@ -990,7 +990,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							bypass = true
 						} else {
 
-//line gbgates.w:1309
+//line gbgates.gw:1309
 							var bb *gbgraph.Arc
 							for c := v.Arcs; c != a; c = c.Next {
 								if c.Tip == u || c.Tip == u.W.V {
@@ -1008,10 +1008,10 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 								bb = c
 							}
 
-//line gbgates.w:1301
+//line gbgates.gw:1301
 						}
 
-//line gbgates.w:1204
+//line gbgates.gw:1204
 						if bypass {
 							if aa != nil {
 								aa.Next = a.Next
@@ -1022,15 +1022,15 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							aa = a
 						}
 
-//line gbgates.w:1303
+//line gbgates.gw:1303
 					}
 
-//line gbgates.w:1277
+//line gbgates.gw:1277
 					if v.Arcs == nil {
 						setConst(cmp)
 					} else if cmp != 0 {
 
-//line gbgates.w:1330
+//line gbgates.gw:1330
 						{
 							var a *gbgraph.Arc
 							var u *gbgraph.Vertex
@@ -1047,28 +1047,28 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 							a.Tip = u.W.V
 						}
 
-//line gbgates.w:1281
+//line gbgates.gw:1281
 					}
 				}
 
-//line gbgates.w:1114
+//line gbgates.gw:1114
 
-//line gbgates.w:1125
+//line gbgates.gw:1125
 				if v.Arcs != nil && v.Arcs.Next == nil {
 					setEq(v.Arcs.Tip)
 				}
 
-//line gbgates.w:1115
+//line gbgates.gw:1115
 			}
 			if resetBar {
 				v.W.V = nil // 이 필드는 나중에 여를 가리킬 수 있다
 			}
 			v.X.V = b.at(v, 1) // |foo|: 모든 정점을 잇는다
 
-//line gbgates.w:1079
+//line gbgates.gw:1079
 		}
 
-//line gbgates.w:1363
+//line gbgates.gw:1363
 		noConstantsYet := true
 		for v := latchPtr; v != nil; v = v.V.V {
 			u := v.Z.V // 값이 래치될 게이트
@@ -1084,12 +1084,12 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			break
 		}
 
-//line gbgates.w:1081
+//line gbgates.gw:1081
 	}
 
-//line gbgates.w:1063
+//line gbgates.gw:1063
 
-//line gbgates.w:1382
+//line gbgates.gw:1382
 	for v := &g.Vertices[0]; v != sentinel; v = v.X.V {
 		v.W.V = nil
 	}
@@ -1107,11 +1107,11 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			continue
 		}
 
-//line gbgates.w:1406
+//line gbgates.gw:1406
 		if v.W.V == nil {
 			v.W.V = sentinel // |v|가 표시할 노드 스택의 꼭대기다
 
-//line gbgates.w:1415
+//line gbgates.gw:1415
 			for {
 				n++
 				bb := v.Arcs
@@ -1141,15 +1141,15 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 				}
 			}
 
-//line gbgates.w:1409
+//line gbgates.gw:1409
 		}
 
-//line gbgates.w:1399
+//line gbgates.gw:1399
 	}
 
-//line gbgates.w:1064
+//line gbgates.gw:1064
 
-//line gbgates.w:1448
+//line gbgates.gw:1448
 	newGraph := gbgraph.NewGraph(n)
 	newGraph.ID = g.ID
 	newGraph.UtilTypes = "ZZZIIVZZZZZZZA"
@@ -1162,7 +1162,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			b.nextV++
 			v.W.V = u // 어디에 옮겼는지 적어 둔다
 
-//line gbgates.w:1476
+//line gbgates.gw:1476
 			u.Name = v.Name
 			u.Y.I = v.Y.I
 			if v.Y.I == 'L' {
@@ -1174,11 +1174,11 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 				b.g.NewArc(u, a.Tip.W.V, a.Len)
 			}
 
-//line gbgates.w:1460
+//line gbgates.gw:1460
 		}
 	}
 
-//line gbgates.w:1491
+//line gbgates.gw:1491
 	for latchPtr != nil {
 		u := latchPtr.W.V // 래치의 사본
 		v := u.Z.V
@@ -1186,7 +1186,7 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 		latchPtr = v
 		if b.g.Index(u.Z.V) < b.g.Index(u) {
 
-//line gbgates.w:1502
+//line gbgates.gw:1502
 			w := u.Z.V // 래치를 위해 베낄 입력 게이트
 			nv := &b.g.Vertices[b.nextV]
 			b.nextV++
@@ -1196,11 +1196,11 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 			b.g.NewArc(nv, w, DELAY)
 			u.Z.V = nv
 
-//line gbgates.w:1498
+//line gbgates.gw:1498
 		}
 	}
 
-//line gbgates.w:1463
+//line gbgates.gw:1463
 	g.ZZ.A = reverseArcs(g.ZZ.A)
 	for a := g.ZZ.A; a != nil; a = a.Next {
 		nb := newGraph.VirginArc()
@@ -1213,11 +1213,11 @@ func (b *builder) reduce(g *gbgraph.Graph) (*gbgraph.Graph, error) {
 		newGraph.ZZ.A = nb
 	}
 
-//line gbgates.w:1065
+//line gbgates.gw:1065
 	return newGraph, nil
 }
 
-//line gbgates.w:1565
+//line gbgates.gw:1565
 func Prod(m, n int64) (*gbgraph.Graph, error) {
 	if m < 2 {
 		m = 2
@@ -1227,7 +1227,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 	}
 	mPlusN := m + n
 
-//line gbgates.w:1586
+//line gbgates.gw:1586
 	f := int64(4)
 	j := int64(3)
 	k := int64(5) // $j=F_f$, $k=F_{f+1}$
@@ -1237,14 +1237,14 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		f++
 	}
 
-//line gbgates.w:1574
+//line gbgates.gw:1574
 	b := &builder{g: gbgraph.NewGraph((6*m - 7 + 3*f) * mPlusN)}
 	b.g.ID = fmt.Sprintf("prod(%d,%d)", m, n)
 	b.g.UtilTypes = "ZZZIIVZZZZZZZA"
 	longTables := make([]int64, 2*mPlusN+f)
 	vertTables := make([]*gbgraph.Vertex, f*mPlusN)
 
-//line gbgates.w:1600
+//line gbgates.gw:1600
 	b.startPrefix("X")
 	x := b.firstOf(int(m), 'I')
 	b.startPrefix("Y")
@@ -1256,7 +1256,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		return m + 5*((j-m)>>1) + 3 + (((j - m) & 1) << 1)
 	}
 
-//line gbgates.w:1617
+//line gbgates.gw:1617
 	for j := int64(0); j < m; j++ {
 		b.numericPrefix('A', j)
 		for kk := int64(0); kk < j; kk++ {
@@ -1270,10 +1270,10 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:1633
+//line gbgates.gw:1633
 	for j := int64(0); j < m-2; j++ {
 
-//line gbgates.w:1642
+//line gbgates.gw:1642
 		alpha := b.vAt(aPos(3*j) * mPlusN)
 		beta := b.vAt(aPos(3*j+1) * mPlusN)
 		b.numericPrefix('P', j)
@@ -1291,9 +1291,9 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 			b.make2(XOR, b.at(alpha, kk), b.at(beta, kk))
 		}
 
-//line gbgates.w:1635
+//line gbgates.gw:1635
 
-//line gbgates.w:1663
+//line gbgates.gw:1663
 		b.numericPrefix('R', j)
 		for kk := int64(0); kk < mPlusN; kk++ {
 			b.make2(AND, b.at(alpha, kk), b.at(beta, kk))
@@ -1306,10 +1306,10 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 			b.make2(OR, b.at(alpha, kk), b.at(beta, kk))
 		}
 
-//line gbgates.w:1636
+//line gbgates.gw:1636
 	}
 
-//line gbgates.w:1679
+//line gbgates.gw:1679
 	alpha := b.vAt(aPos(3*m-6) * mPlusN)
 	beta := b.vAt(aPos(3*m-5) * mPlusN)
 	b.startPrefix("U")
@@ -1321,7 +1321,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		b.make2(AND, b.at(alpha, kk), b.at(beta, kk))
 	}
 
-//line gbgates.w:1731
+//line gbgates.gw:1731
 	w := vertTables
 	c := vertTables[mPlusN:]
 	flog := longTables
@@ -1329,7 +1329,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 	anc := longTables[2*mPlusN+1-mPlusN:] // |down| 뒤 |mPlusN|만큼; 아래에서 다시 잡는다
 	_ = anc
 
-//line gbgates.w:1744
+//line gbgates.gw:1744
 	anc = longTables[2*mPlusN+1:] // |flog| 표(|mPlusN+1|개)와 |down| 표(|mPlusN|개) 다음
 	flog[1], flog[2] = 0, 2
 	down[1], down[2] = 0, 1
@@ -1346,7 +1346,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		}
 	}
 
-//line gbgates.w:1765
+//line gbgates.gw:1765
 	vv := b.vAt(int64(b.nextV) - mPlusN)
 	uu := b.vAt(int64(b.nextV) - 2*mPlusN)
 	b.startPrefix("W")
@@ -1356,7 +1356,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 	w[1].Z.V = vv // $w_1=v_0$
 	for k := int64(2); k < mPlusN; k++ {
 
-//line gbgates.w:1798
+//line gbgates.gw:1798
 		var l int64
 		{
 			jj := k
@@ -1369,7 +1369,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 			}
 		}
 
-//line gbgates.w:1774
+//line gbgates.gw:1774
 		i := int64(1)
 		cc := b.at(vv, k-1)
 		dd := b.at(uu, k-1)
@@ -1377,7 +1377,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		for {
 			jN := anc[l] // 이제 $i=\down[jN]$
 
-//line gbgates.w:1815
+//line gbgates.gw:1815
 			specGate := func(a byte, kk, jj, t int64) *gbgraph.Vertex {
 				g := &b.g.Vertices[b.nextV]
 				b.nextV++
@@ -1394,9 +1394,9 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 				b.g.NewArc(v, b.at(vv, k-i-1), DELAY)
 			}
 
-//line gbgates.w:1781
+//line gbgates.gw:1781
 
-//line gbgates.w:1834
+//line gbgates.gw:1834
 			if l != 0 {
 				v = specGate('C', k, jN, OR)
 			} else {
@@ -1405,7 +1405,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 			b.g.NewArc(v, cc, DELAY)                      // 첫 인수는 $c_k^{\,i}$
 			b.g.NewArc(v, b.vAt(int64(b.nextV)-2), DELAY) // 둘째 인수는 $b_k^{\,jN}$
 
-//line gbgates.w:1782
+//line gbgates.gw:1782
 			if flog[jN] < flog[jN+1] { // $jN$이 피보나치 수다
 				c[k+(flog[jN]-2)*mPlusN] = v
 			}
@@ -1414,7 +1414,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 			}
 			cc = v
 
-//line gbgates.w:1846
+//line gbgates.gw:1846
 			v = specGate('D', k, jN, AND)
 			b.g.NewArc(v, dd, DELAY) // 첫 인수는 $d_k^{\,i}$
 			if f > 0 {
@@ -1423,7 +1423,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 				b.g.NewArc(v, b.at(uu, k-i-1), DELAY)
 			}
 
-//line gbgates.w:1790
+//line gbgates.gw:1790
 			dd = v
 			i = jN
 			l--
@@ -1431,7 +1431,7 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		w[k] = v
 	}
 
-//line gbgates.w:1857
+//line gbgates.gw:1857
 	b.startPrefix("Z")
 	for k := int64(0); k < mPlusN; k++ {
 		a := b.g.VirginArc()
@@ -1440,21 +1440,21 @@ func Prod(m, n int64) (*gbgraph.Graph, error) {
 		b.g.ZZ.A = a
 	}
 
-//line gbgates.w:1614
+//line gbgates.gw:1614
 	b.g.N = int64(b.nextV) // 실제로 쓴 게이트 수로 줄인다
 
-//line gbgates.w:1580
+//line gbgates.gw:1580
 	return b.reduce(b.g)
 }
 
-//line gbgates.w:1897
+//line gbgates.gw:1897
 func PartialGates(g *gbgraph.Graph, r, prob, seed int64, buf *strings.Builder) (*gbgraph.Graph, error) {
 	if g == nil {
 		return nil, gbgraph.MissingOperand
 	}
 	rng := gbflip.New(seed)
 
-//line gbgates.w:1916
+//line gbgates.gw:1916
 loop:
 	for vi := r; vi < g.N; vi++ {
 		v := &g.Vertices[vi]
@@ -1476,14 +1476,14 @@ loop:
 		}
 	}
 
-//line gbgates.w:1903
+//line gbgates.gw:1903
 	b := &builder{}
 	rg, err := b.reduce(g)
 	if err != nil {
 		return nil, err
 	}
 
-//line gbgates.w:1940
+//line gbgates.gw:1940
 	if rg != nil {
 		id := rg.ID
 		if len(id) > 54 {
@@ -1492,6 +1492,6 @@ loop:
 		rg.ID = fmt.Sprintf("partial_gates(%s,%d,%d,%d)", id, r, prob, seed)
 	}
 
-//line gbgates.w:1909
+//line gbgates.gw:1909
 	return rg, nil
 }

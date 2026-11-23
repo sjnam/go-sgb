@@ -1,11 +1,11 @@
-//line gbgames.w:482
+//line gbgames.gw:482
 package gbgames
 
 import "testing"
 
 const dataDir = "../data"
 
-//line gbgames.w:496
+//line gbgames.gw:496
 func TestFullGraph(t *testing.T) {
 	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -22,7 +22,7 @@ func TestFullGraph(t *testing.T) {
 	}
 }
 
-//line gbgames.w:515
+//line gbgames.gw:515
 func TestLatterHalf(t *testing.T) {
 	full, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestLatterHalf(t *testing.T) {
 	}
 }
 
-//line gbgames.w:536
+//line gbgames.gw:536
 func TestSelectByVotes(t *testing.T) {
 	g, err := Games(53, 1, 1, 1, 1, 0, 0, 0, dataDir)
 	if err != nil {
@@ -58,7 +58,7 @@ func TestSelectByVotes(t *testing.T) {
 	}
 }
 
-//line gbgames.w:556
+//line gbgames.gw:556
 func TestVertexFields(t *testing.T) {
 	g, err := Games(30, 0, 0, 1, 2, 0, 0, 0, dataDir)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestVertexFields(t *testing.T) {
 	}
 }
 
-//line gbgames.w:577
+//line gbgames.gw:577
 func TestConferencesAndNicknames(t *testing.T) {
 	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -97,7 +97,7 @@ func TestConferencesAndNicknames(t *testing.T) {
 			len(confs), len(nicks), indep)
 	}
 
-//line gbgames.w:601
+//line gbgames.gw:601
 	for i := int64(0); i < g.N; i++ {
 		v := &g.Vertices[i]
 		if v.Name != "Stanford" {
@@ -115,10 +115,10 @@ func TestConferencesAndNicknames(t *testing.T) {
 		}
 	}
 
-//line gbgames.w:598
+//line gbgames.gw:598
 }
 
-//line gbgames.w:621
+//line gbgames.gw:621
 func TestArcsInReverseDateOrder(t *testing.T) {
 	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -136,7 +136,7 @@ func TestArcsInReverseDateOrder(t *testing.T) {
 	}
 }
 
-//line gbgames.w:642
+//line gbgames.gw:642
 func TestArcFields(t *testing.T) {
 	g, err := Games(0, 0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {

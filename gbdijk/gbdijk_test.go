@@ -1,4 +1,4 @@
-//line gbdijk.w:436
+//line gbdijk.gw:436
 package gbdijk
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/sjnam/go-sgb/gbgraph"
 )
 
-//line gbdijk.w:455
+//line gbdijk.gw:455
 func buildGraph() *gbgraph.Graph {
 	g := gbgraph.NewGraph(5)
 	for i := range g.Vertices[:5] {
@@ -23,7 +23,7 @@ func buildGraph() *gbgraph.Graph {
 	return g
 }
 
-//line gbdijk.w:472
+//line gbdijk.gw:472
 func TestShortestPath(t *testing.T) {
 	for _, pq := range []struct {
 		name string
@@ -40,7 +40,7 @@ func TestShortestPath(t *testing.T) {
 	}
 }
 
-//line gbdijk.w:492
+//line gbdijk.gw:492
 func TestHeuristic(t *testing.T) {
 	g := buildGraph()
 	hval := map[string]int64{"a": 2, "b": 1, "c": 1, "d": 0, "e": 0}
@@ -51,7 +51,7 @@ func TestHeuristic(t *testing.T) {
 	}
 }
 
-//line gbdijk.w:505
+//line gbdijk.gw:505
 func TestUnreachable(t *testing.T) {
 	g := buildGraph()
 	if d := Dijkstra(&g.Vertices[0], &g.Vertices[4], g, nil, nil, nil); d != -1 {
@@ -59,7 +59,7 @@ func TestUnreachable(t *testing.T) {
 	}
 }
 
-//line gbdijk.w:516
+//line gbdijk.gw:516
 func TestPrintResult(t *testing.T) {
 	g := buildGraph()
 	Dijkstra(&g.Vertices[0], &g.Vertices[3], g, nil, nil, nil)

@@ -33,7 +33,7 @@ def die(msg):
 
 def webdir(stem):
     for d in (stem, os.path.join('demos', stem), '.'):
-        if os.path.exists(os.path.join(ROOT, d, stem + '.w')):
+        if os.path.exists(os.path.join(ROOT, d, stem + '.gw')):
             return os.path.join(ROOT, d)
     die('웹 %s를 찾을 수 없다' % stem)
 
@@ -54,7 +54,7 @@ def lines_by_section(path, out=None, n=None):
 
 
 def title(stem):
-    w = open(os.path.join(webdir(stem), stem + '.w'), encoding='utf-8').read()
+    w = open(os.path.join(webdir(stem), stem + '.gw'), encoding='utf-8').read()
     m = re.search(r'\\def\\title\{((?:[^{}]|\{[^{}]*\})*)\}', w)
     return m.group(1) if m else stem
 
@@ -93,16 +93,16 @@ def typeset(exprs):
     types = set()
     for d, _, fs in os.walk(ROOT):
         for f in fs:
-            if f.endswith('.w'):
+            if f.endswith('.gw'):
                 types |= set(re.findall(r'(?m)^\s*type\s+([A-Za-z_]\w*)',
                                         open(os.path.join(d, f), encoding='utf-8').read()))
     tmp = tempfile.mkdtemp()
-    with open(os.path.join(tmp, 'x.w'), 'w', encoding='utf-8') as f:
-        f.write('@i %s/gbtypes.w\n' % ROOT)
+    with open(os.path.join(tmp, 'x.gw'), 'w', encoding='utf-8') as f:
+        f.write('@i %s/gbtypes.gw\n' % ROOT)
         f.writelines('@s %s int\n' % t for t in sorted(types))
         f.write('@* x.\n')
         f.writelines('|%s|\\par\n' % e for e in exprs)
-    subprocess.run(['gweave', 'x.w'], cwd=tmp, check=True, capture_output=True)
+    subprocess.run(['gweave', 'x.gw'], cwd=tmp, check=True, capture_output=True)
     tex = open(os.path.join(tmp, 'x.tex'), encoding='utf-8').read()
     out, i = [], 0
     while (i := tex.find('\\PB{', i)) >= 0:
@@ -145,7 +145,7 @@ def location(stem, name, loc, secs):
         return loc
     other, _, num = loc.partition('§')
     web = other or stem
-    ss = secs if web == stem else lines_by_section(os.path.join(webdir(web), web + '.w'))
+    ss = secs if web == stem else lines_by_section(os.path.join(webdir(web), web + '.gw'))
     hits = [n for n, l in ss if n > 0 and in_bars(name, l)]
     if not hits:
         die('%s: %s가 %s의 |...|에 나오지 않는다' % (stem, name, web))
@@ -157,7 +157,7 @@ def location(stem, name, loc, secs):
 def hint_bux(stem, srcs):
     secs = []
     for s in srcs:
-        if s.endswith('.w'):
+        if s.endswith('.gw'):
             secs = lines_by_section(s)
     rows = hints_for(stem)
     exprs = [m[1:] for _, _, m in rows if m[0] in '=:']
@@ -181,7 +181,7 @@ def main():
     stem, srcs = sys.argv[1], sys.argv[2:]
     head = '%% twill/bux.py가 만든 것이다. 고치려면 %s를 고친다.\n'
     with open('system.bux', 'w', encoding='utf-8') as f:
-        f.write(head % '이 웹이 가져오는 패키지의 .w')
+        f.write(head % '이 웹이 가져오는 패키지의 .gw')
         f.writelines(l + '\n' for l in system_bux(stem, srcs))
     with open(stem + '.bux', 'w', encoding='utf-8') as f:
         f.write(head % 'twill/hints.txt')

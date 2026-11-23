@@ -1,4 +1,4 @@
-//line gbmiles.w:71
+//line gbmiles.gw:71
 package gbmiles
 
 import (
@@ -11,7 +11,7 @@ import (
 	"github.com/sjnam/go-sgb/gbsort"
 )
 
-//line gbmiles.w:100
+//line gbmiles.gw:100
 const maxN = 128 // 도시의 최대이자 기본 수
 
 const (
@@ -22,7 +22,7 @@ const (
 	minPop = 2521
 	maxPop = 875538
 
-//line gbmiles.w:109
+//line gbmiles.gw:109
 )
 
 type cityInfo struct {
@@ -32,12 +32,12 @@ type cityInfo struct {
 	name     string // |"City Name, ST"|
 }
 
-//line gbmiles.w:221
+//line gbmiles.gw:221
 func readCities(f *gbio.File, nodes []gbsort.Node[cityInfo], dist []int64,
 	northWeight, westWeight, popWeight int64) error {
 	for k := int64(maxN - 1); k >= 0; k-- {
 
-//line gbmiles.w:234
+//line gbmiles.gw:234
 		p := &nodes[k]
 		p.Data.kk = k
 		if k > 0 {
@@ -62,7 +62,7 @@ func readCities(f *gbio.File, nodes []gbsort.Node[cityInfo], dist []int64,
 		p.Key = northWeight*(p.Data.lat-minLat) + westWeight*(p.Data.lon-minLon) +
 			popWeight*(p.Data.pop-minPop) + (1 << 30)
 
-//line gbmiles.w:265
+//line gbmiles.gw:265
 		for j := k + 1; j < maxN; j++ {
 			if f.Char() != ' ' {
 				f.NextLine()
@@ -72,18 +72,18 @@ func readCities(f *gbio.File, nodes []gbsort.Node[cityInfo], dist []int64,
 			dist[maxN*k+j] = dd
 		}
 
-//line gbmiles.w:258
+//line gbmiles.gw:258
 		f.NextLine()
 
-//line gbmiles.w:225
+//line gbmiles.gw:225
 	}
 	return nil
 }
 
 // |MilesRNG|는 |Miles|와 같되 난수 생성기 |rng|를 직접 받는다.
 //
-//line gbmiles.w:124
-//line gbmiles.w:125
+//line gbmiles.gw:124
+//line gbmiles.gw:125
 func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64,
 	rng *gbflip.RNG, dir string) (*gbgraph.Graph, error) {
 	g, _, err := MilesRNGDist(n, northWeight, westWeight, popWeight,
@@ -93,14 +93,14 @@ func MilesRNG(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, see
 
 // |MaxN|은 도시의 최대 수(거리 행렬의 변)다.
 //
-//line gbmiles.w:138
-//line gbmiles.w:139
+//line gbmiles.gw:138
+//line gbmiles.gw:139
 const MaxN = maxN
 
 func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed int64,
 	rng *gbflip.RNG, dir string) (*gbgraph.Graph, []int64, error) {
 
-//line gbmiles.w:162
+//line gbmiles.gw:162
 	if n == 0 || n > maxN {
 		n = maxN
 	}
@@ -112,7 +112,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 		return nil, nil, gbgraph.BadSpecs // 무게 하나의 크기가 너무 크다
 	}
 
-//line gbmiles.w:144
+//line gbmiles.gw:144
 	g := gbgraph.NewGraph(n)
 	g.ID = fmt.Sprintf("miles(%d,%d,%d,%d,%d,%d,%d)",
 		n, northWeight, westWeight, popWeight, maxDistance, maxDegree, seed)
@@ -120,7 +120,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 	nodes := make([]gbsort.Node[cityInfo], maxN)
 	dist := make([]int64, maxN*maxN)
 
-//line gbmiles.w:204
+//line gbmiles.gw:204
 	f, err := gbio.Open(filepath.Join(dir, "miles.dat"))
 	if err != nil {
 		return nil, nil, gbgraph.EarlyDataFault
@@ -133,16 +133,16 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 		return nil, nil, err
 	}
 
-//line gbmiles.w:151
+//line gbmiles.gw:151
 
-//line gbmiles.w:279
+//line gbmiles.gw:279
 	sorted := gbsort.LinkSort(&nodes[maxN-1], rng)
 	var filled int64
 	for j := 127; j >= 0; j-- {
 		for p := sorted[j]; p != nil; p = p.Link {
 			if filled < n {
 
-//line gbmiles.w:297
+//line gbmiles.gw:297
 				v := &g.Vertices[filled]
 				v.X.I = maxLon - p.Data.lon // |x| 좌표는 경도의 여값
 				y := p.Data.lat - minLat
@@ -151,7 +151,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 				v.W.I = p.Data.pop
 				v.Name = p.Data.name
 
-//line gbmiles.w:285
+//line gbmiles.gw:285
 				filled++
 			} else {
 				p.Data.pop = 0 // 이 도시는 안 쓴다
@@ -159,13 +159,13 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 		}
 	}
 
-//line gbmiles.w:152
+//line gbmiles.gw:152
 	origDist := append([]int64(nil), dist...) // 가지치기로 바뀌기 전의 스냅샷
 
-//line gbmiles.w:324
+//line gbmiles.gw:324
 	if maxDistance > 0 || maxDegree > 0 {
 
-//line gbmiles.w:343
+//line gbmiles.gw:343
 		pruneDeg := maxDegree
 		if pruneDeg == 0 {
 			pruneDeg = maxN
@@ -178,7 +178,7 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 			p := &nodes[i]
 			if p.Data.pop != 0 {
 
-//line gbmiles.w:366
+//line gbmiles.gw:366
 				k := p.Data.kk
 				var s *gbsort.Node[cityInfo]
 				for jj := int64(0); jj < maxN; jj++ {
@@ -204,11 +204,11 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 					}
 				}
 
-//line gbmiles.w:355
+//line gbmiles.gw:355
 			}
 		}
 
-//line gbmiles.w:326
+//line gbmiles.gw:326
 	}
 	for ui := int64(0); ui < n; ui++ {
 		u := &g.Vertices[ui]
@@ -222,14 +222,14 @@ func MilesRNGDist(n, northWeight, westWeight, popWeight, maxDistance, maxDegree,
 		}
 	}
 
-//line gbmiles.w:154
+//line gbmiles.gw:154
 	return g, origDist, nil
 }
 
 // |Miles|는 씨앗 |seed|로 난수 스트림을 열어 도시 그래프를 짓는다.
 //
-//line gbmiles.w:87
-//line gbmiles.w:88
+//line gbmiles.gw:87
+//line gbmiles.gw:88
 func Miles(n, northWeight, westWeight, popWeight,
 	maxDistance, maxDegree, seed int64, dir string) (*gbgraph.Graph, error) {
 	return MilesRNG(n, northWeight, westWeight, popWeight,

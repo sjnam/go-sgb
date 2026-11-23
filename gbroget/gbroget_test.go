@@ -1,4 +1,4 @@
-//line gbroget.w:254
+//line gbroget.gw:254
 package gbroget
 
 import (
@@ -21,7 +21,7 @@ func TestRogetDefault(t *testing.T) {
 	}
 }
 
-//line gbroget.w:284
+//line gbroget.gw:284
 func TestRogetSample(t *testing.T) {
 	g, err := Roget(1000, 3, 1009, 1009, dataDir)
 	if err != nil {
@@ -54,7 +54,7 @@ func TestRogetSample(t *testing.T) {
 	}
 }
 
-//line gbroget.w:323
+//line gbroget.gw:323
 func TestArcCounts(t *testing.T) {
 	full, err := Roget(0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -64,7 +64,7 @@ func TestArcCounts(t *testing.T) {
 		t.Errorf("M = %d, 원함 5075", full.M)
 	}
 
-//line gbroget.w:344
+//line gbroget.gw:344
 	var d0, d1, d2, isolated int64
 	for i := int64(0); i < full.N; i++ {
 		v := &full.Vertices[i]
@@ -92,7 +92,7 @@ func TestArcCounts(t *testing.T) {
 		t.Errorf("호가 없는 범주 = %d, 원함 25", isolated)
 	}
 
-//line gbroget.w:332
+//line gbroget.gw:332
 	far, err := Roget(0, 3, 0, 0, dataDir)
 	if err != nil {
 		t.Fatal(err)

@@ -1,4 +1,4 @@
-//line gbmiles.w:396
+//line gbmiles.gw:396
 package gbmiles
 
 import (
@@ -9,7 +9,7 @@ import (
 
 const dataDir = "../data"
 
-//line gbmiles.w:417
+//line gbmiles.gw:417
 func TestPopulationOrder(t *testing.T) {
 	g, err := Miles(100, 0, 0, 1, 0, 0, 0, dataDir)
 	if err != nil {
@@ -38,7 +38,7 @@ func TestPopulationOrder(t *testing.T) {
 	}
 }
 
-//line gbmiles.w:449
+//line gbmiles.gw:449
 func TestCompleteGraph(t *testing.T) {
 	g, err := Miles(0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {
@@ -62,7 +62,7 @@ func TestCompleteGraph(t *testing.T) {
 	}
 }
 
-//line gbmiles.w:476
+//line gbmiles.gw:476
 func vertexNamed(g *gbgraph.Graph, name string) *gbgraph.Vertex {
 	for v := range g.AllVertices() {
 		if v.Name == name {
@@ -93,7 +93,7 @@ func TestKnownDistance(t *testing.T) {
 	t.Error("Worcester-Youngstown 간선이 없다")
 }
 
-//line gbmiles.w:511
+//line gbmiles.gw:511
 func TestMutualNearest(t *testing.T) {
 	g, err := Miles(50, 0, 0, 0, 0, 1, 0, dataDir)
 	if err != nil {
@@ -110,7 +110,7 @@ func TestMutualNearest(t *testing.T) {
 	}
 }
 
-//line gbmiles.w:530
+//line gbmiles.gw:530
 func TestMilesBadSpecs(t *testing.T) {
 	if _, err := Miles(10, 200000, 0, 0, 0, 0, 0, dataDir); err != gbgraph.BadSpecs {
 		t.Errorf("err = %v, 원함 BadSpecs", err)
@@ -120,14 +120,14 @@ func TestMilesBadSpecs(t *testing.T) {
 	}
 }
 
-//line gbmiles.w:544
+//line gbmiles.gw:544
 func TestTriangleInequality(t *testing.T) {
 	g, err := Miles(40, 0, 0, 1, 0, 0, 0, dataDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gbmiles.w:569
+//line gbmiles.gw:569
 	d := make([][]int64, g.N)
 	for i := range d {
 		d[i] = make([]int64, g.N)
@@ -138,7 +138,7 @@ func TestTriangleInequality(t *testing.T) {
 		}
 	}
 
-//line gbmiles.w:550
+//line gbmiles.gw:550
 	for u := int64(0); u < g.N; u++ {
 		for v := int64(0); v < g.N; v++ {
 			for w := int64(0); w < g.N; w++ {
@@ -155,7 +155,7 @@ func TestTriangleInequality(t *testing.T) {
 	}
 }
 
-//line gbmiles.w:584
+//line gbmiles.gw:584
 func TestCoordinateRanges(t *testing.T) {
 	g, err := Miles(0, 0, 0, 0, 0, 0, 0, dataDir)
 	if err != nil {

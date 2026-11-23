@@ -1,9 +1,9 @@
-//line gbrand.w:527
+//line gbrand.gw:527
 package gbrand
 
 import "testing"
 
-//line gbrand.w:541
+//line gbrand.gw:541
 func TestBasicUndirected(t *testing.T) {
 	g, err := RandomGraph(1000, 5000, 0, false, false, nil, nil, 1, 1, 0)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestBasicUndirected(t *testing.T) {
 	}
 }
 
-//line gbrand.w:573
+//line gbrand.gw:573
 func TestDeterministic(t *testing.T) {
 	g1, err := RandomGraph(50, 100, 1, true, true, nil, nil, 1, 10, 42)
 	if err != nil {
@@ -57,7 +57,7 @@ func TestDeterministic(t *testing.T) {
 	}
 }
 
-//line gbrand.w:601
+//line gbrand.gw:601
 func TestDirectedSelfMulti(t *testing.T) {
 	g, err := RandomGraph(2, 500, 1, true, true, nil, nil, 1, 1, 7)
 	if err != nil {
@@ -87,7 +87,7 @@ func TestDirectedSelfMulti(t *testing.T) {
 	}
 }
 
-//line gbrand.w:633
+//line gbrand.gw:633
 func TestNoDuplicates(t *testing.T) {
 	g, err := RandomGraph(5, 15, 0, false, true, nil, nil, 1, 1, 3)
 	if err != nil {
@@ -105,7 +105,7 @@ func TestNoDuplicates(t *testing.T) {
 	}
 }
 
-//line gbrand.w:657
+//line gbrand.gw:657
 func TestNonuniformDistribution(t *testing.T) {
 	const n = 8
 	var distFrom, distTo [n]int64
@@ -140,7 +140,7 @@ func TestNonuniformDistribution(t *testing.T) {
 	}
 }
 
-//line gbrand.w:696
+//line gbrand.gw:696
 func TestKnuthThirtyOneExample(t *testing.T) {
 	d0 := make([]int64, 31)
 	for k := 0; k < 30; k++ {
@@ -152,7 +152,7 @@ func TestKnuthThirtyOneExample(t *testing.T) {
 		d1[k] = d0[30-k]
 	}
 
-//line gbrand.w:715
+//line gbrand.gw:715
 	for _, d := range [][]int64{d0, d1} {
 		var s int64
 		for _, x := range d {
@@ -163,13 +163,13 @@ func TestKnuthThirtyOneExample(t *testing.T) {
 		}
 	}
 
-//line gbrand.w:707
+//line gbrand.gw:707
 	g, err := RandomGraph(31, 20000, 1, true, true, d0, d1, 0, 255, 3)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-//line gbrand.w:726
+//line gbrand.gw:726
 	forward, total := 0, 0
 	for i := int64(0); i < g.N; i++ {
 		for a := range g.Vertices[i].AllArcs() {
@@ -189,10 +189,10 @@ func TestKnuthThirtyOneExample(t *testing.T) {
 		t.Errorf("0->30의 비율 = %.3f, 1/4 언저리라야 한다", r)
 	}
 
-//line gbrand.w:712
+//line gbrand.gw:712
 }
 
-//line gbrand.w:749
+//line gbrand.gw:749
 func TestWalkerTableRuns(t *testing.T) {
 	dist := []int64{0x20000000, 0x10000000, 0x10000000}
 	g, err := RandomGraph(3, 10, 1, true, false, nil, dist, 1, 2, 1)
@@ -211,7 +211,7 @@ func TestWalkerTableRuns(t *testing.T) {
 	}
 }
 
-//line gbrand.w:771
+//line gbrand.gw:771
 func TestRandomBigraph(t *testing.T) {
 	g, err := RandomBigraph(50, 30, 200, 1, nil, nil, 1, 5, 9)
 	if err != nil {
@@ -237,7 +237,7 @@ func TestRandomBigraph(t *testing.T) {
 	}
 }
 
-//line gbrand.w:800
+//line gbrand.gw:800
 func TestRandomLengths(t *testing.T) {
 	g, err := RandomGraph(20, 40, 1, false, false, nil, nil, 1, 1, 2)
 	if err != nil {

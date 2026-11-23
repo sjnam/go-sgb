@@ -1,13 +1,13 @@
 # go-sgb 빌드용 Makefile.
 #
 #   make            # tangle + go vet + go test
-#   make tangle     # 라이브러리 패키지의 .w -> .go (+ _test.go)
-#   make doc        # 각 .w의 .pdf 조판 (한글이라 luatex)
+#   make tangle     # 라이브러리 패키지의 .gw -> .go (+ _test.go)
+#   make doc        # 각 .gw의 .pdf 조판 (한글이라 luatex)
 #   make twill      # gtwill로 오른쪽 쪽마다 미니 색인을 단 책꼴 .pdf 조판
 #   make test       # go vet + go test
-#   make clean      # 생성물 삭제 (.w 원본과 data/는 남김)
+#   make clean      # 생성물 삭제 (.gw 원본과 data/는 남김)
 #
-# 라이브러리 패키지의 .go는 go get이 되도록 커밋한다(일차 산출물은 .w). 데모와
+# 라이브러리 패키지의 .go는 go get이 되도록 커밋한다(일차 산출물은 .gw). 데모와
 # 루트 설치 검증 프로그램의 .go는 커밋하지 않는다.
 
 GTANGLE ?= gtangle
@@ -31,16 +31,16 @@ all: tangle $(DEMOS) $(ROOTS) queen_wrap test
 tangle: $(PKGS)
 
 $(PKGS) $(DEMOS):
-	cd $@ && $(GTANGLE) $(notdir $@).w
+	cd $@ && $(GTANGLE) $(notdir $@).gw
 
 $(ROOTS):
-	$(GTANGLE) $@.w
+	$(GTANGLE) $@.gw
 
-# queen_wrap은 .w가 따로 없다 — 변경 파일 queen_wrap.ch를 queen.w에 물려 얻는다.
+# queen_wrap은 .gw가 따로 없다 — 변경 파일 queen_wrap.ch를 queen.gw에 물려 얻는다.
 # 출력이 queen.go라는 이름으로 나오므로 원본과 겹치지 않게 다른 디렉터리에 둔다.
 queen_wrap:
 	mkdir -p demos/queen_wrap
-	cd demos/queen && $(GTANGLE) -o ../queen_wrap queen.w queen_wrap.ch
+	cd demos/queen && $(GTANGLE) -o ../queen_wrap queen.gw queen_wrap.ch
 
 test:
 	go vet ./...
@@ -49,14 +49,14 @@ test:
 # luatex은 nonstopmode라야 오류가 나도 멈추지 않고 .log에 다 남긴다.
 doc:
 	for p in $(PKGS) $(DEMOS); do \
-	  (cd $$p && $(GWEAVE) $$(basename $$p).w && \
+	  (cd $$p && $(GWEAVE) $$(basename $$p).gw && \
 	   luatex --interaction=nonstopmode $$(basename $$p).tex); \
 	done
 	for r in $(ROOTS); do \
-	  $(GWEAVE) $$r.w && luatex --interaction=nonstopmode $$r.tex; \
+	  $(GWEAVE) $$r.gw && luatex --interaction=nonstopmode $$r.tex; \
 	done
 	mkdir -p demos/queen_wrap
-	cd demos/queen && $(GWEAVE) -o ../queen_wrap queen.w queen_wrap.ch
+	cd demos/queen && $(GWEAVE) -o ../queen_wrap queen.gw queen_wrap.ch
 	cd demos/queen_wrap && luatex --interaction=nonstopmode queen.tex
 
 # 원본 SGB 책은 CTWILL로 조판했다. gtwill이 그 GWEB판이다: gtwill이 .tex와 .aux를
@@ -86,19 +86,19 @@ BUX = python3 $(CURDIR)/twill/bux.py
 
 twill:
 	@for p in $(PKGS) $(TWILL_DEMOS); do \
-	  (cd $$p && $(GTWILL) $$(basename $$p).w >/dev/null 2>&1); \
+	  (cd $$p && $(GTWILL) $$(basename $$p).gw >/dev/null 2>&1); \
 	done; \
-	for j in $(ROOTS); do $(GTWILL) $$j.w >/dev/null 2>&1; done
+	for j in $(ROOTS); do $(GTWILL) $$j.gw >/dev/null 2>&1; done
 	for p in $(PKGS) $(TWILL_DEMOS); do \
-	  (cd $$p && j=$$(basename $$p) && $(BUX) $$j $$j.w && \
-	   $(GTWILL) $$j.w && { $(TWILL_TEX); }); \
+	  (cd $$p && j=$$(basename $$p) && $(BUX) $$j $$j.gw && \
+	   $(GTWILL) $$j.gw && { $(TWILL_TEX); }); \
 	done
 	for j in $(ROOTS); do \
-	  $(BUX) $$j $$j.w && $(GTWILL) $$j.w && { $(TWILL_TEX); }; \
+	  $(BUX) $$j $$j.gw && $(GTWILL) $$j.gw && { $(TWILL_TEX); }; \
 	done
 	mkdir -p demos/queen_wrap
-	cd demos/queen && $(BUX) queen queen.w queen_wrap.ch && \
-	  $(GTWILL) -o ../queen_wrap queen.w queen_wrap.ch
+	cd demos/queen && $(BUX) queen queen.gw queen_wrap.ch && \
+	  $(GTWILL) -o ../queen_wrap queen.gw queen_wrap.ch
 	cd demos/queen_wrap && j=queen && { $(TWILL_TEX); }
 
 clean:
